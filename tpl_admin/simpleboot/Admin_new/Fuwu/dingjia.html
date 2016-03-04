@@ -58,7 +58,11 @@ $(document).ready(function(){
 </script>
 <body class="J_scroll_fixed">
 	<div class="wrap J_check_wrap">
-	<input type="hidden" id="id"/>
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('fuwu/dingjia')}">静态定价</a></li>
+			<li><a href="{:U('fuwu/dynamicdingjia')}">动态定价</a></li>
+		</ul>
+		<input type="hidden" id="id"/>
 		<table style="width: 100%">
 			<tr>
 				<td style="vertical-align: top; width: 15%"><table class="table table-hover table-bordered table-list"

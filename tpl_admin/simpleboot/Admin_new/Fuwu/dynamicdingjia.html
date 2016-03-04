@@ -1,0 +1,273 @@
+<admintpl file="header" />
+<meta charset="UTF-8">
+<style>
+<!--
+.table td{padding:0;}
+.table .th2{background:#93e3f9;}
+.table .th4{background:#85f8be;}
+.dynPrice-left {
+  text-align: right;
+  width: 15%;
+  display: inline-block;
+}
+.dynPrice-center {
+  text-align: center;
+  width: 5%;
+  display: inline-block;
+}
+.dynPrice-right {
+  text-align: left;
+  width: 75%;
+  display: inline-block;
+}
+.dynPrice-btn {
+  vertical-align: top; 
+  width:40px;
+}
+-->
+</style>
+<script type="text/javascript">
+<!--
+function select_services(id) {
+	$("#id").val(id);
+	$.post('{:U("Fuwu/select_services3")}', { id: id }, function (data) {
+		$("#province").html(data[0]);
+		$("#city").html('<tr><th class="th4">城市编码</th><th class="th4">城市名称</th><th class="th4">简称</th></tr>');
+		$('#province tr').click(function(){
+			$('#province tr').siblings().removeClass("tr_hover");
+			$(this).addClass("tr_hover");
+		});
+	});
+}
+function select_city(province) {
+	var id = $("#id").val();
+	$.post('{:U("Fuwu/select_city2")}', { province: province, id : id }, function (data) {
+		$("#city").html(data[0]);
+		$('#city tr').click(function(){
+			$('#city tr').siblings().removeClass("tr_hover");
+			$(this).addClass("tr_hover");
+		});
+	});
+}
+function select_scode(city_id){
+	var id = $("#id").val();
+	$("#city_id").val(city_id);
+	$.post('{:U("Fuwu/select_scode_dynamic")}', { city_id: city_id, id : id }, function (data) {
+		if(data.state == "success"){
+			$("#moneyPerPoint").val(data[0].point_fee);
+			$("#moneyPerTx").val(data[0].fee);
+		}
+		else{
+			$("#moneyPerPoint").val(0);
+			$("#moneyPerTx").val(0);
+		}
+	});
+}
+function insert_sd(){
+	var id = $("#id").val();
+	var city_id = $("#city_id").val();
+	var moneyPerPoint = $("#moneyPerPoint").val();
+	var moneyPerTx = $("#moneyPerTx").val();
+	$.post('{:U("Fuwu/insert_dynamic")}', { id: id, city_id: city_id, moneyPerPoint: moneyPerPoint, moneyPerTx: moneyPerTx}, function (data) {
+		if (data == 1) {
+			alert('定价单已提交');
+		}
+	});
+}
+function incrMoneyPerPoint(){
+	var moneyPerPoint = parseInt($("#moneyPerPoint").val());
+	$("#moneyPerPoint").val(moneyPerPoint + 10);
+}
+function decrMoneyPerPoint(){
+	var moneyPerPoint = parseInt($("#moneyPerPoint").val());
+	var target = moneyPerPoint - 10;
+	if(target < 0){
+		target = 0;
+	}
+	$("#moneyPerPoint").val(target);
+}
+function incrMoneyPerTx(){
+	var moneyPerTx = parseInt($("#moneyPerTx").val());
+	$("#moneyPerTx").val(moneyPerTx + 5);
+}
+function decrMoneyPerTx(){
+	var moneyPerTx = parseInt($("#moneyPerTx").val());
+	var target = moneyPerTx - 5;
+	if(target < 0){
+		target = 0;
+	}
+	$("#moneyPerTx").val(target);
+}
+function generate_preview(){
+	var city_id = $("#city_id").val();
+	if(city_id == ""){
+		alert("请先选择城市后，再输入相应违章代码");
+		return;
+	}
+	var code = $("#code").val();
+	$.post('{:U("Fuwu/generate_preview")}', { code: code}, function (data) {
+		if(data.state == "success"){
+			$("#violation_id").html("#" + data[0].code);
+			$("#violation_money").html(data[0].money);
+			$("#violation_point").html(data[0].points);
+			$("#violation_desc").html(data[0].content);
+			$("#init_money").html(data[0].money);
+			$("#point").html(data[0].points);
+			var feePerPoint = parseInt($("#moneyPerPoint").val());
+			var feePerTx = parseInt($("#moneyPerTx").val());
+			var violation_money = parseInt(data[0].money);
+			var violation_point = parseInt(data[0].points);
+			$("#feePerPoint").html(feePerPoint.toFixed(2));
+			$("#feePerTx").html(feePerTx.toFixed(2));
+			var finalMoney = violation_money + (feePerPoint * violation_point) + feePerTx;
+			$("#final_money").html(finalMoney.toFixed(2));
+		}
+		else{
+			alert("请输入正确的违章代码");
+		}
+	});
+}
+//-->
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#menus-table tr').click(function(){
+		$('tr').siblings().removeClass("tr_hover");
+		$(this).addClass("tr_hover");
+	});
+});
+</script>
+<body class="J_scroll_fixed">
+	<div class="wrap J_check_wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:U('fuwu/dingjia')}">静态定价</a></li>
+			<li class="active"><a href="{:U('fuwu/dynamicdingjia')}">动态定价</a></li>
+		</ul>
+		<input type="hidden" id="id"/>
+		<input type="hidden" id="city_id"/>
+		<table style="width: 100%">
+			<tr>
+				<td style="vertical-align: top; width: 15%"><table class="table table-hover table-bordered table-list"
+						id="menus-table">
+						<tr>
+							<th class="th1">服务商编号</th>
+							<th class="th1">手机号</th>
+						</tr>
+						<foreach name="roles" item="vo">
+						<tr onclick="select_services({$vo.id})">
+							<td>{$vo.services_sn}</td>
+							<td>{$vo.phone}</td>
+						</tr>
+						</foreach>
+					</table><div class="pagination">{$Page}</div></td>
+				<td style="vertical-align: top; width: 20%"><table class="table table-hover table-bordered table-list" id="province">
+						<tr>
+							<th class="th2">省份编码</th>
+							<th class="th2">省份名称</th>
+							<th class="th2">简称</th>
+						</tr>
+					</table></td>
+				<td style="vertical-align: top; width: 20%"><table class="table table-hover table-bordered table-list" id="city">
+						<tr>
+							<th class="th4">城市编码</th>
+							<th class="th4">城市名称</th>
+							<th class="th4">简称</th>
+						</tr>
+						<tr></tr>
+					</table></td>
+				<td style="vertical-align: top;">
+					<table class="table table-hover table-bordered table-list" id="sod">
+						<tr>
+							<td style="text-align:left;padding-left:20px">计算公式</td>
+						</tr>
+						<tr><td >
+							<div class="dynPrice-left">处理费用</div>
+							<div class="dynPrice-center"> = </div>
+							<div class="dynPrice-right">处罚金额</div>
+						</td></tr>
+						<tr>
+							<td >
+							<div class="dynPrice-left"></div>
+							<div class="dynPrice-center" style="vertical-align: top;"> + </div>
+							<div class="dynPrice-right" style="vertical-align: top;">
+								<input type="button" class="dynPrice-btn" value="-10" onclick="decrMoneyPerPoint()" />
+								<div style="display: inline-block; text-align:center;" >
+									<input type="text" name="moneyPerPoint" id="moneyPerPoint" pattern="\d*" style="width:60px" readonly/>
+									<br>
+									<span >劳务费</span>
+								</div>
+								<input type="button" class="dynPrice-btn" value="+10" onclick="incrMoneyPerPoint()" /> * 违章罚分
+							</div>
+							</td>
+						</tr>
+						<tr>
+							<td >
+							<div class="dynPrice-left"></div>
+							<div class="dynPrice-center" style="vertical-align: top;"> + </div>
+							<div class="dynPrice-right" style="vertical-align: top;">
+								<input type="button" class="dynPrice-btn" value="-5" onclick="decrMoneyPerTx()" />
+								<div style="display: inline-block;text-align:center;" >
+									<input type="text" name="moneyPerTx" id="moneyPerTx" pattern="\d*" style="width:60px" readonly/>
+									<br>
+									<span >手续费</span>
+								</div>
+								<input type="button" class="dynPrice-btn" value="+5" onclick="incrMoneyPerTx()" />
+							</div>
+							</td>
+						</tr>
+						<tr>
+							<td >
+							#<input type="text" name="code" id="code" pattern="\d*" style="width:20%;min-width:80px"/>
+							<input type="button" style="width:20%;min-width:80px; background: #5E00FF;float: initial;margin: 0;" class="query_btn edit"  onclick="generate_preview();" value="生成预览"/>
+							<input type="button" style="width:20%;min-width:80px;background: #ffa600;float: initial;margin: 0;" class="query_btn edit" onclick="insert_sd();" value="保存定价" />
+							</td>
+						</tr>
+						<tr>
+							<td >
+							<div>
+								<div class="dynPrice-left">违章代码</div>
+								<div class="dynPrice-center"> ：</div>
+								<div class="dynPrice-right" id="violation_id">&nbsp;</div>
+								<br>
+								<div class="dynPrice-left">处罚金额</div>
+								<div class="dynPrice-center"> ：</div>
+								<div style="text-align: left; width: 13%; display: inline-block;" id="violation_money">&nbsp;</div>
+								<div class="dynPrice-left">处罚扣分</div>
+								<div class="dynPrice-center"> ：</div>
+								<div style="text-align: left; width: 38%; display: inline-block;" id="violation_point">&nbsp;</div>
+								<br>
+								<div class="dynPrice-left">违章内容</div>
+								<div class="dynPrice-center"> ：</div>
+								<div class="dynPrice-right" id="violation_desc">&nbsp;</div>
+								<br>
+								<br>
+								<div class="dynPrice-left">处理费用</div>
+								<div class="dynPrice-center"> = </div>
+								<div class="dynPrice-right" id="final_money"></div>
+								<br>
+								<div class="dynPrice-left"></div>
+								<div class="dynPrice-center"> + </div>
+								<div class="dynPrice-right"><span id="init_money"></span>元（违章金额）
+								</div>
+								<br>
+								<div class="dynPrice-left"></div>
+								<div class="dynPrice-center"> + </div>
+								<div class="dynPrice-right">
+									<span id="feePerPoint"></span>元（劳务费单价） * <span id="point"></span>分（违章罚分）
+								</div>
+								<br>
+								<div class="dynPrice-left"></div>
+								<div class="dynPrice-center"> + </div>
+								<div class="dynPrice-right">
+									<span id="feePerTx"></span>元（手续费）
+								</div>
+							</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

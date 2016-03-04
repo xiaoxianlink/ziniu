@@ -434,6 +434,15 @@ class FuwuController extends AdminbaseController {
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->display ();
 	}
+	function dynamicdingjia() {
+		$where = '1=1';
+		$count = $this->Fuwu_model->table ( "cw_services as s" )->where ( $where )->count ();
+		$page = $this->page ( $count, 50 );
+		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,s.*" )->table ( "(SELECT @rownum:=0) r,cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$this->assign ( "roles", $roles );
+		$this->assign ( "Page", $page->show ( 'Admin' ) );
+		$this->display ();
+	}
 	function select_services3() {
 		$id = $_REQUEST ['id'];
 		$roles = $this->Fuwu_model->field ( "r.province" )->table ( "cw_services_city as sc" )->join ( "cw_region as r on r.id=sc.code" )->where ( "sc.services_id = '$id' and sc.state = 0" )->select ();
@@ -532,6 +541,57 @@ class FuwuController extends AdminbaseController {
 		}
 		
 		$this->ajaxReturn ( 1 );
+	}
+	function select_scode_dynamic() {
+		$id = $_REQUEST ['id'];
+		$city_id = $_REQUEST ['city_id'];
+		$model = M ( "services_dyna" );
+		$item = $model->where ( "services_id='$id' and code = '$city_id'" )->find ();
+		$status = 0;
+		if($item != null){
+			$status = 1;
+		}
+		$data = array (
+				0 => $item,
+				"status" => $status
+		);
+		$this->ajaxReturn ($data);
+	}
+	function insert_dynamic() {
+		$id = $_REQUEST ['id'];
+		$city_id = $_REQUEST ['city_id'];
+		$point_fee = $_REQUEST ['moneyPerPoint'];
+		$fee = $_REQUEST ['moneyPerTx'];
+		$model = M ( "services_dyna" );
+		$sd_info = $model->where ( "services_id = '$id' and code = '$city_id'" )->find ();
+		$data = array (
+				"services_id" => $id,
+				"code" => $city_id,
+				"point_fee" => $point_fee,
+				"fee" => $fee,
+				"create_time" => time () 
+		);
+		if (empty ( $sd_info )) {
+			$model->add ( $data );
+		} else {
+			$model->where ( "id='{$sd_info['id']}'" )->save ( $data );
+		}
+		
+		$this->ajaxReturn ( 1 );
+	}
+	function generate_preview() {
+		$code = $_REQUEST ['code'];
+		$violation_model = M ( "violation" );
+		$violation = $violation_model->where ( "code = '$code' and state = 0" )->find ();
+		$status = 0;
+		if($violation != null){
+			$status = 1;
+		}
+		$data = array (
+				0 => $violation,
+				"status" => $status
+		);
+		$this->ajaxReturn ( $data );
 	}
 	function pinggu() {
 		$phone = $_POST ['user_number'];
