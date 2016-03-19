@@ -133,7 +133,7 @@ class ScanController extends IndexController {
 					// 4
 					$so = $so_model->where ( "violation = '{$v['code']}' and services_id = '$services_id' and (code = '$city_id1' or code = '$city_id2')" )->order ( "money asc" )->find ();
 					$endorsementlist [$k] ['so_id'] = $so ['id'];
-					$endorsementlist [$k] ['so_money'] = $so ['money'];
+					$endorsementlist [$k] ['srv_money'] = $so ['money'];
 				}
 			}
 		}

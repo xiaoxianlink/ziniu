@@ -444,7 +444,7 @@ class FuwuController extends AdminbaseController {
 		$this->display ();
 	}
 	function select_services3() {
-		$id = $_REQUEST ['id'];
+				$id = $_REQUEST ['id'];
 		$roles = $this->Fuwu_model->field ( "r.province" )->table ( "cw_services_city as sc" )->join ( "cw_region as r on r.id=sc.code" )->where ( "sc.services_id = '$id' and sc.state = 0" )->select ();
 		$provinces = "'0'";
 		foreach ( $roles as $v ) {
@@ -507,7 +507,7 @@ class FuwuController extends AdminbaseController {
 				$money = $v['money'] + $v['points'] * 100 + 30;
 				$table .= "<td><input type='text' style='width: 50px; color: #BFBFBF' id='money_" . $v ['code'] . "' value='" . $money . "'/></td>";
 			} else {
-				if ($so_info ['money'] > 0) {
+				if ($so_info ['money'] >= 0) {
 					$table .= "<td><input type='text' style='width: 50px;' id='money_" . $v ['code'] . "' value='" . $so_info ['money'] . "'/></td>";
 				}
 			}
@@ -521,23 +521,27 @@ class FuwuController extends AdminbaseController {
 	}
 	function insert_sod() {
 		$id = $_REQUEST ['id'];
-		$money = $_REQUEST ['money'];
+		$money = isset($_REQUEST ['money']) ? $_REQUEST ['money'] : 0;
 		$code = $_REQUEST ['code'];
 		$city_id = $_REQUEST ['city_id'];
 		$region = M ( "region" );
 		$model = M ( "services_order" );
 		$so_info = $model->where ( "services_id = '$id' and violation = '$code' and code = '$city_id'" )->find ();
-		$data = array (
-				"services_id" => $id,
-				"code" => $city_id,
-				"violation" => $code,
-				"money" => $money,
-				"create_time" => time () 
-		);
-		if (empty ( $so_info )) {
-			$model->add ( $data );
+		if ($money == 0) {
+			$model->where ( "id='{$so_info['id']}'" )->delete();
 		} else {
-			$model->where ( "id='{$so_info['id']}'" )->save ( $data );
+			$data = array (
+					"services_id" => $id,
+					"code" => $city_id,
+					"violation" => $code,
+					"money" => $money,
+					"create_time" => time ()
+			);
+			if (empty ( $so_info )) {
+				$model->add ( $data );
+			} else {
+				$model->where ( "id='{$so_info['id']}'" )->save ( $data );
+			}
 		}
 		
 		$this->ajaxReturn ( 1 );
