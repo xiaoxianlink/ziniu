@@ -59,3 +59,4 @@ ADD COLUMN `scan_state`  int(2) NULL DEFAULT 1 AFTER `unsubscribe_time`,
 ADD COLUMN `scan_state_desc`  varchar(256) NULL AFTER `scan_state`,
 ADD COLUMN `scan_state_time`  int(11) NULL AFTER `scan_state_desc`,
 ADD COLUMN `scan_stop_query`  int(11) NULL AFTER `scan_state_time`;
+
