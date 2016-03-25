@@ -5,13 +5,13 @@
 DROP TABLE IF EXISTS `cw_services_dyna`;
 CREATE TABLE `cw_services_dyna` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `services_id` varchar(32) NOT NULL COMMENT '·þÎñÉÌid',
-  `code` int(11) NOT NULL COMMENT '³ÇÊÐcode',
-  `point_fee` int(11) NOT NULL COMMENT 'Î¥ÕÂ´úÂëid',
-  `fee` int(10) NOT NULL COMMENT '¶¨¼Û',
-  `create_time` int(11) DEFAULT NULL COMMENT '¶¨¼ÛÊ±¼ä',
+  `services_id` varchar(32) NOT NULL COMMENT 'æœåŠ¡å•†id',
+  `code` int(11) NOT NULL COMMENT 'åŸŽå¸‚code',
+  `point_fee` int(11) NOT NULL COMMENT 'è¿ç« ä»£ç id',
+  `fee` int(10) NOT NULL COMMENT 'å®šä»·',
+  `create_time` int(11) DEFAULT NULL COMMENT 'å®šä»·æ—¶é—´',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=gbk ROW_FORMAT=DYNAMIC COMMENT='·þÎñÉÌ¶¨¼Û±í';
+) ENGINE=InnoDB DEFAULT CHARSET=gbk ROW_FORMAT=DYNAMIC COMMENT='æœåŠ¡å•†å®šä»·è¡¨';
 
 ALTER TABLE `cw_order`
 ADD COLUMN `so_type`  int(2) NULL DEFAULT 1 AFTER `so_id`;
@@ -19,37 +19,37 @@ ADD COLUMN `so_type`  int(2) NULL DEFAULT 1 AFTER `so_id`;
 -- ----------------------------
 -- mobile app
 -- ----------------------------
-ALTER TABLE `cw_services` ADD `nickname` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'êÇ³Æ' ;
+ALTER TABLE `cw_services` ADD `nickname` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'æ˜µç§°' ;
 
-ALTER TABLE `cw_message` CHANGE `msg_type` `msg_type` INT(11) NULL DEFAULT NULL COMMENT 'ÏûÏ¢ÀàÐÍ£»1£ºÎ¥ÕÂÌáÐÑ£¬2£ºÐÂÎ¥ÕÂÌáÐÑ£¬3£ºÐ¡ÏÉÌáÐÑ£¬4£ºÐ¡ÏÉÕËÎñ';
+ALTER TABLE `cw_message` CHANGE `msg_type` `msg_type` INT(11) NULL DEFAULT NULL COMMENT 'æ¶ˆæ¯ç±»åž‹ï¼›1ï¼šè¿ç« æé†’ï¼Œ2ï¼šæ–°è¿ç« æé†’ï¼Œ3ï¼šå°ä»™æé†’ï¼Œ4ï¼šå°ä»™è´¦åŠ¡';
 
-ALTER TABLE `cw_message` ADD `content` VARCHAR(128) NULL COMMENT 'ÏûÏ¢ÄÚÈÝ' ;
+ALTER TABLE `cw_message` ADD `content` VARCHAR(128) NULL COMMENT 'æ¶ˆæ¯å†…å®¹' ;
 
-ALTER TABLE `cw_message` ADD `is_readed` INT(10) NULL COMMENT 'ÏûÏ¢×´Ì¬£º0Î´¶Á£¬1ÒÑ¶Á' ;
+ALTER TABLE `cw_message` ADD `is_readed` INT(10) NULL COMMENT 'æ¶ˆæ¯çŠ¶æ€ï¼š0æœªè¯»ï¼Œ1å·²è¯»' ;
 
-ALTER TABLE `cw_message` CHANGE `msg_type` `msg_type` INT(11) NULL DEFAULT NULL COMMENT 'ÏûÏ¢ÀàÐÍ£»1£ºÎ¥ÕÂÌáÐÑ£¬2£ºÐÂÎ¥ÕÂÌáÐÑ£¬3£ºÐ¡ÏÉÌáÐÑ£¬4£ºÐ¡ÏÉÕËÎñ£¬5£º¿Í·þÐ¡ÏÉ';
+ALTER TABLE `cw_message` CHANGE `msg_type` `msg_type` INT(11) NULL DEFAULT NULL COMMENT 'æ¶ˆæ¯ç±»åž‹ï¼›1ï¼šè¿ç« æé†’ï¼Œ2ï¼šæ–°è¿ç« æé†’ï¼Œ3ï¼šå°ä»™æé†’ï¼Œ4ï¼šå°ä»™è´¦åŠ¡ï¼Œ5ï¼šå®¢æœå°ä»™';
 
-ALTER TABLE `cw_message` ADD `tixing_type` INT(10) NULL COMMENT 'Ð¡ÏÉÌáÐÑÀàÐÍ£¬µ±msg_type=3Ê±ÓÐÐ§' AFTER `msg_type`;
+ALTER TABLE `cw_message` ADD `tixing_type` INT(10) NULL COMMENT 'å°ä»™æé†’ç±»åž‹ï¼Œå½“msg_type=3æ—¶æœ‰æ•ˆ' AFTER `msg_type`;
 
-ALTER TABLE `cw_message` CHANGE `tixing_type` `tixing_type` INT(10) NULL COMMENT 'Ð¡ÏÉÌáÐÑÀàÐÍ£¬µ±msg_type=3Ê±ÓÐÐ§¡£1¿ªÊ¼½Óµ¥×´Ì¬¸üÐÂÌáÐÑ£¬2ÏµÍ³Éý¼¶ÌáÐÑ£¬3ÐÂµ¥ÍÆËÍÌáÐÑ£¬4ÐÂµ¥¼´½«¹ýÆÚÌáÐÑ£¬5½Óµ¥´¦Àí¼´½«¹ýÆÚÌáÐÑ£¬6½Óµ¥³É¹¦ÌáÐÑ';
+ALTER TABLE `cw_message` CHANGE `tixing_type` `tixing_type` INT(10) NULL COMMENT 'å°ä»™æé†’ç±»åž‹ï¼Œå½“msg_type=3æ—¶æœ‰æ•ˆã€‚1å¼€å§‹æŽ¥å•çŠ¶æ€æ›´æ–°æé†’ï¼Œ2ç³»ç»Ÿå‡çº§æé†’ï¼Œ3æ–°å•æŽ¨é€æé†’ï¼Œ4æ–°å•å³å°†è¿‡æœŸæé†’ï¼Œ5æŽ¥å•å¤„ç†å³å°†è¿‡æœŸæé†’ï¼Œ6æŽ¥å•æˆåŠŸæé†’';
 
-ALTER TABLE `cw_message` ADD `zhangwu_type` INT(10) NULL COMMENT 'Ð¡ÏÉÕËÎñÀàÐÍ£¬µ±msg_type=4Ê±ÓÐÐ§' AFTER `tixing_type`;
+ALTER TABLE `cw_message` ADD `zhangwu_type` INT(10) NULL COMMENT 'å°ä»™è´¦åŠ¡ç±»åž‹ï¼Œå½“msg_type=4æ—¶æœ‰æ•ˆ' AFTER `tixing_type`;
 
-ALTER TABLE `cw_message` CHANGE `zhangwu_type` `zhangwu_type` INT(10) NULL COMMENT 'Ð¡ÏÉÕËÎñÀàÐÍ£¬µ±type=4Ê±ÓÐÐ§¡£1¿ÉÌáÏÖ½ð¶î±ä¶¯ÌáÐÑ£¬2ÕË»§½ð¶î±ä¶¯ÌáÐÑ£¬3ÌáÏÖÉêÇëÌáÐÑ£¬4ÌáÏÖµ½ÕËÌáÐÑ';
+ALTER TABLE `cw_message` CHANGE `zhangwu_type` `zhangwu_type` INT(10) NULL COMMENT 'å°ä»™è´¦åŠ¡ç±»åž‹ï¼Œå½“type=4æ—¶æœ‰æ•ˆã€‚1å¯æçŽ°é‡‘é¢å˜åŠ¨æé†’ï¼Œ2è´¦æˆ·é‡‘é¢å˜åŠ¨æé†’ï¼Œ3æçŽ°ç”³è¯·æé†’ï¼Œ4æçŽ°åˆ°è´¦æé†’';
 
-ALTER TABLE `cw_message` ADD `icon` VARCHAR(32) NULL COMMENT 'Í¼Æ¬' ;
+ALTER TABLE `cw_message` ADD `icon` VARCHAR(32) NULL COMMENT 'å›¾ç‰‡' ;
 
-ALTER TABLE `cw_message` CHANGE `tixing_type` `tixing_type` INT(10) NULL COMMENT 'Ð¡ÏÉÌáÐÑÀàÐÍ£¬µ±msg_type=3Ê±ÓÐÐ§¡£1¿ªÊ¼½Óµ¥×´Ì¬¸üÐÂÌáÐÑ£¬2ÐÂ¶©µ¥¼´½«¹ýÆÚÌáÐÑ£¬3½Óµ¥´¦Àí¼´½«¹ýÆÚÌáÐÑ£¬4ÐÂ¶©µ¥ÌáÐÑ£¬5ÐÂµ¥³¬Ê±È¡ÏûÌáÐÑ£¬6½Óµ¥³¬Ê±È¡ÏûÌáÐÑ£¬7¶©µ¥½áËãÌáÐÑ£¬8°ïÖúÓë¹æÔò¸üÐÂ';
+ALTER TABLE `cw_message` CHANGE `tixing_type` `tixing_type` INT(10) NULL COMMENT 'å°ä»™æé†’ç±»åž‹ï¼Œå½“msg_type=3æ—¶æœ‰æ•ˆã€‚1å¼€å§‹æŽ¥å•çŠ¶æ€æ›´æ–°æé†’ï¼Œ2æ–°è®¢å•å³å°†è¿‡æœŸæé†’ï¼Œ3æŽ¥å•å¤„ç†å³å°†è¿‡æœŸæé†’ï¼Œ4æ–°è®¢å•æé†’ï¼Œ5æ–°å•è¶…æ—¶å–æ¶ˆæé†’ï¼Œ6æŽ¥å•è¶…æ—¶å–æ¶ˆæé†’ï¼Œ7è®¢å•ç»“ç®—æé†’ï¼Œ8å¸®åŠ©ä¸Žè§„åˆ™æ›´æ–°';
 
-ALTER TABLE `cw_message` CHANGE `zhangwu_type` `zhangwu_type` INT(10) NULL COMMENT 'Ð¡ÏÉÕËÎñÀàÐÍ£¬µ±ty1ÕË»§Óà¶î±ä¶¯ÌáÐÑ£¬2¿ÉÌáÏÖ½ð¶î±ä¶¯ÌáÐÑ£¬3°ó¶¨ÒøÐÐ¿¨/½â°óÒøÐÐ¿¨£¬4ÌáÏÖ²Ù×÷';
+ALTER TABLE `cw_message` CHANGE `zhangwu_type` `zhangwu_type` INT(10) NULL COMMENT 'å°ä»™è´¦åŠ¡ç±»åž‹ï¼Œå½“ty1è´¦æˆ·ä½™é¢å˜åŠ¨æé†’ï¼Œ2å¯æçŽ°é‡‘é¢å˜åŠ¨æé†’ï¼Œ3ç»‘å®šé“¶è¡Œå¡/è§£ç»‘é“¶è¡Œå¡ï¼Œ4æçŽ°æ“ä½œ';
 
-CREATE TABLE `cw_yinhang` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '±àºÅid ×ÔÔö³¤Ö÷¼ü' , `bank_name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ÒøÐÐÃû³Æ' , `bank_img` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ËõÂÔÍ¼' , `state` INT(11) NOT NULL COMMENT 'ÊÇ·ñÊ¹ÓÃ£º0Ê¹ÓÃ£¬1²»Ê¹ÓÃ' , `sort` INT(11) NOT NULL COMMENT 'ÅÅÐò' , PRIMARY KEY (`id`) );
+CREATE TABLE `cw_yinhang` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ç¼–å·id è‡ªå¢žé•¿ä¸»é”®' , `bank_name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'é“¶è¡Œåç§°' , `bank_img` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ç¼©ç•¥å›¾' , `state` INT(11) NOT NULL COMMENT 'æ˜¯å¦ä½¿ç”¨ï¼š0ä½¿ç”¨ï¼Œ1ä¸ä½¿ç”¨' , `sort` INT(11) NOT NULL COMMENT 'æŽ’åº' , PRIMARY KEY (`id`) );
 
-CREATE TABLE `cw_duanxin` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔö³¤Ö÷¼ü' , `phone` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ÊÖ»úºÅÂë' , `code` VARCHAR(32) CHARACTER SET utf32 COLLATE utf32_general_ci NOT NULL COMMENT '¶ÌÐÅÑéÖ¤Âë' , `expires_time` DATETIME NOT NULL COMMENT '¶ÌÐÅ¹ýÆÚÊ±¼ä' , `create_time` DATETIME NOT NULL COMMENT '´´½¨Ê±¼ä' , PRIMARY KEY (`id`) );
+CREATE TABLE `cw_duanxin` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢žé•¿ä¸»é”®' , `phone` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'æ‰‹æœºå·ç ' , `code` VARCHAR(32) CHARACTER SET utf32 COLLATE utf32_general_ci NOT NULL COMMENT 'çŸ­ä¿¡éªŒè¯ç ' , `expires_time` DATETIME NOT NULL COMMENT 'çŸ­ä¿¡è¿‡æœŸæ—¶é—´' , `create_time` DATETIME NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´' , PRIMARY KEY (`id`) );
 
-CREATE TABLE `cw_secret` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔö³¤Ö÷¼ü' , `username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'µÇÂ¼ÕË»§' , `secret` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ÃØÔ¿' , `clientUUID` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'Éè±¸id ÓÃÓÚÇø·ÖÃ¿Ì¨Éè±¸' , `user_agent` VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'User-Agent' , `expires_time` DATETIME NOT NULL COMMENT 'ÃØÔ¿¹ýÆÚÊ±¼ä' , `update_time` DATETIME NOT NULL COMMENT 'ÃØÔ¿¸üÐÂÊ±¼ä' , PRIMARY KEY (`id`) ) COMMENT = 'ÃØÔ¿¼ÇÂ¼';
+CREATE TABLE `cw_secret` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢žé•¿ä¸»é”®' , `username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ç™»å½•è´¦æˆ·' , `secret` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ç§˜é’¥' , `clientUUID` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'è®¾å¤‡id ç”¨äºŽåŒºåˆ†æ¯å°è®¾å¤‡' , `user_agent` VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'User-Agent' , `expires_time` DATETIME NOT NULL COMMENT 'ç§˜é’¥è¿‡æœŸæ—¶é—´' , `update_time` DATETIME NOT NULL COMMENT 'ç§˜é’¥æ›´æ–°æ—¶é—´' , PRIMARY KEY (`id`) ) COMMENT = 'ç§˜é’¥è®°å½•';
 
-ALTER TABLE `cw_bank` ADD `yh_id` INT(11) NULL COMMENT 'ÒøÐÐid' ;
+ALTER TABLE `cw_bank` ADD `yh_id` INT(11) NULL COMMENT 'é“¶è¡Œid' ;
 
 -- ----------------------------
 -- scan by state of car
@@ -57,5 +57,5 @@ ALTER TABLE `cw_bank` ADD `yh_id` INT(11) NULL COMMENT 'ÒøÐÐid' ;
 ALTER TABLE `cw_car`
 ADD COLUMN `scan_state`  int(2) NULL DEFAULT 1 AFTER `unsubscribe_time`,
 ADD COLUMN `scan_state_desc`  varchar(256) NULL AFTER `scan_state`,
-ADD COLUMN `scan_state_time`  int(11) NULL ON UPDATE CURRENT_TIMESTAMP AFTER `scan_state_desc`,
+ADD COLUMN `scan_state_time`  int(11) NULL AFTER `scan_state_desc`,
 ADD COLUMN `scan_stop_query`  int(11) NULL AFTER `scan_state_time`;
