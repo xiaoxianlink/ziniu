@@ -45,7 +45,7 @@ class DingyueController extends AdminbaseController {
 		$this->assign ( "number", $che_number );
 		$count = $this->Dingyue_model->table ( "cw_user_car as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_user as c on c.id=a.user_id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,b.id,b.license_number,a.c_time,a.create_time,a.is_sub,b.unsubscribe_time,b.channel,c.nickname,b.engine_number,b.frame_number,c.openid,c.city,c.username" )->table ( "(SELECT @rownum:=0) r,cw_user_car as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_user as c on c.id=a.user_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,b.id,b.license_number,a.c_time,a.create_time,a.is_sub,b.unsubscribe_time,c.channel,c.channel_key, c.nickname,b.engine_number,b.frame_number,c.openid,c.city,c.username" )->table ( "(SELECT @rownum:=0) r,cw_user_car as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_user as c on c.id=a.user_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$d_number = $this->Dingyue_model->field ( "count(*)" )->table ( "cw_user_car as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_user as c on c.id=a.user_id" )->where ( "is_sub=0" )->select ();
@@ -97,7 +97,7 @@ class DingyueController extends AdminbaseController {
 		$this->assign ( 'order', $_order );
 		$count = $this->Dingyue_model->table ( "cw_message as a" )->join ( "cw_car as c on c.id=a.tar_id" )->join ( "cw_user as d  on a.openid=d.openid" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,c.channel,a.create_time,d.nickname,c.license_number,a.all_money as money,a.all_points as points,a.nums,d.openid,d.city,d.create_time as u_time" )->table ( "(SELECT @rownum:=0) r,cw_message as a" )->join ( "cw_car as c on c.id=a.tar_id" )->join ( "cw_user as d  on a.openid=d.openid" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,d.channel,d.channel_key,a.create_time,d.nickname,c.license_number,a.all_money as money,a.all_points as points,a.nums,d.openid,d.city,d.create_time as u_time" )->table ( "(SELECT @rownum:=0) r,cw_message as a" )->join ( "cw_car as c on c.id=a.tar_id" )->join ( "cw_user as d  on a.openid=d.openid" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$model = M ( "endorsement" );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->assign ( 'str', $roles );
@@ -224,7 +224,7 @@ class DingyueController extends AdminbaseController {
 		// $roles=$this->Dingyue_model->query("select a.id,a.license_number,a.frame_number,a.engine_number,a.create_time from cw_car as a ".$where );
 		$count = $this->Dingyue_model->table ( "cw_car as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.license_number,a.frame_number,a.engine_number,a.create_time" )->table ( "(SELECT @rownum:=0) r,cw_car as a" )->where ( $where )->order ( 'a.create_time desc' )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.license_number,a.frame_number,a.engine_number,a.create_time, a.scan_state, a.scan_state_desc" )->table ( "(SELECT @rownum:=0) r,cw_car as a" )->where ( $where )->order ( 'a.create_time desc' )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$region_model = M ( "Region" );
 		foreach ( $roles as $k => $v ) {
 			$nums = mb_substr ( $v ['license_number'], 0, 2, 'utf-8' );
@@ -237,6 +237,21 @@ class DingyueController extends AdminbaseController {
 		$this->assign ( "pageIndex", $page->firstRow );
 		$this->display ();
 	}
+	
+	function change_scan(){
+		$car_id = $_POST ['car_id'];
+		$car_scan_state = $_POST ['car_scan_state'];
+		$car_scan_desc = $_POST ['car_scan_desc'];
+		
+		$data = array (
+				"scan_state" => $car_scan_state,
+				"scan_state_desc" => $car_scan_desc,
+				"scan_state_time" => time () 
+		);
+		$car_model = M ( "car" );
+		$car_model->where ( "id='{$car_id}'" )->save ( $data );
+	}
+	
 	function shuju_delete() {
 		$id = intval ( I ( "get.id" ) );
 		if ($this->Dingyue_model->execute ( "delete from cw_car where id=$id" ) > 0) {
@@ -297,7 +312,7 @@ class DingyueController extends AdminbaseController {
 		$this->assign ( 'state', $state );
 		$count = $this->Dingyue_model->table ( "cw_message as a" )->join ( "cw_endorsement as b on b.id=a.tar_id" )->join ( "cw_car as c on c.id=b.car_id" )->join ( "cw_user as d  on a.openid=d.openid" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,b.content,b.time,b.create_time as c_time,b.address,b.code,b.area,b.money,b.points,c.channel,a.create_time,d.nickname,c.license_number,a.nums,d.openid,d.city,d.create_time as u_time,b.query_no" )->table ( "(SELECT @rownum:=0) r,cw_message as a" )->join ( "cw_endorsement as b on b.id=a.tar_id" )->join ( "cw_car as c on c.id=b.car_id" )->join ( "cw_user as d  on a.openid=d.openid" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,b.content,b.time,b.create_time as c_time,b.address,b.code,b.area,b.money,b.points,d.channel,d.channel_key,a.create_time,d.nickname,c.license_number,a.nums,d.openid,d.city,d.create_time as u_time,b.query_no" )->table ( "(SELECT @rownum:=0) r,cw_message as a" )->join ( "cw_endorsement as b on b.id=a.tar_id" )->join ( "cw_car as c on c.id=b.car_id" )->join ( "cw_user as d  on a.openid=d.openid" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$model = M ( "endorsement" );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->assign ( 'str', $roles );
@@ -348,7 +363,7 @@ class DingyueController extends AdminbaseController {
 		) );
 		$count = $this->Dingyue_model->table ( "cw_user as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.group_id,a.openid,a.username,a.nickname,is_att,a.create_time,a.city" )->table ( "(SELECT @rownum:=0) r,cw_user as a" )->where ( $where )->order ( "a.create_time desc" )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.group_id,a.openid,a.username,a.channel, a.channel_key, a.nickname,is_att,a.create_time,a.city" )->table ( "(SELECT @rownum:=0) r,cw_user as a" )->where ( $where )->order ( "a.create_time desc" )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$typ_roles = $this->Dingyue_model->field ( "count(is_att) as nums" )->table ( "cw_user as a" )->group ( "is_att" )->select ();

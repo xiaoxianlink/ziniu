@@ -518,6 +518,13 @@ class XitongController extends AdminbaseController {
 		$order_info = $order_model->where ( "id='{$info['order_id']}'" )->find ();
 		$so_model = M ( "services_order" );
 		$so_info = $so_model->where ( "id='{$info['sod_id']}'" )->find ();
+		
+		$user_model = M ("User");
+		$user = $user_model->where ( "id = '{$order_info['user_id']}'" )->find ();
+		
+		$car_model = M ("Car");
+		$car = $user_model->where ( "id = '{$order_info['car_id']}'" )->find ();
+		
 		switch ($state) {
 			case 1 : // 办不了
 				$so_id = $this->screen ( $so_info ['violation'], $s_ids, $order_info ['endorsement_id'] );
@@ -624,6 +631,7 @@ class XitongController extends AdminbaseController {
 					$endorsement_model = M ( "Endorsement" );
 					$endorsement_model->where ( "id={$order_info['endorsement_id']}" )->save ( $data );
 				}
+				//$this->postBizApi($order_info, $user, 1);
 				break;
 			case 3 : // 我来办理
 				$data = array (
@@ -647,9 +655,7 @@ class XitongController extends AdminbaseController {
 					$services_model->where ( "id='{$order_info['services_id']}'" )->save ( $data );
 				}
 				// 推送消息
-				$model = M ();
-				$user = $model->table ( "cw_order as o" )->join ( "cw_user as u on u.id=o.user_id" )->join ( "cw_car as c on c.id=o.car_id" )->field ( "u.openid, o.order_sn, c.license_number" )->where ( "o.id = '{$info['order_id']}'" )->find ();
-				if (! empty ( $user )) {
+				if ($user['channel'] == 0) {
 					$model = new IndexController ();
 					$data = array (
 							'first' => array (
@@ -657,11 +663,11 @@ class XitongController extends AdminbaseController {
 									'color' => "#000000" 
 							),
 							'keyword1' => array (
-									'value' => urlencode ( "{$user ['order_sn']}" ),
+									'value' => urlencode ( "{$order_info ['order_sn']}" ),
 									'color' => '#000000' 
 							),
 							'keyword2' => array (
-									'value' => urlencode ( "{$user['license_number']}" ),
+									'value' => urlencode ( "{$car['license_number']}" ),
 									'color' => '#000000' 
 							),
 							'keyword3' => array (
@@ -676,6 +682,7 @@ class XitongController extends AdminbaseController {
 					include_once 'application/Weixin/Conf/config.php';
 					$model->doSend ( 0, '', $user ['openid'], MUBAN3, URL2, $data );
 				}
+				$this->postBizApi($order_info, $user, 3);
 				break;
 			case 4 : // 办理完成
 				$data = array (
@@ -684,6 +691,14 @@ class XitongController extends AdminbaseController {
 						'finish_time' => time () 
 				);
 				$model->where ( "id='{$info['id']}'" )->save ( $data );
+				/*
+				$data = array (
+						"last_time" => time (),
+						"order_status" => 4 
+				);
+				$order_model->where ( "id='{$order_info['id']}'" )->save ( $data );
+				$this->postBizApi($order_info, $user, 4);
+				*/
 				break;
 			default :
 				;
@@ -691,6 +706,70 @@ class XitongController extends AdminbaseController {
 		}
 		$this->redirect ( "Xitong/window" );
 	}
+	
+	function postBizApi($order, $user, $state){
+		$log = new Log();
+		if($user['channel'] == 99){
+			$_model = M("");
+			$_result = $_model->query("select c.license_number, e.* from cw_endorsement e, cw_car c where e.id = {$order['endorsement_id']} and c.id = {$order['car_id']}");
+			$result = $_result[0];
+			
+			$bizapi_id = substr($user['channel_key'], 7);
+			$bizapi_model = M('bizapi');
+			$now = time();
+			$bizapi = $bizapi_model->where("id = $bizapi_id and state = 1 and expiration_time >= $now ")->find();
+			
+			if(!empty($bizapi)){
+				$target_url = $bizapi['app_domain'];
+				if(false === strpos($target_url, 'http://')){
+						$target_url = "http://" . $target_url;
+					}
+				$target_url = $target_url . "/api/weizhang/banlijieguo";
+				if($state == 1){
+					$state_desc = "未处理";
+				}
+				if($state == 3){
+					$state_desc = "处理中";
+				}
+				if($state == 4){
+					$state_desc = "已处理";
+				}
+				$post_data = array (
+					'chepai' => $result['license_number'],
+					'weizhangtime' => $result['time'],
+					'weizhangcity' => $result['area'],
+					'weizhangcode' => $result['code'],
+					'fajin' => $result['money'],
+					'fafen' => $result['points'],
+					'dingdanhao' => $order['order_sn'],
+					'banlizhuangtai' => $state_desc,
+					'timestamp' => time()
+					);
+				$log->write ( "target_url=" . $target_url, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Ziniu/' . date ( 'y_m_d' ) . '.log' );
+				$log->write ( serialize ( http_build_query($post_data) ), 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Ziniu/' . date ( 'y_m_d' ) . '.log' );
+				$dataRes = $this->request_post($target_url, http_build_query($post_data));
+				$log->write ( serialize ( $dataRes ), 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Ziniu/' . date ( 'y_m_d' ) . '.log' );
+			}
+		}
+	}
+	
+	function request_post($url = '', $param = '') {
+		if (empty ( $url ) || empty ( $param )) {
+			return false;
+		}
+		$postUrl = $url;
+		$curlPost = $param;
+		$ch = curl_init (); // 初始化curl
+		curl_setopt ( $ch, CURLOPT_URL, $postUrl ); // 抓取指定网页
+		curl_setopt ( $ch, CURLOPT_HEADER, 0 ); // 设置header
+		curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 ); // 要求结果为字符串且输出到屏幕上
+		curl_setopt ( $ch, CURLOPT_POST, 1 ); // post提交方式
+		curl_setopt ( $ch, CURLOPT_POSTFIELDS, $curlPost );
+		$data = curl_exec ( $ch ); // 运行curl
+		curl_close ( $ch );
+		return $data;
+	}
+	
 	function screen($code, $s_ids, $e_id) {
 		$endorsement_model = M ( "Endorsement" );
 		$endorsemen_info = $endorsement_model->where ( "id='$e_id'" )->find ();

@@ -85,7 +85,7 @@ $(document).ready(function(){
 			<td><if condition="$vo['is_sub'] eq 0">是<else />否</if></td>
 			<td>{$vo.username}</td>
 			<td><if condition="$vo['c_time'] eq 0"><else />{$vo.c_time|date='Y-m-d H:i:s',###}</if></td>
-			<td><if condition="$vo['channel'] eq 0">wechat<else />alipay</if></td>
+			<td><if condition="$vo['channel'] eq 0">wechat<elseif condition="$vo['channel'] eq 99"/>{$vo.channel_key}<else />alipay</if></td>
 			<td><span class="sview" onmouseover="ShowPrompt2(event,'{$vo.nickname}','{$vo.openid}','{$vo.city}','{$vo.create_time|date='Y-m-d H:i:s',###}')" onmouseout="HiddenPrompt()">{$vo.nickname}</span></td>
 		</tr>
 	</foreach>

@@ -1,5 +1,66 @@
 <admintpl file="header" />
 <meta charset="UTF-8">
+<link href="__ROOT__/statics/js/switch/style.css" rel="stylesheet" type="text/css"/>
+<style>
+.PopupPanel
+{
+    border: solid 1px black;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    background-color: white;
+    z-index: 100;
+    height: 210px;
+    width: 400px;
+	margin-left: -200px;
+	margin-top: -100px;
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+	-webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top: -300px; opacity: 0} 
+    to {top: 0; opacity: 1}
+}
+
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+/* Popup Header */
+.Popup-header {
+    padding: 2px 16px;
+	height: 40px;
+    background-color: #e6e6e6;
+    color: white;
+	display: flex;
+}
+.Popup-close {
+    color: white;
+    align-self: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+/* Popup Body */
+.Popup-body {
+	padding: 2px 16px;
+	height: 118px;
+}
+
+/* Popup Footer */
+.Popup-footer {
+    padding: 2px 16px;
+	height: 40px;
+    background-color: #e6e6e6;
+    color: white;
+	display: flex;
+	justify-content: flex-end;
+}
+</style>
 <script type="text/javascript">
 $(document).ready(function(){
 	$('tr').click(function(){
@@ -7,11 +68,40 @@ $(document).ready(function(){
 		$(this).addClass("tr_hover");
 	});
 });
+function showScanState(id, license_num, state) {
+	$('#car_id').val(id);
+	$('#car_license').html(license_num);
+	$('#car_scan_desc').val("");
+	if(state == 1){
+		$('#car_scan_state').attr("checked",'checked');
+		$('#car_scan_desc_label').html("停扫原因");
+	}
+	else{
+		$('#car_scan_state').removeAttr("checked");
+		$('#car_scan_desc_label').html("删除停扫原因");
+	}
+	$('#scanStatePanel').show();
+}
+function closeScanState() {
+	$('#scanStatePanel').hide();
+}
+function changeScanState() {
+	var id = $('#car_id').val();
+	var state = 0;
+	if($('#car_scan_state').attr("checked") !== undefined){
+		state = 1;
+	}
+	var desc = $('#car_scan_desc').val();
+	$.post( "{:U('Dingyue/change_scan')}", { "car_id": id, "car_scan_state": state, "car_scan_desc": desc }, function( data ) {
+	  $("#car_query").submit();
+	});
+	$('#scanStatePanel').hide();
+}
 </script>
 <body class="J_scroll_fixed">
 <div class="wrap J_check_wrap">
 	<div id="cheliang_submit" class="top_div">
-		<form action="{:U('Dingyue/shuju')} " method="post">
+		<form id="car_query" action="{:U('Dingyue/shuju')} " method="post">
 			<input type="submit"   class="query_btn"  value="查询"/>
 			<div  class="query_div" > 
 					车牌号 <input type="text"   name="che_number"  class="query_txt"   value="{$number}"/> 
@@ -34,6 +124,8 @@ $(document).ready(function(){
 		<th>车辆所属省</th>
 		<th>车辆所属市</th>
 		<th>添加时间</th>
+		<th>是否扫描</th>
+		<th>停查原因</th>
 	</tr>
 	<?php $i = 1;?>
 	<?php $i = $pageIndex + $i;?>
@@ -47,10 +139,45 @@ $(document).ready(function(){
 			<td>{$vo.province}</td>
             <td>{$vo.city}</td>
 			<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
+			<td>
+				<if condition="$vo['scan_state'] eq 1">
+					<a href="javascript:;" onclick="showScanState({$vo.id},'{$vo.license_number}',{$vo.scan_state})">扫描</a>
+				<else />
+					<a href="javascript:;" onclick="showScanState({$vo.id},'{$vo.license_number}',{$vo.scan_state})">停止</a>
+				</if>
+			</td>
+			<td>{$vo.scan_state_desc}</td>
 		</tr>
 	</foreach>
 </table>
 <div class="pagination">{$Page}</div>
+</div>
+<div id="scanStatePanel" style="display:none" class="PopupPanel">
+	<div id="popop_header" class="Popup-header">
+		<input id="car_id" type="hidden"/>
+		<div id="car_license" style="display:inline;align-self:center;width:95%"></div>
+		<span class="Popup-close" onclick="closeScanState()">X</span>
+	</div>
+	<div id="popup_content" class="Popup-body">
+		<div style="height: 50%; display: flex;">
+			<div id="car_scan_state_label" style="display:inline;align-self:center;width:30%">是否启动扫描</div>
+			<div style="display:inline;align-self:center;">
+				<input id="car_scan_state" class="cmn-toggle cmn-toggle-round" type="checkbox">
+				<label for="car_scan_state"></label>
+			</div>
+		</div>
+		<div style="height: 50%; display: flex;">
+			<div id="car_scan_desc_label" style="display:inline;align-self:center;width:30%">停扫原因</div>
+			<div style="display:inline;align-self:center;">
+				<input id="car_scan_desc" type="area"/>
+			</div>
+		</div>
+	</div>
+	<div id="popop_footer" class="Popup-footer">
+		<div class="Popup-close">
+			<button style="width: 60px;" onclick="changeScanState()">保存</button>
+		</div>
+	</div>
 </div>
 </body>
 </html>

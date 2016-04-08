@@ -1,0 +1,126 @@
+<admintpl file="header" />
+<link href="__ROOT__/statics/js/switch/style.css" rel="stylesheet" type="text/css"/>
+<meta charset="UTF-8">
+<style>
+<!--
+.iftd a {
+	width: 60px;
+}
+-->
+</style>
+<script type="text/javascript">
+function checkInput(){
+	$("#bizapi_name_tips").html("");
+	$("#bizapi_domain_tips").html("");
+	$("#bizapi_id_tips").html("");
+	$("#bizapi_expiration_tips").html("");
+	var bizapi_id = $("#bizapi_id").val();
+	var bizapi_name = $("#bizapi_name").val();
+	var bizapi_app_domain = $("#bizapi_app_domain").val();
+	var bizapi_app_id = $("#bizapi_app_id").val();
+	var expiration_time = $("#expiration_time").val();
+	
+	var has_error = false;
+	if(bizapi_name == ""){
+		$("#bizapi_name_tips").html("名称不能为空");
+		has_error = true;
+	}
+	if(bizapi_app_domain == ""){
+		$("#bizapi_domain_tips").html("名称不能为空");
+		has_error = true;
+	}
+	if(bizapi_app_id == ""){
+		$("#bizapi_id_tips").html("名称不能为空");
+		has_error = true;
+	}
+	if(expiration_time == ""){
+		$("#bizapi_expiration_tips").html("名称不能为空");
+		has_error = true;
+	}
+	if(has_error){
+		return false;
+	}
+	$.ajax({
+		url: "{:U('Bizapi/bizapi_update_check')}", 
+		async: false,
+		dataType:"json",
+		data: {"bizapi_id": bizapi_id, "bizapi_name" : bizapi_name, "bizapi_app_domain": bizapi_app_domain, "bizapi_app_id":bizapi_app_id}, 
+		success: function(data,status,xhr){
+			if(data['status'] == 1){
+				has_error = true;
+				$("#bizapi_name_tips").html(data["info"]);
+			}
+			if(data['status'] == 2){
+				has_error = true;
+				$("#bizapi_domain_tips").html(data["info"]);
+			}
+			if(data['status'] == 3){
+				has_error = true;
+				$("#bizapi_id_tips").html(data["info"]);
+			}
+		}
+		});
+	if(has_error){
+		return false;
+	}
+	if($('#biazapi_state').attr("checked") !== undefined){
+		$("#state").val("1");
+	}
+	else{
+		$("#state").val("0");
+	}
+	return true;
+}	
+</script>
+<body class="J_scroll_fixed">
+	<div class="wrap J_check_wrap">
+		<div class="common-form">
+			<form method="post" class="form-horizontal J_ajaxForm" onsubmit="return checkInput();" action="{:U('Bizapi/bizapi_update')}">
+				<input type="hidden" id="bizapi_id" name="bizapi_id" value="{$api.id}"/>
+				<input type="hidden" id="state" name="state" value="{$api.state}"/>
+				<div class="window_div">
+					<span class="window_span">名称:</span>
+					<span class="window_span"><input type="text" class="input" id="bizapi_name" name="bizapi_name" value="{$api.name}"></span>
+					<span class="window_span" id="bizapi_name_tips" style="color:red"></span>
+				</div>
+				<div class="window_div">
+					<span class="window_span">APP Domain:</span>
+					<span class="window_span"><input type="text" class="input" id="bizapi_app_domain" name="bizapi_app_domain"  style="width:300px"value="{$api.app_domain}"></span>
+					<span class="window_span" id="bizapi_domain_tips" style="color:red"></span>
+				</div>
+				<div class="window_div">
+					<span class="window_span">APP ID:</span>
+					<span class="window_span"><input type="text" class="input" id="bizapi_app_id" name="bizapi_app_id" value="{$api.app_id}"></span>
+					<span class="window_span" id="bizapi_id_tips" style="color:red"></span>
+				</div>
+				<div class="window_div">
+					<span class="window_span">APP KEY:</span>
+					<span class="window_span" id="bizapi_id_tips">{$api.app_key}</span>
+				</div>
+				<div class="window_div">
+					<span class="window_span">有效截止时间:</span>
+					<span class="window_span"><input type="text" class="input length_3 J_datetime" name="expiration_time" value="{$api.expiration_time|date='Y-m-d H:i:s',###}"></span>
+					<span class="window_span" id="bizapi_expiration_tips" style="color:red"></span>
+				</div>
+				<div class="window_div">
+					<span class="window_span">是否有效:</span>
+					<span class="window_span" id="bizapi_id_tips">
+						<if condition="$api['state'] eq 1">
+							<input id="biazapi_state" class="cmn-toggle cmn-toggle-round" style="display:inline" type="checkbox" checked>
+						<else />
+							<input id="biazapi_state" class="cmn-toggle cmn-toggle-round" style="display:inline" type="checkbox">
+						</if>
+						<label for="biazapi_state"></label>
+					</span>
+				</div>
+				<div class="window_div">
+					<input type="submit" style="background: #66d99f;float:left" class="query_btn" value="确定" />
+					<a class="btn" style="margin-top: 12px;" href="{:U('Bizapi/bizapi_list')}">返回</a>
+				</div>
+			</form>
+		</div>
+	</div>
+	
+	<script type="text/javascript" src="__ROOT__/statics/js/common.js"></script>
+</body>
+</html>

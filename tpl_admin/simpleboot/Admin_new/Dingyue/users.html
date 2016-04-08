@@ -52,7 +52,7 @@ $(document).ready(function(){
 			<td>{$vo.username}</td>
 			<td><if condition="$vo['is_att'] eq '0'">是<else />否</if></td>
 			<td><if condition="$vo['create_time'] eq 0"><else />{$vo.create_time|date='Y-m-d H:i:s',###}</if></td>
-			<td>wechat</td>
+			<td><if condition="$vo['channel'] eq 0">wechat<elseif condition="$vo['channel'] eq 99"/>{$vo.channel_key}<else />alipay</if></td>
 			<td>{$vo.nickname}</td>
 			<td>{$vo.city}</td>
 		</tr>

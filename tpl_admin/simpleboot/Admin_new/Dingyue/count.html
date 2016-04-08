@@ -73,7 +73,7 @@ $(document).ready(function(){
 			<foreach name="str" item="vo">
 				<tr>
 					<td>{$i++}</td>
-					<td><if condition="$vo['channel'] eq 0">wechat<else />alipay</if></td>
+					<td><if condition="$vo['channel'] eq 0">wechat<elseif condition="$vo['channel'] eq 99"/>{$vo.channel_key}<else />alipay</if></td>
 					<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
 					<td><span class="sview" onmouseover="ShowPrompt2(event,'{$vo.nickname}','{$vo.openid}','{$vo.city}','{$vo.u_time|date='Y-m-d H:i:s',###}')" onmouseout="HiddenPrompt()">{$vo.nickname}</span></td>
 					<td>{$vo.license_number}</td>
