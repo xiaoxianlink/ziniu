@@ -60,3 +60,30 @@ ADD COLUMN `scan_state_desc`  varchar(256) NULL AFTER `scan_state`,
 ADD COLUMN `scan_state_time`  int(11) NULL AFTER `scan_state_desc`,
 ADD COLUMN `scan_stop_query`  int(11) NULL AFTER `scan_state_time`;
 
+-- ----------------------------
+-- bizapi
+-- ----------------------------
+CREATE TABLE `cw_bizapi` (
+`id`  int(11) NOT NULL AUTO_INCREMENT ,
+`name`  varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+`app_domain`  varchar(256) NOT NULL ,
+`app_id`  varchar(256) NOT NULL ,
+`app_key`  varchar(256) NOT NULL ,
+`create_time`  int(11) NOT NULL ,
+`expiration_time`  int(11) NOT NULL ,
+`state`  int(2) NOT NULL DEFAULT 1 ,
+`last_time`  int(11) NULL ,
+PRIMARY KEY (`id`)
+)
+;
+ALTER TABLE `cw_car`
+ADD COLUMN `channel_key`  varchar(128) NULL AFTER `channel`;
+
+ALTER TABLE `cw_user`
+ADD COLUMN `channel_key`  varchar(128) NULL AFTER `channel`;
+
+insert into cw_menu (parentid, app, model, action, type, status, name, listorder) values (165, 'Admin_new', 'Bizapi',	'bizapi_list', 1, 1, '商用接口管理', 5);
+
+insert into cw_auth_rule (module, type, name, title, status) values ('Admin', 'admin_url', 'admin_new/bizapi/bizapi_list', '商用接口管理', 1);	
+
+
