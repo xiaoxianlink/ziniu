@@ -5,13 +5,13 @@
 DROP TABLE IF EXISTS `cw_services_dyna`;
 CREATE TABLE `cw_services_dyna` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `services_id` varchar(32) NOT NULL COMMENT 'æœåŠ¡å•†id',
-  `code` int(11) NOT NULL COMMENT 'åŸå¸‚code',
-  `point_fee` int(11) NOT NULL COMMENT 'è¿ç« ä»£ç id',
-  `fee` int(10) NOT NULL COMMENT 'å®šä»·',
-  `create_time` int(11) DEFAULT NULL COMMENT 'å®šä»·æ—¶é—´',
+  `services_id` varchar(32) NOT NULL COMMENT '·şÎñÉÌid',
+  `code` int(11) NOT NULL COMMENT '³ÇÊĞcode',
+  `point_fee` int(11) NOT NULL COMMENT 'Î¥ÕÂ´úÂëid',
+  `fee` int(10) NOT NULL COMMENT '¶¨¼Û',
+  `create_time` int(11) DEFAULT NULL COMMENT '¶¨¼ÛÊ±¼ä',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=gbk ROW_FORMAT=DYNAMIC COMMENT='æœåŠ¡å•†å®šä»·è¡¨';
+) ENGINE=InnoDB DEFAULT CHARSET=gbk ROW_FORMAT=DYNAMIC COMMENT='·şÎñÉÌ¶¨¼Û±í';
 
 ALTER TABLE `cw_order`
 ADD COLUMN `so_type`  int(2) NULL DEFAULT 1 AFTER `so_id`;
@@ -19,37 +19,37 @@ ADD COLUMN `so_type`  int(2) NULL DEFAULT 1 AFTER `so_id`;
 -- ----------------------------
 -- mobile app
 -- ----------------------------
-ALTER TABLE `cw_services` ADD `nickname` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'æ˜µç§°' ;
+ALTER TABLE `cw_services` ADD `nickname` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'êÇ³Æ' ;
 
-ALTER TABLE `cw_message` CHANGE `msg_type` `msg_type` INT(11) NULL DEFAULT NULL COMMENT 'æ¶ˆæ¯ç±»å‹ï¼›1ï¼šè¿ç« æé†’ï¼Œ2ï¼šæ–°è¿ç« æé†’ï¼Œ3ï¼šå°ä»™æé†’ï¼Œ4ï¼šå°ä»™è´¦åŠ¡';
+ALTER TABLE `cw_message` CHANGE `msg_type` `msg_type` INT(11) NULL DEFAULT NULL COMMENT 'ÏûÏ¢ÀàĞÍ£»1£ºÎ¥ÕÂÌáĞÑ£¬2£ºĞÂÎ¥ÕÂÌáĞÑ£¬3£ºĞ¡ÏÉÌáĞÑ£¬4£ºĞ¡ÏÉÕËÎñ';
 
-ALTER TABLE `cw_message` ADD `content` VARCHAR(128) NULL COMMENT 'æ¶ˆæ¯å†…å®¹' ;
+ALTER TABLE `cw_message` ADD `content` VARCHAR(128) NULL COMMENT 'ÏûÏ¢ÄÚÈİ' ;
 
-ALTER TABLE `cw_message` ADD `is_readed` INT(10) NULL COMMENT 'æ¶ˆæ¯çŠ¶æ€ï¼š0æœªè¯»ï¼Œ1å·²è¯»' ;
+ALTER TABLE `cw_message` ADD `is_readed` INT(10) NULL COMMENT 'ÏûÏ¢×´Ì¬£º0Î´¶Á£¬1ÒÑ¶Á' ;
 
-ALTER TABLE `cw_message` CHANGE `msg_type` `msg_type` INT(11) NULL DEFAULT NULL COMMENT 'æ¶ˆæ¯ç±»å‹ï¼›1ï¼šè¿ç« æé†’ï¼Œ2ï¼šæ–°è¿ç« æé†’ï¼Œ3ï¼šå°ä»™æé†’ï¼Œ4ï¼šå°ä»™è´¦åŠ¡ï¼Œ5ï¼šå®¢æœå°ä»™';
+ALTER TABLE `cw_message` CHANGE `msg_type` `msg_type` INT(11) NULL DEFAULT NULL COMMENT 'ÏûÏ¢ÀàĞÍ£»1£ºÎ¥ÕÂÌáĞÑ£¬2£ºĞÂÎ¥ÕÂÌáĞÑ£¬3£ºĞ¡ÏÉÌáĞÑ£¬4£ºĞ¡ÏÉÕËÎñ£¬5£º¿Í·şĞ¡ÏÉ';
 
-ALTER TABLE `cw_message` ADD `tixing_type` INT(10) NULL COMMENT 'å°ä»™æé†’ç±»å‹ï¼Œå½“msg_type=3æ—¶æœ‰æ•ˆ' AFTER `msg_type`;
+ALTER TABLE `cw_message` ADD `tixing_type` INT(10) NULL COMMENT 'Ğ¡ÏÉÌáĞÑÀàĞÍ£¬µ±msg_type=3Ê±ÓĞĞ§' AFTER `msg_type`;
 
-ALTER TABLE `cw_message` CHANGE `tixing_type` `tixing_type` INT(10) NULL COMMENT 'å°ä»™æé†’ç±»å‹ï¼Œå½“msg_type=3æ—¶æœ‰æ•ˆã€‚1å¼€å§‹æ¥å•çŠ¶æ€æ›´æ–°æé†’ï¼Œ2ç³»ç»Ÿå‡çº§æé†’ï¼Œ3æ–°å•æ¨é€æé†’ï¼Œ4æ–°å•å³å°†è¿‡æœŸæé†’ï¼Œ5æ¥å•å¤„ç†å³å°†è¿‡æœŸæé†’ï¼Œ6æ¥å•æˆåŠŸæé†’';
+ALTER TABLE `cw_message` CHANGE `tixing_type` `tixing_type` INT(10) NULL COMMENT 'Ğ¡ÏÉÌáĞÑÀàĞÍ£¬µ±msg_type=3Ê±ÓĞĞ§¡£1¿ªÊ¼½Óµ¥×´Ì¬¸üĞÂÌáĞÑ£¬2ÏµÍ³Éı¼¶ÌáĞÑ£¬3ĞÂµ¥ÍÆËÍÌáĞÑ£¬4ĞÂµ¥¼´½«¹ıÆÚÌáĞÑ£¬5½Óµ¥´¦Àí¼´½«¹ıÆÚÌáĞÑ£¬6½Óµ¥³É¹¦ÌáĞÑ';
 
-ALTER TABLE `cw_message` ADD `zhangwu_type` INT(10) NULL COMMENT 'å°ä»™è´¦åŠ¡ç±»å‹ï¼Œå½“msg_type=4æ—¶æœ‰æ•ˆ' AFTER `tixing_type`;
+ALTER TABLE `cw_message` ADD `zhangwu_type` INT(10) NULL COMMENT 'Ğ¡ÏÉÕËÎñÀàĞÍ£¬µ±msg_type=4Ê±ÓĞĞ§' AFTER `tixing_type`;
 
-ALTER TABLE `cw_message` CHANGE `zhangwu_type` `zhangwu_type` INT(10) NULL COMMENT 'å°ä»™è´¦åŠ¡ç±»å‹ï¼Œå½“type=4æ—¶æœ‰æ•ˆã€‚1å¯æç°é‡‘é¢å˜åŠ¨æé†’ï¼Œ2è´¦æˆ·é‡‘é¢å˜åŠ¨æé†’ï¼Œ3æç°ç”³è¯·æé†’ï¼Œ4æç°åˆ°è´¦æé†’';
+ALTER TABLE `cw_message` CHANGE `zhangwu_type` `zhangwu_type` INT(10) NULL COMMENT 'Ğ¡ÏÉÕËÎñÀàĞÍ£¬µ±type=4Ê±ÓĞĞ§¡£1¿ÉÌáÏÖ½ğ¶î±ä¶¯ÌáĞÑ£¬2ÕË»§½ğ¶î±ä¶¯ÌáĞÑ£¬3ÌáÏÖÉêÇëÌáĞÑ£¬4ÌáÏÖµ½ÕËÌáĞÑ';
 
-ALTER TABLE `cw_message` ADD `icon` VARCHAR(32) NULL COMMENT 'å›¾ç‰‡' ;
+ALTER TABLE `cw_message` ADD `icon` VARCHAR(32) NULL COMMENT 'Í¼Æ¬' ;
 
-ALTER TABLE `cw_message` CHANGE `tixing_type` `tixing_type` INT(10) NULL COMMENT 'å°ä»™æé†’ç±»å‹ï¼Œå½“msg_type=3æ—¶æœ‰æ•ˆã€‚1å¼€å§‹æ¥å•çŠ¶æ€æ›´æ–°æé†’ï¼Œ2æ–°è®¢å•å³å°†è¿‡æœŸæé†’ï¼Œ3æ¥å•å¤„ç†å³å°†è¿‡æœŸæé†’ï¼Œ4æ–°è®¢å•æé†’ï¼Œ5æ–°å•è¶…æ—¶å–æ¶ˆæé†’ï¼Œ6æ¥å•è¶…æ—¶å–æ¶ˆæé†’ï¼Œ7è®¢å•ç»“ç®—æé†’ï¼Œ8å¸®åŠ©ä¸è§„åˆ™æ›´æ–°';
+ALTER TABLE `cw_message` CHANGE `tixing_type` `tixing_type` INT(10) NULL COMMENT 'Ğ¡ÏÉÌáĞÑÀàĞÍ£¬µ±msg_type=3Ê±ÓĞĞ§¡£1¿ªÊ¼½Óµ¥×´Ì¬¸üĞÂÌáĞÑ£¬2ĞÂ¶©µ¥¼´½«¹ıÆÚÌáĞÑ£¬3½Óµ¥´¦Àí¼´½«¹ıÆÚÌáĞÑ£¬4ĞÂ¶©µ¥ÌáĞÑ£¬5ĞÂµ¥³¬Ê±È¡ÏûÌáĞÑ£¬6½Óµ¥³¬Ê±È¡ÏûÌáĞÑ£¬7¶©µ¥½áËãÌáĞÑ£¬8°ïÖúÓë¹æÔò¸üĞÂ';
 
-ALTER TABLE `cw_message` CHANGE `zhangwu_type` `zhangwu_type` INT(10) NULL COMMENT 'å°ä»™è´¦åŠ¡ç±»å‹ï¼Œå½“ty1è´¦æˆ·ä½™é¢å˜åŠ¨æé†’ï¼Œ2å¯æç°é‡‘é¢å˜åŠ¨æé†’ï¼Œ3ç»‘å®šé“¶è¡Œå¡/è§£ç»‘é“¶è¡Œå¡ï¼Œ4æç°æ“ä½œ';
+ALTER TABLE `cw_message` CHANGE `zhangwu_type` `zhangwu_type` INT(10) NULL COMMENT 'Ğ¡ÏÉÕËÎñÀàĞÍ£¬µ±ty1ÕË»§Óà¶î±ä¶¯ÌáĞÑ£¬2¿ÉÌáÏÖ½ğ¶î±ä¶¯ÌáĞÑ£¬3°ó¶¨ÒøĞĞ¿¨/½â°óÒøĞĞ¿¨£¬4ÌáÏÖ²Ù×÷';
 
-CREATE TABLE `cw_yinhang` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ç¼–å·id è‡ªå¢é•¿ä¸»é”®' , `bank_name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'é“¶è¡Œåç§°' , `bank_img` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ç¼©ç•¥å›¾' , `state` INT(11) NOT NULL COMMENT 'æ˜¯å¦ä½¿ç”¨ï¼š0ä½¿ç”¨ï¼Œ1ä¸ä½¿ç”¨' , `sort` INT(11) NOT NULL COMMENT 'æ’åº' , PRIMARY KEY (`id`) );
+CREATE TABLE `cw_yinhang` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '±àºÅid ×ÔÔö³¤Ö÷¼ü' , `bank_name` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ÒøĞĞÃû³Æ' , `bank_img` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ËõÂÔÍ¼' , `state` INT(11) NOT NULL COMMENT 'ÊÇ·ñÊ¹ÓÃ£º0Ê¹ÓÃ£¬1²»Ê¹ÓÃ' , `sort` INT(11) NOT NULL COMMENT 'ÅÅĞò' , PRIMARY KEY (`id`) );
 
-CREATE TABLE `cw_duanxin` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢é•¿ä¸»é”®' , `phone` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'æ‰‹æœºå·ç ' , `code` VARCHAR(32) CHARACTER SET utf32 COLLATE utf32_general_ci NOT NULL COMMENT 'çŸ­ä¿¡éªŒè¯ç ' , `expires_time` DATETIME NOT NULL COMMENT 'çŸ­ä¿¡è¿‡æœŸæ—¶é—´' , `create_time` DATETIME NOT NULL COMMENT 'åˆ›å»ºæ—¶é—´' , PRIMARY KEY (`id`) );
+CREATE TABLE `cw_duanxin` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔö³¤Ö÷¼ü' , `phone` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ÊÖ»úºÅÂë' , `code` VARCHAR(32) CHARACTER SET utf32 COLLATE utf32_general_ci NOT NULL COMMENT '¶ÌĞÅÑéÖ¤Âë' , `expires_time` DATETIME NOT NULL COMMENT '¶ÌĞÅ¹ıÆÚÊ±¼ä' , `create_time` DATETIME NOT NULL COMMENT '´´½¨Ê±¼ä' , PRIMARY KEY (`id`) );
 
-CREATE TABLE `cw_secret` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'è‡ªå¢é•¿ä¸»é”®' , `username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ç™»å½•è´¦æˆ·' , `secret` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ç§˜é’¥' , `clientUUID` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'è®¾å¤‡id ç”¨äºåŒºåˆ†æ¯å°è®¾å¤‡' , `user_agent` VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'User-Agent' , `expires_time` DATETIME NOT NULL COMMENT 'ç§˜é’¥è¿‡æœŸæ—¶é—´' , `update_time` DATETIME NOT NULL COMMENT 'ç§˜é’¥æ›´æ–°æ—¶é—´' , PRIMARY KEY (`id`) ) COMMENT = 'ç§˜é’¥è®°å½•';
+CREATE TABLE `cw_secret` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔö³¤Ö÷¼ü' , `username` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'µÇÂ¼ÕË»§' , `secret` VARCHAR(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'ÃØÔ¿' , `clientUUID` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'Éè±¸id ÓÃÓÚÇø·ÖÃ¿Ì¨Éè±¸' , `user_agent` VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'User-Agent' , `expires_time` DATETIME NOT NULL COMMENT 'ÃØÔ¿¹ıÆÚÊ±¼ä' , `update_time` DATETIME NOT NULL COMMENT 'ÃØÔ¿¸üĞÂÊ±¼ä' , PRIMARY KEY (`id`) ) COMMENT = 'ÃØÔ¿¼ÇÂ¼';
 
-ALTER TABLE `cw_bank` ADD `yh_id` INT(11) NULL COMMENT 'é“¶è¡Œid' ;
+ALTER TABLE `cw_bank` ADD `yh_id` INT(11) NULL COMMENT 'ÒøĞĞid' ;
 
 -- ----------------------------
 -- scan by state of car
@@ -82,6 +82,413 @@ ADD COLUMN `channel_key`  varchar(128) NULL AFTER `channel`;
 ALTER TABLE `cw_user`
 ADD COLUMN `channel_key`  varchar(128) NULL AFTER `channel`;
 
-insert into cw_menu (parentid, app, model, action, type, status, name, listorder) values (165, 'Admin_new', 'Bizapi',	'bizapi_list', 1, 1, 'å•†ç”¨æ¥å£ç®¡ç†', 5);
+insert into cw_menu (parentid, app, model, action, type, status, name, listorder) values (165, 'Admin_new', 'Bizapi',	'bizapi_list', 1, 1, 'ÉÌÓÃ½Ó¿Ú¹ÜÀí', 5);
 
-insert into cw_auth_rule (module, type, name, title, status) values ('Admin', 'admin_url', 'admin_new/bizapi/bizapi_list', 'å•†ç”¨æ¥å£ç®¡ç†', 1);	
+insert into cw_auth_rule (module, type, name, title, status) values ('Admin', 'admin_url', 'admin_new/bizapi/bizapi_list', 'ÉÌÓÃ½Ó¿Ú¹ÜÀí', 1);	
+
+ALTER TABLE `cw_region`
+ADD COLUMN `gb_code_p`  int(4) NULL AFTER `abbreviation`,
+ADD COLUMN `gb_code_c`  int(8) NULL AFTER `gb_code_p`,
+ADD COLUMN `cxy_engine_nums`  int(4) NULL AFTER `c_frame_nums`,
+ADD COLUMN `cxy_frame_nums`  int(4) NULL AFTER `cxy_engine_nums`;
+
+update `cw_region` set gb_code_p = 11, gb_code_c = 11  where city = '±±¾©';
+update `cw_region` set gb_code_p = 12, gb_code_c = 12  where city = 'Ìì½ò';
+update `cw_region` set gb_code_p = 31, gb_code_c = 31  where city = 'ÉÏº£';
+update `cw_region` set gb_code_p = 50, gb_code_c = 50  where province = 'ÖØÇì';
+update cw_region set gb_code_p = 13, gb_code_c = 1301, nums = '¼½A' where city ='Ê¯¼Ò×¯';
+update cw_region set gb_code_p = 13, gb_code_c = 1302, nums = '¼½B' where city ='ÌÆÉ½';
+update cw_region set gb_code_p = 13, gb_code_c = 1303, nums = '¼½C' where city ='ÇØ»Êµº';
+update cw_region set gb_code_p = 13, gb_code_c = 1304, nums = '¼½D' where city ='ºªµ¦';
+update cw_region set gb_code_p = 13, gb_code_c = 1305, nums = '¼½E' where city ='ĞÏÌ¨';
+update cw_region set gb_code_p = 13, gb_code_c = 1306, nums = '¼½F' where city ='±£¶¨';
+update cw_region set gb_code_p = 13, gb_code_c = 1307, nums = '¼½G' where city ='ÕÅ¼Ò¿Ú';
+update cw_region set gb_code_p = 13, gb_code_c = 1308, nums = '¼½H' where city ='³ĞµÂ';
+update cw_region set gb_code_p = 13, gb_code_c = 1309, nums = '¼½J' where city ='²×Öİ';
+update cw_region set gb_code_p = 13, gb_code_c = 1310, nums = '¼½R' where city ='ÀÈ·»';
+update cw_region set gb_code_p = 13, gb_code_c = 1311, nums = '¼½T' where city ='ºâË®';
+update cw_region set gb_code_p = 13, gb_code_c = 1312, nums = '¼½S' where city ='²×ÖİĞĞÊğ';
+update cw_region set gb_code_p = 14, gb_code_c = 1401, nums = '½úA' where city ='Ì«Ô­';
+update cw_region set gb_code_p = 14, gb_code_c = 1402, nums = '½úB' where city ='´óÍ¬';
+update cw_region set gb_code_p = 14, gb_code_c = 1403, nums = '½úC' where city ='ÑôÈª';
+update cw_region set gb_code_p = 14, gb_code_c = 1404, nums = '½úD' where city ='³¤ÖÎ';
+update cw_region set gb_code_p = 14, gb_code_c = 1405, nums = '½úE' where city ='½ú³Ç';
+update cw_region set gb_code_p = 14, gb_code_c = 1406, nums = '½úF' where city ='Ë·Öİ';
+update cw_region set gb_code_p = 14, gb_code_c = 1407, nums = '½úK' where city ='½úÖĞ';
+update cw_region set gb_code_p = 14, gb_code_c = 1408, nums = '½úM' where city ='ÔË³Ç';
+update cw_region set gb_code_p = 14, gb_code_c = 1409, nums = '½úH' where city ='ĞÃÖİ';
+update cw_region set gb_code_p = 14, gb_code_c = 1410, nums = '½úL' where city ='ÁÙ·Ú';
+update cw_region set gb_code_p = 14, gb_code_c = 1411, nums = '½úJ' where city ='ÂÀÁº';
+update cw_region set gb_code_p = 14, gb_code_c = 1423, nums = '½úG' where city ='Ñã±±';
+update cw_region set gb_code_p = 15, gb_code_c = 1501, nums = 'ÃÉA' where city ='ºôºÍºÆÌØ';
+update cw_region set gb_code_p = 15, gb_code_c = 1502, nums = 'ÃÉB' where city ='°üÍ·';
+update cw_region set gb_code_p = 15, gb_code_c = 1503, nums = 'ÃÉC' where city ='ÎÚº£';
+update cw_region set gb_code_p = 15, gb_code_c = 1504, nums = 'ÃÉD' where city ='³à·å';
+update cw_region set gb_code_p = 15, gb_code_c = 1505, nums = 'ÃÉG' where city ='Í¨ÁÉ';
+update cw_region set gb_code_p = 15, gb_code_c = 1506, nums = 'ÃÉK' where city ='¶õ¶û¶àË¹';
+update cw_region set gb_code_p = 15, gb_code_c = 1507, nums = 'ÃÉE' where city ='ºôÂ×±´¶û';
+update cw_region set gb_code_p = 15, gb_code_c = 1508, nums = 'ÃÉL' where city ='°ÍÑåÄ×¶û';
+update cw_region set gb_code_p = 15, gb_code_c = 1509, nums = 'ÃÉJ' where city ='ÎÚÀ¼²ì²¼';
+update cw_region set gb_code_p = 15, gb_code_c = 1522, nums = 'ÃÉF' where city ='ĞË°²';
+update cw_region set gb_code_p = 15, gb_code_c = 1525, nums = 'ÃÉH' where city ='ÎıÁÖ¹ùÀÕ';
+update cw_region set gb_code_p = 15, gb_code_c = 1529, nums = 'ÃÉM' where city ='°¢À­ÉÆ';
+update cw_region set gb_code_p = 21, gb_code_c = 2101, nums = 'ÁÉA' where city ='ÉòÑô';
+update cw_region set gb_code_p = 21, gb_code_c = 2102, nums = 'ÁÉB' where city ='´óÁ¬';
+update cw_region set gb_code_p = 21, gb_code_c = 2103, nums = 'ÁÉC' where city ='°°É½';
+update cw_region set gb_code_p = 21, gb_code_c = 2104, nums = 'ÁÉD' where city ='¸§Ë³';
+update cw_region set gb_code_p = 21, gb_code_c = 2105, nums = 'ÁÉE' where city ='±¾Ïª';
+update cw_region set gb_code_p = 21, gb_code_c = 2106, nums = 'ÁÉF' where city ='µ¤¶«';
+update cw_region set gb_code_p = 21, gb_code_c = 2107, nums = 'ÁÉG' where city ='½õÖİ';
+update cw_region set gb_code_p = 21, gb_code_c = 2108, nums = 'ÁÉH' where city ='Óª¿Ú';
+update cw_region set gb_code_p = 21, gb_code_c = 2109, nums = 'ÁÉJ' where city ='¸·ĞÂ';
+update cw_region set gb_code_p = 21, gb_code_c = 2110, nums = 'ÁÉK' where city ='ÁÉÑô';
+update cw_region set gb_code_p = 21, gb_code_c = 2111, nums = 'ÁÉL' where city ='ÅÌ½õ';
+update cw_region set gb_code_p = 21, gb_code_c = 2112, nums = 'ÁÉM' where city ='ÌúÁë';
+update cw_region set gb_code_p = 21, gb_code_c = 2113, nums = 'ÁÉN' where city ='³¯Ñô';
+update cw_region set gb_code_p = 21, gb_code_c = 2114, nums = 'ÁÉP' where city ='ºùÂ«µº';
+update cw_region set gb_code_p = 22, gb_code_c = 2201, nums = '¼ªA' where city ='³¤´º';
+update cw_region set gb_code_p = 22, gb_code_c = 2202, nums = '¼ªB' where city ='¼ªÁÖ';
+update cw_region set gb_code_p = 22, gb_code_c = 2203, nums = '¼ªC' where city ='ËÄÆ½';
+update cw_region set gb_code_p = 22, gb_code_c = 2204, nums = '¼ªD' where city ='ÁÉÔ´';
+update cw_region set gb_code_p = 22, gb_code_c = 2205, nums = '¼ªE' where city ='Í¨»¯';
+update cw_region set gb_code_p = 22, gb_code_c = 2206, nums = '¼ªF' where city ='°×É½';
+update cw_region set gb_code_p = 22, gb_code_c = 2207, nums = '¼ªJ' where city ='ËÉÔ­';
+update cw_region set gb_code_p = 22, gb_code_c = 2208, nums = '¼ªG' where city ='°×³Ç';
+update cw_region set gb_code_p = 22, gb_code_c = 2224, nums = '¼ªH' where city ='ÑÓ±ß';
+update cw_region set gb_code_p = 23, gb_code_c = 2301, nums = 'ºÚA' where city ='¹ş¶û±õ';
+update cw_region set gb_code_p = 23, gb_code_c = 2302, nums = 'ºÚB' where city ='ÆëÆë¹ş¶û';
+update cw_region set gb_code_p = 23, gb_code_c = 2303, nums = 'ºÚG' where city ='¼¦Î÷';
+update cw_region set gb_code_p = 23, gb_code_c = 2304, nums = 'ºÚH' where city ='º×¸Ú';
+update cw_region set gb_code_p = 23, gb_code_c = 2305, nums = 'ºÚJ' where city ='Ë«Ñ¼É½';
+update cw_region set gb_code_p = 23, gb_code_c = 2306, nums = 'ºÚE' where city ='´óÇì';
+update cw_region set gb_code_p = 23, gb_code_c = 2307, nums = 'ºÚF' where city ='ÒÁ´º';
+update cw_region set gb_code_p = 23, gb_code_c = 2308, nums = 'ºÚD' where city ='¼ÑÄ¾Ë¹';
+update cw_region set gb_code_p = 23, gb_code_c = 2309, nums = 'ºÚK', city ='ÆßÌ¨ºÓ' where id = 4373;
+update cw_region set gb_code_p = 23, gb_code_c = 2310, nums = 'ºÚC' where city ='Äµµ¤½­';
+update cw_region set gb_code_p = 23, gb_code_c = 2311, nums = 'ºÚN' where city ='ºÚºÓ';
+update cw_region set gb_code_p = 23, gb_code_c = 2312, nums = 'ºÚM' where city ='Ëç»¯';
+update cw_region set gb_code_p = 23, gb_code_c = 2327, nums = 'ºÚP' where city ='´óĞË°²Áë';
+update cw_region set gb_code_p = 23, gb_code_c = 2328, nums = 'ºÚL' where city ='ËÉ»¨½­µØÇø';
+update cw_region set gb_code_p = 23, gb_code_c = 2329, nums = 'ºÚR' where city ='Å©¿ÑÏµÍ³';
+update cw_region set gb_code_p = 32, gb_code_c = 3201, nums = 'ËÕA' where city ='ÄÏ¾©';
+update cw_region set gb_code_p = 32, gb_code_c = 3202, nums = 'ËÕB' where city ='ÎŞÎı';
+update cw_region set gb_code_p = 32, gb_code_c = 3203, nums = 'ËÕC' where city ='ĞìÖİ';
+update cw_region set gb_code_p = 32, gb_code_c = 3204, nums = 'ËÕD' where city ='³£Öİ';
+update cw_region set gb_code_p = 32, gb_code_c = 3205, nums = 'ËÕE' where city ='ËÕÖİ';
+update cw_region set gb_code_p = 32, gb_code_c = 3206, nums = 'ËÕF' where city ='ÄÏÍ¨';
+update cw_region set gb_code_p = 32, gb_code_c = 3207, nums = 'ËÕG' where city ='Á¬ÔÆ¸Û';
+update cw_region set gb_code_p = 32, gb_code_c = 3208, nums = 'ËÕH' where city ='»´°²';
+update cw_region set gb_code_p = 32, gb_code_c = 3209, nums = 'ËÕJ' where city ='ÑÎ³Ç';
+update cw_region set gb_code_p = 32, gb_code_c = 3210, nums = 'ËÕK' where city ='ÑïÖİ';
+update cw_region set gb_code_p = 32, gb_code_c = 3211, nums = 'ËÕL' where city ='Õò½­';
+update cw_region set gb_code_p = 32, gb_code_c = 3212, nums = 'ËÕM' where city ='Ì©Öİ';
+update cw_region set gb_code_p = 32, gb_code_c = 3213, nums = 'ËÕN' where city ='ËŞÇ¨';
+update cw_region set gb_code_p = 33, gb_code_c = 3301, nums = 'ÕãA' where city ='º¼Öİ';
+update cw_region set gb_code_p = 33, gb_code_c = 3302, nums = 'ÕãB' where city ='Äş²¨';
+update cw_region set gb_code_p = 33, gb_code_c = 3303, nums = 'ÕãC' where city ='ÎÂÖİ';
+update cw_region set gb_code_p = 33, gb_code_c = 3304, nums = 'ÕãF' where city ='¼ÎĞË';
+update cw_region set gb_code_p = 33, gb_code_c = 3305, nums = 'ÕãE' where city ='ºşÖİ';
+update cw_region set gb_code_p = 33, gb_code_c = 3306, nums = 'ÕãD' where city ='ÉÜĞË';
+update cw_region set gb_code_p = 33, gb_code_c = 3307, nums = 'ÕãG' where city ='½ğ»ª';
+update cw_region set gb_code_p = 33, gb_code_c = 3308, nums = 'ÕãH' where city ='áéÖİ';
+update cw_region set gb_code_p = 33, gb_code_c = 3309, nums = 'ÕãL' where city ='ÖÛÉ½';
+update cw_region set gb_code_p = 33, gb_code_c = 3310, nums = 'ÕãJ' where city ='Ì¨Öİ';
+update cw_region set gb_code_p = 33, gb_code_c = 3311, nums = 'ÕãK' where city ='ÀöË®';
+update cw_region set gb_code_p = 34, gb_code_c = 3401, nums = 'ÍîA' where city ='ºÏ·Ê';
+update cw_region set gb_code_p = 34, gb_code_c = 3402, nums = 'ÍîB' where city ='Îßºş';
+update cw_region set gb_code_p = 34, gb_code_c = 3403, nums = 'ÍîC' where city ='°ö²º';
+update cw_region set gb_code_p = 34, gb_code_c = 3404, nums = 'ÍîD' where city ='»´ÄÏ';
+update cw_region set gb_code_p = 34, gb_code_c = 3405, nums = 'ÍîE' where city ='Âí°°É½';
+update cw_region set gb_code_p = 34, gb_code_c = 3406, nums = 'ÍîF' where city ='»´±±';
+update cw_region set gb_code_p = 34, gb_code_c = 3407, nums = 'ÍîG' where city ='Í­Áê';
+update cw_region set gb_code_p = 34, gb_code_c = 3408, nums = 'ÍîH' where city ='°²Çì';
+update cw_region set gb_code_p = 34, gb_code_c = 3410, nums = 'ÍîJ' where city ='»ÆÉ½';
+update cw_region set gb_code_p = 34, gb_code_c = 3411, nums = 'ÍîM' where city ='³üÖİ';
+update cw_region set gb_code_p = 34, gb_code_c = 3412, nums = 'ÍîK' where city ='¸·Ñô';
+update cw_region set gb_code_p = 34, gb_code_c = 3413, nums = 'ÍîL' where city ='ËŞÖİ';
+update cw_region set gb_code_p = 34, gb_code_c = 3415, nums = 'ÍîN' where city ='Áù°²';
+update cw_region set gb_code_p = 34, gb_code_c = 3416, nums = 'ÍîS' where city ='ÙñÖİ';
+update cw_region set gb_code_p = 34, gb_code_c = 3417, nums = 'ÍîR' where city ='³ØÖİ';
+update cw_region set gb_code_p = 34, gb_code_c = 3418, nums = 'ÍîP' where city ='Ğû³Ç';
+update cw_region set gb_code_p = 35, gb_code_c = 3501, nums = 'ÃöA' where city ='¸£Öİ';
+update cw_region set gb_code_p = 35, gb_code_c = 3502, nums = 'ÃöD' where city ='ÏÃÃÅ';
+update cw_region set gb_code_p = 35, gb_code_c = 3503, nums = 'ÃöB' where city ='ÆÎÌï';
+update cw_region set gb_code_p = 35, gb_code_c = 3504, nums = 'ÃöG' where city ='ÈıÃ÷';
+update cw_region set gb_code_p = 35, gb_code_c = 3505, nums = 'ÃöC' where city ='ÈªÖİ';
+update cw_region set gb_code_p = 35, gb_code_c = 3506, nums = 'ÃöE' where city ='ÕÄÖİ';
+update cw_region set gb_code_p = 35, gb_code_c = 3507, nums = 'ÃöH' where city ='ÄÏÆ½';
+update cw_region set gb_code_p = 35, gb_code_c = 3508, nums = 'ÃöF' where city ='ÁúÑÒ';
+update cw_region set gb_code_p = 35, gb_code_c = 3509, nums = 'ÃöJ' where city ='ÄşµÂ';
+update cw_region set gb_code_p = 35, gb_code_c = 3510, nums = 'ÃöK' where province='¸£½¨' and city ='Ê¡Ö±ÏµÍ³';
+update cw_region set gb_code_p = 36, gb_code_c = 3601, nums = '¸ÓA' where city ='ÄÏ²ı';
+update cw_region set gb_code_p = 36, gb_code_c = 3602, nums = '¸ÓH' where city ='¾°µÂÕò';
+update cw_region set gb_code_p = 36, gb_code_c = 3603, nums = '¸ÓJ' where city ='Æ¼Ïç';
+update cw_region set gb_code_p = 36, gb_code_c = 3604, nums = '¸ÓG' where city ='¾Å½­';
+update cw_region set gb_code_p = 36, gb_code_c = 3605, nums = '¸ÓK' where city ='ĞÂÓà';
+update cw_region set gb_code_p = 36, gb_code_c = 3606, nums = '¸ÓL' where city ='Ó¥Ì¶';
+update cw_region set gb_code_p = 36, gb_code_c = 3607, nums = '¸ÓB' where city ='¸ÓÖİ';
+update cw_region set gb_code_p = 36, gb_code_c = 3608, nums = '¸ÓD' where city ='¼ª°²';
+update cw_region set gb_code_p = 36, gb_code_c = 3609, nums = '¸ÓC' where city ='ÒË´º';
+update cw_region set gb_code_p = 36, gb_code_c = 3610, nums = '¸ÓF' where city ='¸§Öİ';
+update cw_region set gb_code_p = 36, gb_code_c = 3611, nums = '¸ÓE' where city ='ÉÏÈÄ';
+update cw_region set gb_code_p = 37, gb_code_c = 3701, nums = 'Â³A' where city ='¼ÃÄÏ';
+update cw_region set gb_code_p = 37, gb_code_c = 3702, nums = 'Â³B' where city ='Çàµº';
+update cw_region set gb_code_p = 37, gb_code_c = 3703, nums = 'Â³C' where city ='×Í²©';
+update cw_region set gb_code_p = 37, gb_code_c = 3704, nums = 'Â³D' where city ='Ôæ×¯';
+update cw_region set gb_code_p = 37, gb_code_c = 3705, nums = 'Â³E' where city ='¶«Óª';
+update cw_region set gb_code_p = 37, gb_code_c = 3706, nums = 'Â³F' where city ='ÑÌÌ¨';
+update cw_region set gb_code_p = 37, gb_code_c = 3707, nums = 'Â³G' where city ='Î«·»';
+update cw_region set gb_code_p = 37, gb_code_c = 3708, nums = 'Â³H' where city ='¼ÃÄş';
+update cw_region set gb_code_p = 37, gb_code_c = 3709, nums = 'Â³J' where city ='Ì©°²';
+update cw_region set gb_code_p = 37, gb_code_c = 3710, nums = 'Â³K' where city ='Íşº£';
+update cw_region set gb_code_p = 37, gb_code_c = 3711, nums = 'Â³L' where city ='ÈÕÕÕ';
+update cw_region set gb_code_p = 37, gb_code_c = 3712, nums = 'Â³S' where city ='À³Îß';
+update cw_region set gb_code_p = 37, gb_code_c = 3713, nums = 'Â³Q' where city ='ÁÙÒÊ';
+update cw_region set gb_code_p = 37, gb_code_c = 3714, nums = 'Â³N' where city ='µÂÖİ';
+update cw_region set gb_code_p = 37, gb_code_c = 3715, nums = 'Â³P' where city ='ÁÄ³Ç';
+update cw_region set gb_code_p = 37, gb_code_c = 3716, nums = 'Â³M' where city ='±õÖİ';
+update cw_region set gb_code_p = 37, gb_code_c = 3717, nums = 'Â³R' where city ='ºÊÔó';
+update cw_region set gb_code_p = 37, gb_code_c = 3718, nums = 'Â³U' where city ='ÇàµºÔö²¹';
+update cw_region set gb_code_p = 37, gb_code_c = 3719, nums = 'Â³V' where city ='Î«·»Ôö²¹';
+update cw_region set gb_code_p = 37, gb_code_c = 3720, nums = 'Â³Y' where city ='ÑÌÌ¨Ôö²¹';
+update cw_region set gb_code_p = 41, gb_code_c = 4101, nums = 'Ô¥A' where city ='Ö£Öİ';
+update cw_region set gb_code_p = 41, gb_code_c = 4102, nums = 'Ô¥B' where city ='¿ª·â';
+update cw_region set gb_code_p = 41, gb_code_c = 4103, nums = 'Ô¥C' where city ='ÂåÑô';
+update cw_region set gb_code_p = 41, gb_code_c = 4104, nums = 'Ô¥D' where city ='Æ½¶¥É½';
+update cw_region set gb_code_p = 41, gb_code_c = 4105, nums = 'Ô¥E' where city ='°²Ñô';
+update cw_region set gb_code_p = 41, gb_code_c = 4106, nums = 'Ô¥F' where city ='º×±Ú';
+update cw_region set gb_code_p = 41, gb_code_c = 4107, nums = 'Ô¥G' where city ='ĞÂÏç';
+update cw_region set gb_code_p = 41, gb_code_c = 4108, nums = 'Ô¥H' where city ='½¹×÷';
+update cw_region set gb_code_p = 41, gb_code_c = 4109, nums = 'Ô¥J' where city ='å§Ñô';
+update cw_region set gb_code_p = 41, gb_code_c = 4110, nums = 'Ô¥K' where city ='Ğí²ı';
+update cw_region set gb_code_p = 41, gb_code_c = 4111, nums = 'Ô¥L' where city ='äğºÓ';
+update cw_region set gb_code_p = 41, gb_code_c = 4112, nums = 'Ô¥M' where city ='ÈıÃÅÏ¿';
+update cw_region set gb_code_p = 41, gb_code_c = 4113, nums = 'Ô¥R' where city ='ÄÏÑô';
+update cw_region set gb_code_p = 41, gb_code_c = 4114, nums = 'Ô¥N' where city ='ÉÌÇğ';
+update cw_region set gb_code_p = 41, gb_code_c = 4115, nums = 'Ô¥S' where city ='ĞÅÑô';
+update cw_region set gb_code_p = 41, gb_code_c = 4116, nums = 'Ô¥P' where city ='ÖÜ¿Ú';
+update cw_region set gb_code_p = 41, gb_code_c = 4117, nums = 'Ô¥Q' where city ='×¤Âíµê';
+update cw_region set gb_code_p = 42, gb_code_c = 4201, nums = '¶õA' where city ='Îäºº';
+update cw_region set gb_code_p = 42, gb_code_c = 4202, nums = '¶õB' where city ='»ÆÊ¯';
+update cw_region set gb_code_p = 42, gb_code_c = 4203, nums = '¶õC' where city ='Ê®Ñß';
+update cw_region set gb_code_p = 42, gb_code_c = 4205, nums = '¶õE' where city ='ÒË²ı';
+update cw_region set gb_code_p = 42, gb_code_c = 4206, nums = '¶õF' where city ='Ïå·®';
+update cw_region set gb_code_p = 42, gb_code_c = 4207, nums = '¶õG' where city ='¶õÖİ';
+update cw_region set gb_code_p = 42, gb_code_c = 4208, nums = '¶õH' where city ='¾£ÃÅ';
+update cw_region set gb_code_p = 42, gb_code_c = 4209, nums = '¶õK' where city ='Ğ¢¸Ğ';
+update cw_region set gb_code_p = 42, gb_code_c = 4210, nums = '¶õD' where city ='¾£Öİ';
+update cw_region set gb_code_p = 42, gb_code_c = 4211, nums = '¶õJ' where city ='»Æ¸Ô';
+update cw_region set gb_code_p = 42, gb_code_c = 4212, nums = '¶õL' where city ='ÏÌÄş';
+update cw_region set gb_code_p = 42, gb_code_c = 4213, nums = '¶õS' where city ='ËæÖİ';
+update cw_region set gb_code_p = 42, gb_code_c = 4228, nums = '¶õQ' where city ='¶÷Ê©';
+update cw_region set gb_code_p = 43, gb_code_c = 4301, nums = 'ÏæA' where city ='³¤É³';
+update cw_region set gb_code_p = 43, gb_code_c = 4302, nums = 'ÏæB' where city ='ÖêÖŞ';
+update cw_region set gb_code_p = 43, gb_code_c = 4303, nums = 'ÏæC' where city ='ÏæÌ¶';
+update cw_region set gb_code_p = 43, gb_code_c = 4304, nums = 'ÏæD' where city ='ºâÑô';
+update cw_region set gb_code_p = 43, gb_code_c = 4305, nums = 'ÏæE' where city ='ÉÛÑô';
+update cw_region set gb_code_p = 43, gb_code_c = 4306, nums = 'ÏæF' where city ='ÔÀÑô';
+update cw_region set gb_code_p = 43, gb_code_c = 4307, nums = 'ÏæJ' where city ='³£µÂ';
+update cw_region set gb_code_p = 43, gb_code_c = 4308, nums = 'ÏæG' where city ='ÕÅ¼Ò½ç';
+update cw_region set gb_code_p = 43, gb_code_c = 4309, nums = 'ÏæH' where city ='ÒæÑô';
+update cw_region set gb_code_p = 43, gb_code_c = 4310, nums = 'ÏæL' where city ='³»Öİ';
+update cw_region set gb_code_p = 43, gb_code_c = 4311, nums = 'ÏæM' where province='ºşÄÏ' and city ='ÓÀÖİ';
+update cw_region set gb_code_p = 43, gb_code_c = 4312, nums = 'ÏæN' where city ='»³»¯';
+update cw_region set gb_code_p = 43, gb_code_c = 4313, nums = 'ÏæK' where city ='Â¦µ×';
+update cw_region set gb_code_p = 43, gb_code_c = 4331, nums = 'ÏæU' where city ='ÏæÎ÷';
+update cw_region set gb_code_p = 44, gb_code_c = 4401, nums = 'ÔÁA' where city ='¹ãÖİ';
+update cw_region set gb_code_p = 44, gb_code_c = 4402, nums = 'ÔÁF' where city ='ÉØ¹Ø';
+update cw_region set gb_code_p = 44, gb_code_c = 4403, nums = 'ÔÁB' where city ='ÉîÛÚ';
+update cw_region set gb_code_p = 44, gb_code_c = 4404, nums = 'ÔÁC' where city ='Öéº£';
+update cw_region set gb_code_p = 44, gb_code_c = 4405, nums = 'ÔÁD' where city ='ÉÇÍ·';
+update cw_region set gb_code_p = 44, gb_code_c = 4406, nums = 'ÔÁE' where city ='·ğÉ½';
+update cw_region set gb_code_p = 44, gb_code_c = 4407, nums = 'ÔÁJ' where city ='½­ÃÅ';
+update cw_region set gb_code_p = 44, gb_code_c = 4408, nums = 'ÔÁG' where city ='Õ¿½­';
+update cw_region set gb_code_p = 44, gb_code_c = 4409, nums = 'ÔÁK' where city ='Ã¯Ãû';
+update cw_region set gb_code_p = 44, gb_code_c = 4412, nums = 'ÔÁH' where city ='ÕØÇì';
+update cw_region set gb_code_p = 44, gb_code_c = 4413, nums = 'ÔÁL' where city ='»İÖİ';
+update cw_region set gb_code_p = 44, gb_code_c = 4414, nums = 'ÔÁM' where city ='Ã·Öİ';
+update cw_region set gb_code_p = 44, gb_code_c = 4415, nums = 'ÔÁN' where city ='ÉÇÎ²';
+update cw_region set gb_code_p = 44, gb_code_c = 4416, nums = 'ÔÁP' where city ='ºÓÔ´';
+update cw_region set gb_code_p = 44, gb_code_c = 4417, nums = 'ÔÁQ' where city ='Ñô½­';
+update cw_region set gb_code_p = 44, gb_code_c = 4418, nums = 'ÔÁR' where city ='ÇåÔ¶';
+update cw_region set gb_code_p = 44, gb_code_c = 4419, nums = 'ÔÁS' where city ='¶«İ¸';
+update cw_region set gb_code_p = 44, gb_code_c = 4420, nums = 'ÔÁT' where city ='ÖĞÉ½';
+update cw_region set gb_code_p = 44, gb_code_c = 4451, nums = 'ÔÁU' where city ='³±Öİ';
+update cw_region set gb_code_p = 44, gb_code_c = 4452, nums = 'ÔÁV' where city ='½ÒÑô';
+update cw_region set gb_code_p = 44, gb_code_c = 4453, nums = 'ÔÁW' where city ='ÔÆ¸¡';
+update cw_region set gb_code_p = 44, gb_code_c = 4454, nums = 'ÔÁX' where city ='Ë³µÂ';
+update cw_region set gb_code_p = 44, gb_code_c = 4455, nums = 'ÔÁY' where city ='ÄÏº£';
+update cw_region set gb_code_p = 44, gb_code_c = 4480, nums = 'ÔÁZ' where city ='¸Û°Ä';
+update cw_region set gb_code_p = 45, gb_code_c = 4501, nums = '¹ğA' where city ='ÄÏÄş';
+update cw_region set gb_code_p = 45, gb_code_c = 4502, nums = '¹ğB' where city ='ÁøÖİ';
+update cw_region set gb_code_p = 45, gb_code_c = 4503, nums = '¹ğC' where city ='¹ğÁÖ';
+update cw_region set gb_code_p = 45, gb_code_c = 4504, nums = '¹ğD' where city ='ÎàÖİ';
+update cw_region set gb_code_p = 45, gb_code_c = 4505, nums = '¹ğE' where city ='±±º£';
+update cw_region set gb_code_p = 45, gb_code_c = 4506, nums = '¹ğP', city ='·À³Ç¸Û' where id=4491;
+update cw_region set gb_code_p = 45, gb_code_c = 4507, nums = '¹ğN' where city ='ÇÕÖİ';
+update cw_region set gb_code_p = 45, gb_code_c = 4508, nums = '¹ğR' where city ='¹ó¸Û';
+update cw_region set gb_code_p = 45, gb_code_c = 4509, nums = '¹ğK' where city ='ÓñÁÖ';
+update cw_region set gb_code_p = 45, gb_code_c = 4510, nums = '¹ğL' where city ='°ÙÉ«';
+update cw_region set gb_code_p = 45, gb_code_c = 4511, nums = '¹ğJ' where city ='ºØÖİ';
+update cw_region set gb_code_p = 45, gb_code_c = 4512, nums = '¹ğM' where city ='ºÓ³Ø';
+update cw_region set gb_code_p = 45, gb_code_c = 4513, nums = '¹ğG' where city ='À´±ö';
+update cw_region set gb_code_p = 45, gb_code_c = 4514, nums = '¹ğF' where city ='³ç×ó';
+update cw_region set gb_code_p = 45, gb_code_c = 4525, nums = '¹ğH' where city ='¹ğÁÖ';
+update cw_region set gb_code_p = 46, gb_code_c = 4601, nums = 'ÇíA' where city ='º£¿Ú';
+update cw_region set gb_code_p = 46, gb_code_c = 4602, nums = 'ÇíB' where city ='ÈıÑÇ';
+update cw_region set gb_code_p = 46, gb_code_c = 4606, nums = 'ÇíE' where city ='ÑóÆÖ';
+update cw_region set gb_code_p = 51, gb_code_c = 5101, nums = '´¨A' where city ='³É¶¼';
+update cw_region set gb_code_p = 51, gb_code_c = 5103, nums = '´¨C' where city ='×Ô¹±';
+update cw_region set gb_code_p = 51, gb_code_c = 5104, nums = '´¨D' where city ='ÅÊÖ¦»¨';
+update cw_region set gb_code_p = 51, gb_code_c = 5105, nums = '´¨E' where city ='ãòÖİ';
+update cw_region set gb_code_p = 51, gb_code_c = 5106, nums = '´¨F' where city ='µÂÑô';
+update cw_region set gb_code_p = 51, gb_code_c = 5107, nums = '´¨B' where city ='ÃàÑô';
+update cw_region set gb_code_p = 51, gb_code_c = 5108, nums = '´¨H' where city ='¹ãÔª';
+update cw_region set gb_code_p = 51, gb_code_c = 5109, nums = '´¨J' where city ='ËìÄş';
+update cw_region set gb_code_p = 51, gb_code_c = 5110, nums = '´¨K' where city ='ÄÚ½­';
+update cw_region set gb_code_p = 51, gb_code_c = 5111, nums = '´¨L' where city ='ÀÖÉ½';
+update cw_region set gb_code_p = 51, gb_code_c = 5113, nums = '´¨R' where city ='ÄÏ³ä';
+update cw_region set gb_code_p = 51, gb_code_c = 5114, nums = '´¨Z' where city ='Ã¼É½';
+update cw_region set gb_code_p = 51, gb_code_c = 5115, nums = '´¨Q' where city ='ÒË±ö';
+update cw_region set gb_code_p = 51, gb_code_c = 5116, nums = '´¨X' where city ='¹ã°²';
+update cw_region set gb_code_p = 51, gb_code_c = 5117, nums = '´¨S' where city ='´ïÖİ';
+update cw_region set gb_code_p = 51, gb_code_c = 5118, nums = '´¨T' where city ='ÑÅ°²';
+update cw_region set gb_code_p = 51, gb_code_c = 5119, nums = '´¨Y' where city ='°ÍÖĞ';
+update cw_region set gb_code_p = 51, gb_code_c = 5120, nums = '´¨M' where city ='×ÊÑô';
+update cw_region set gb_code_p = 51, gb_code_c = 5132, nums = '´¨U' where city ='°¢°Ó';
+update cw_region set gb_code_p = 51, gb_code_c = 5133, nums = '´¨V' where city ='¸Ê×Î';
+update cw_region set gb_code_p = 51, gb_code_c = 5134, nums = '´¨W' where city ='Á¹É½';
+update cw_region set gb_code_p = 52, gb_code_c = 5201, nums = '¹óA' where city ='¹óÑô';
+update cw_region set gb_code_p = 52, gb_code_c = 5202, nums = '¹óB' where city ='ÁùÅÌË®';
+update cw_region set gb_code_p = 52, gb_code_c = 5203, nums = '¹óC' where city ='×ñÒå';
+update cw_region set gb_code_p = 52, gb_code_c = 5204, nums = '¹óG' where city ='°²Ë³';
+update cw_region set gb_code_p = 52, gb_code_c = 5205, nums = '¹óF' where city ='±Ï½Ú';
+update cw_region set gb_code_p = 52, gb_code_c = 5206, nums = '¹óD' where city ='Í­ÈÊ';
+update cw_region set gb_code_p = 52, gb_code_c = 5223, nums = '¹óE' where city ='Ç­Î÷ÄÏ';
+update cw_region set gb_code_p = 52, gb_code_c = 5226, nums = '¹óH' where city ='Ç­¶«ÄÏ';
+update cw_region set gb_code_p = 52, gb_code_c = 5227, nums = '¹óJ' where city ='Ç­ÄÏ';
+update cw_region set gb_code_p = 53, gb_code_c = 5301, nums = 'ÔÆA' where city ='À¥Ã÷';
+update cw_region set gb_code_p = 53, gb_code_c = 5303, nums = 'ÔÆD' where city ='Çú¾¸';
+update cw_region set gb_code_p = 53, gb_code_c = 5304, nums = 'ÔÆF' where city ='ÓñÏª';
+update cw_region set gb_code_p = 53, gb_code_c = 5305, nums = 'ÔÆM' where city ='±£É½';
+update cw_region set gb_code_p = 53, gb_code_c = 5306, nums = 'ÔÆC' where city ='ÕÑÍ¨';
+update cw_region set gb_code_p = 53, gb_code_c = 5307, nums = 'ÔÆP' where city ='Àö½­';
+update cw_region set gb_code_p = 53, gb_code_c = 5308, nums = 'ÔÆJ' where city ='ÆÕ¶ı';
+update cw_region set gb_code_p = 53, gb_code_c = 5309, nums = 'ÔÆS' where city ='ÁÙ²×';
+update cw_region set gb_code_p = 53, gb_code_c = 5323, nums = 'ÔÆE' where city ='³şĞÛ';
+update cw_region set gb_code_p = 53, gb_code_c = 5325, nums = 'ÔÆG' where city ='ºìºÓ';
+update cw_region set gb_code_p = 53, gb_code_c = 5326, nums = 'ÔÆH' where city ='ÎÄÉ½';
+update cw_region set gb_code_p = 53, gb_code_c = 5328, nums = 'ÔÆK' where city ='Î÷Ë«°æÄÉ';
+update cw_region set gb_code_p = 53, gb_code_c = 5329, nums = 'ÔÆL' where city ='´óÀí';
+update cw_region set gb_code_p = 53, gb_code_c = 5331, nums = 'ÔÆN' where city ='µÂºê';
+update cw_region set gb_code_p = 53, gb_code_c = 5333, nums = 'ÔÆQ' where city ='Å­½­';
+update cw_region set gb_code_p = 53, gb_code_c = 5334, nums = 'ÔÆR' where city ='µÏÇì';
+update cw_region set gb_code_p = 54, gb_code_c = 5401, nums = '²ØA' where city ='À­Èø';
+update cw_region set gb_code_p = 54, gb_code_c = 5421, nums = '²ØB' where city ='²ı¶¼';
+update cw_region set gb_code_p = 54, gb_code_c = 5422, nums = '²ØC' where city ='É½ÄÏ';
+update cw_region set gb_code_p = 54, gb_code_c = 5423, nums = '²ØD' where city ='ÈÕ¿¦Ôò';
+update cw_region set gb_code_p = 54, gb_code_c = 5424, nums = '²ØE' where city ='ÄÇÇú';
+update cw_region set gb_code_p = 54, gb_code_c = 5425, nums = '²ØF' where city ='°¢Àï';
+update cw_region set gb_code_p = 54, gb_code_c = 5426, nums = '²ØG' where city ='ÁÖÖ¥';
+update cw_region set gb_code_p = 61, gb_code_c = 6101, nums = 'ÉÂA' where city ='Î÷°²';
+update cw_region set gb_code_p = 61, gb_code_c = 6102, nums = 'ÉÂB' where city ='Í­´¨';
+update cw_region set gb_code_p = 61, gb_code_c = 6103, nums = 'ÉÂC' where city ='±¦¼¦';
+update cw_region set gb_code_p = 61, gb_code_c = 6104, nums = 'ÉÂD' where city ='ÏÌÑô';
+update cw_region set gb_code_p = 61, gb_code_c = 6105, nums = 'ÉÂE' where city ='Î¼ÄÏ';
+update cw_region set gb_code_p = 61, gb_code_c = 6106, nums = 'ÉÂJ' where city ='ÑÓ°²';
+update cw_region set gb_code_p = 61, gb_code_c = 6107, nums = 'ÉÂF' where city ='ººÖĞ';
+update cw_region set gb_code_p = 61, gb_code_c = 6108, nums = 'ÉÂK' where city ='ÓÜÁÖ';
+update cw_region set gb_code_p = 61, gb_code_c = 6109, nums = 'ÉÂG' where city ='°²¿µ';
+update cw_region set gb_code_p = 61, gb_code_c = 6110, nums = 'ÉÂH' where city ='ÉÌÂå';
+update cw_region set gb_code_p = 61, gb_code_c = 6125, nums = 'ÉÂV' where city ='ÑîÁè';
+update cw_region set gb_code_p = 62, gb_code_c = 6201, nums = '¸ÊA' where city ='À¼Öİ';
+update cw_region set gb_code_p = 62, gb_code_c = 6202, nums = '¸ÊB' where city ='¼ÎÓø¹Ø';
+update cw_region set gb_code_p = 62, gb_code_c = 6203, nums = '¸ÊC' where city ='½ğ²ı';
+update cw_region set gb_code_p = 62, gb_code_c = 6204, nums = '¸ÊD' where city ='°×Òø';
+update cw_region set gb_code_p = 62, gb_code_c = 6205, nums = '¸ÊE' where city ='ÌìË®';
+update cw_region set gb_code_p = 62, gb_code_c = 6206, nums = '¸ÊH' where city ='ÎäÍş';
+update cw_region set gb_code_p = 62, gb_code_c = 6207, nums = '¸ÊG' where city ='ÕÅÒ´';
+update cw_region set gb_code_p = 62, gb_code_c = 6208, nums = '¸ÊL' where city ='Æ½Á¹';
+update cw_region set gb_code_p = 62, gb_code_c = 6209, nums = '¸ÊF' where city ='¾ÆÈª';
+update cw_region set gb_code_p = 62, gb_code_c = 6210, nums = '¸ÊM' where city ='ÇìÑô';
+update cw_region set gb_code_p = 62, gb_code_c = 6211, nums = '¸ÊJ' where city ='¶¨Î÷';
+update cw_region set gb_code_p = 62, gb_code_c = 6212, nums = '¸ÊK' where city ='Â¤ÄÏ';
+update cw_region set gb_code_p = 62, gb_code_c = 6229, nums = '¸ÊN' where city ='ÁÙÏÄ';
+update cw_region set gb_code_p = 62, gb_code_c = 6230, nums = '¸ÊP' where city ='¸ÊÄÏ';
+update cw_region set gb_code_p = 63, gb_code_c = 6301, nums = 'ÇàA' where city ='Î÷Äş';
+update cw_region set gb_code_p = 63, gb_code_c = 6321, nums = 'ÇàB' where city ='º£¶«';
+update cw_region set gb_code_p = 63, gb_code_c = 6322, nums = 'ÇàC' where city ='º£±±';
+update cw_region set gb_code_p = 63, gb_code_c = 6323, nums = 'ÇàD' where city ='»ÆÄÏ';
+update cw_region set gb_code_p = 63, gb_code_c = 6325, nums = 'ÇàE' where city ='º£ÄÏ';
+update cw_region set gb_code_p = 63, gb_code_c = 6326, nums = 'ÇàF' where city ='¹ûÂå';
+update cw_region set gb_code_p = 63, gb_code_c = 6327, nums = 'ÇàG' where city ='ÓñÊ÷';
+update cw_region set gb_code_p = 63, gb_code_c = 6328, nums = 'ÇàH' where city ='º£Î÷';
+update cw_region set gb_code_p = 64, gb_code_c = 6401, nums = 'ÄşA' where city ='Òø´¨';
+update cw_region set gb_code_p = 64, gb_code_c = 6402, nums = 'ÄşB' where city ='Ê¯×ìÉ½';
+update cw_region set gb_code_p = 64, gb_code_c = 6403, nums = 'ÄşC' where city ='ÎâÖÒ';
+update cw_region set gb_code_p = 64, gb_code_c = 6404, nums = 'ÄşD' where city ='¹ÌÔ­';
+update cw_region set gb_code_p = 64, gb_code_c = 6405, nums = 'ÄşE' where city ='ÖĞÎÀ';
+update cw_region set gb_code_p = 65, gb_code_c = 6501, nums = 'ĞÂA' where city ='ÎÚÂ³Ä¾Æë';
+update cw_region set gb_code_p = 65, gb_code_c = 6502, nums = 'ĞÂJ' where city ='¿ËÀ­ÂêÒÀ';
+update cw_region set gb_code_p = 65, gb_code_c = 6521, nums = 'ĞÂK' where city ='ÍÂÂ³·¬';
+update cw_region set gb_code_p = 65, gb_code_c = 6522, nums = 'ĞÂL' where city ='¹şÃÜ';
+update cw_region set gb_code_p = 65, gb_code_c = 6523, nums = 'ĞÂB' where city ='²ı¼ª';
+update cw_region set gb_code_p = 65, gb_code_c = 6527, nums = 'ĞÂE' where city ='²©¶ûËşÀ­';
+update cw_region set gb_code_p = 65, gb_code_c = 6528, nums = 'ĞÂM' where city ='°ÍÒô¹ùÀã';
+update cw_region set gb_code_p = 65, gb_code_c = 6529, nums = 'ĞÂN' where city ='°¢¿ËËÕ';
+update cw_region set gb_code_p = 65, gb_code_c = 6530, nums = 'ĞÂP' where city ='¿Ë×ÎÀÕËÕ';
+update cw_region set gb_code_p = 65, gb_code_c = 6531, nums = 'ĞÂQ' where city ='¿¦Ê²';
+update cw_region set gb_code_p = 65, gb_code_c = 6532, nums = 'ĞÂR' where city ='ºÍÌï';
+update cw_region set gb_code_p = 65, gb_code_c = 6540, nums = 'ĞÂF' where city ='ÒÁÀç';
+update cw_region set gb_code_p = 65, gb_code_c = 6542, nums = 'ĞÂG' where city ='Ëş³Ç';
+update cw_region set gb_code_p = 65, gb_code_c = 6543, nums = 'ĞÂH' where city ='°¢ÀÕÌ©';
+update cw_region set gb_code_p = 34, gb_code_c = 340181, nums = 'ÍîQ' where city ='³²ºş';
+update cw_region set gb_code_p = 41, gb_code_c = 419001, nums = 'Ô¥U' where city ='¼ÃÔ´';
+update cw_region set gb_code_p = 42, gb_code_c = 429004, nums = '¶õM' where city ='ÏÉÌÒ';
+update cw_region set gb_code_p = 42, gb_code_c = 429005, nums = '¶õN' where city ='Ç±½­';
+update cw_region set gb_code_p = 42, gb_code_c = 429006, nums = '¶õR' where city ='ÌìÃÅ';
+update cw_region set gb_code_p = 42, gb_code_c = 429021, nums = '¶õP' where city ='ÉñÅ©¼Ü';
+update cw_region set gb_code_p = 46, gb_code_c = 469001, nums = 'ÇíD' where city ='ÎåÖ¸É½';
+update cw_region set gb_code_p = 46, gb_code_c = 469002, nums = 'ÇíC' where city ='Çíº£';
+update cw_region set gb_code_p = 51, gb_code_c = 513401, nums = '´¨W' where city ='Î÷²ı';
+update cw_region set gb_code_p = 65, gb_code_c = 654003, nums = 'ĞÂD' where city ='¿üÍÍ';
+update cw_region set gb_code_p = 65, gb_code_c = 659001, nums = 'ĞÂC' where city ='Ê¯ºÓ×Ó';
+
+delete from cw_region where province='º£ÄÏ' and city='º£ÄÏ';
+delete from cw_region where province='ÉÂÎ÷' and city='Ê¡Ö±ÏµÍ³';
+update cw_region set gb_code_p = 36, gb_code_c = 3601, nums = '¸ÓA' where city ='ÄÏ²ı';
+update cw_region set gb_code_p = 50, gb_code_c = 50, nums = 'ÓåC' where province='ÖØÇì' and city ='ÓÀÖİ';
+update cw_region set gb_code_p = 50, gb_code_c = 50, city = 'ÖØÇì' where province='ÖØÇì' and city ='Ö±Êô³µÁ¾';
+update cw_region set gb_code_p = 36, gb_code_c = 3612, nums = '¸ÓM' where province='½­Î÷' and city ='Ê¡Ö±ÏµÍ³';
+     
+insert into cw_region (level, province, city, abbreviation, nums, is_dredge, orders) values (2, 'Ìì½ò', 'Ìì½ò', '½ò', '½ò', 0, 50);
+insert into cw_region (level, province, city, abbreviation, nums, is_dredge, orders) values (2, 'ÁÉÄş', 'ÁÉÄşÈ«Ê¡', 'ÁÉ', 'ÁÉ', 0, 50);
+insert into cw_region (level, province, city, abbreviation, nums, is_dredge, orders) values (2, '¼ªÁÖ', '¼ªÁÖÈ«Ê¡', '¼ª', '¼ª', 0, 50);
+insert into cw_region (level, province, city, abbreviation, nums, is_dredge, orders) values (2, 'ºÓÄÏ', 'ºÓÄÏÈ«Ê¡', 'Ô¥', 'Ô¥', 0, 50);
+insert into cw_region (level, province, city, abbreviation, nums, is_dredge, orders) values (2, 'ÉÂÎ÷', 'ÉÂÎ÷È«Ê¡', 'ÉÂ', 'ÉÂ', 0, 50);
+insert into cw_region (level, province, city, abbreviation, nums, is_dredge, orders) values (2, '¹ãÎ÷', '¹ãÎ÷È«Ê¡', '¹ğ', '¹ğ', 0, 50);
+
+insert into cw_code (port, code, content) values ('cx580.com', '0', '³É¹¦');
+insert into cw_code (port, code, content) values ('cx580.com', '-1', 'È±ÉÙ±ØÒªµÄ²ÎÊı»òÕÒ²»µ½³µÅÆÇ°×ºËùÆ¥ÅäµÄ³ÇÊĞ');
+insert into cw_code (port, code, content) values ('cx580.com', '-3', '±¾ÏµÍ³Ôİ²»Ìá¹©¸Ã³ÇÊĞÎ¥ÕÂ²éÑ¯ÇëÇó');
+insert into cw_code (port, code, content) values ('cx580.com', '-5', '·şÎñÆ÷´íÎó£¨³¬Ê±£¬Êı¾İ»ñÈ¡Òì³£µÈ£©');
+insert into cw_code (port, code, content) values ('cx580.com', '-10', 'Î´±»ÊÚÈ¨·ÃÎÊ¸Ã·şÎñ»òÓÃ»§ÃûÃÜÂë²»ÕıÈ·');
+insert into cw_code (port, code, content) values ('cx580.com', '-20', 'Î´ºÍ´íÎó');
+insert into cw_code (port, code, content) values ('cx580.com', '-40', 'Î´±»ÊÚÈ¨²éÑ¯´Ë³µÅÆĞÅÏ¢');
+insert into cw_code (port, code, content) values ('cx580.com', '-41', 'ÊäÈë²ÎÊı²»·ûºÏÊı¾İÔ´ÒªÇó');
+insert into cw_code (port, code, content) values ('cx580.com', '-42', 'Êı¾İÔ´Ôİ²»¿ÉÓÃ');
+insert into cw_code (port, code, content) values ('cx580.com', '-43', 'µ±ÈÕ²éÑ¯ÊıÒÑ´ïµ½ÊÚÈ¨Êı±ê×¼£¬ÎŞ·¨¼ÌĞø²éÑ¯');
+insert into cw_code (port, code, content) values ('cx580.com', '-44', 'ÒÑ´ïµ½²éÑ¯ÉÏÏŞ');
+insert into cw_code (port, code, content) values ('cx580.com', '-45', 'È·ÈÏÊı¾İÍêÕûĞÔ£¬ÊÇ·ñ±»´Û¸Ä');
+insert into cw_code (port, code, content) values ('cx580.com', '-6', '´íÎó£ºÄúÊäÈëĞÅÏ¢ÓĞÎó');
+insert into cw_code (port, code, content) values ('cx580.com', '-61', 'ÊäÈë³µÅÆºÅÓĞÎó');
+insert into cw_code (port, code, content) values ('cx580.com', '-62', 'ÊäÈë³µ¼ÜºÅÓĞÎó');
+insert into cw_code (port, code, content) values ('cx580.com', '-63', 'ÊäÈë·¢¶¯»úºÅÓĞÎó');
+insert into cw_code (port, code, content) values ('cx580.com', '-66', '²»Ö§³ÖµÄ³µÁ¾ÀàĞÍ');
+insert into cw_code (port, code, content) values ('cx580.com', '-67', '¸ÃÊ¡·İ£¨³ÇÊĞ£©²»Ö§³ÖÒìµØ³µÅÆ');
+
+
+insert into cw_code (port, code, content) values ('cx580.com', '-9999', 'Êı¾İÔ´²éÑ¯³¬Ê±');
+insert into cw_code (port, code, content) values ('cheshouye.com', '-9999', 'Êı¾İÔ´²éÑ¯³¬Ê±');
+insert into cw_code (port, code, content) values ('http://120.26.57.239/api/', '-9999', 'Êı¾İÔ´²éÑ¯³¬Ê±');
+
