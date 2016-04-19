@@ -492,3 +492,7 @@ insert into cw_code (port, code, content) values ('cx580.com', '-9999', 'Êı¾İÔ´²
 insert into cw_code (port, code, content) values ('cheshouye.com', '-9999', 'Êı¾İÔ´²éÑ¯³¬Ê±');
 insert into cw_code (port, code, content) values ('http://120.26.57.239/api/', '-9999', 'Êı¾İÔ´²éÑ¯³¬Ê±');
 
+insert into cw_code (port, code, content) values ('cx580.com', '-9998', 'Êı¾İÔ´²éÑ¯·µ»ØÒì³£');
+insert into cw_code (port, code, content) values ('cheshouye.com', '-9998', 'Êı¾İÔ´²éÑ¯·µ»ØÒì³£');
+insert into cw_code (port, code, content) values ('http://120.26.57.239/api/', '-9998', 'Êı¾İÔ´²éÑ¯·µ»ØÒì³£');
+

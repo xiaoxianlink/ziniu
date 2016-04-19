@@ -177,12 +177,17 @@ class IndexController extends HomeBaseController {
 		$log->write ( "cheyixing: " . $url, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 		$log->write ( "cheyixing: " . $output, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 		
+		$has_error = 0;
+		if(empty($output)){
+			$has_error = -9999;
+		}
+		$jsoninfo = json_decode($output, true);
+		$json_error = json_last_error();
+		if($json_error != JSON_ERROR_NONE){
+			$has_error = -9998;
+		}
 		$jilu_model = M ( "endorsement_jilu" );
-		if(!empty($output)){
-			$jsoninfo = json_decode($output, true);
-			$car_model = M ( "Car" );
-			$endorsement_model = M ( "Endorsement" );
-			$log_model = M ( "Endorsement_log" );
+		if( $has_error == 0){
 			$jilu_data = array (
 					"car_id" => $car['id'],
 					"city" => $region['city'],
@@ -200,6 +205,8 @@ class IndexController extends HomeBaseController {
 			$jilu_id = $jilu_model->add ( $jilu_data );
 			if ($jsoninfo ['ErrorCode'] == 0) {
 				if (isset($jsoninfo['Records']) && $jsoninfo['Records']) {
+					$endorsement_model = M ( "Endorsement" );
+					$log_model = M ( "Endorsement_log" );
 					foreach ( $jsoninfo ['Records'] as $v ) {
 						$jilu_data ['all_nums'] ++;
 						$jilu_data ['money'] += $v ['count'];
@@ -248,6 +255,7 @@ class IndexController extends HomeBaseController {
 					"scan_state_time" => time (),
 					"scan_stop_query" => $jilu_id
 				);
+				$car_model = M ( "Car" );
 				$car_model->where ( "id={$car['id']}" )->save ( $car_scan_data );
 				return 1;
 			}else{
@@ -264,7 +272,7 @@ class IndexController extends HomeBaseController {
 				"edit_nums" => 0,
 				"c_time" => time (),
 				"port" => api_chexingyi,
-				"code" => -9999,
+				"code" => $has_error,
 				"state" => 1 
 			);
 			$jilu_id = $jilu_model->add ( $jilu_data );
@@ -328,11 +336,17 @@ class IndexController extends HomeBaseController {
 		$log->write ( "cheshouye: " . $url, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 		$log->write ( "cheshouye: " . $output, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 		
+		$has_error = 0;
+		if(empty($output)){
+			$has_error = -9999;
+		}
+		$jsoninfo = json_decode($output, true);
+		$json_error = json_last_error();
+		if($json_error != JSON_ERROR_NONE){
+			$has_error = -9998;
+		}
 		$jilu_model = M ( "endorsement_jilu" );
-		if(!empty($output)){
-			$jsoninfo = json_decode ( $output, true );
-			$endorsement_model = M ( "Endorsement" );
-			$log_model = M ( "Endorsement_log" );
+		if( $has_error == 0){
 			$jilu_data = array (
 				"car_id" => $car['id'],
 				"city" => $region['city'],
@@ -348,6 +362,8 @@ class IndexController extends HomeBaseController {
 			);
 			$jilu_id = $jilu_model->add ( $jilu_data );
 			if ($jsoninfo ['status'] == 2001) {
+				$endorsement_model = M ( "Endorsement" );
+				$log_model = M ( "Endorsement_log" );
 				foreach ( $jsoninfo ['historys'] as $v ) {
 					$jilu_data ['all_nums'] ++;
 					$jilu_data ['money'] += $v ['money'];
@@ -396,6 +412,7 @@ class IndexController extends HomeBaseController {
 					"scan_state_time" => time (),
 					"scan_stop_query" => $jilu_id
 				);
+				$car_model = M ( "Car" );
 				$car_model->where ( "id={$car['id']}" )->save ( $car_scan_data );
 				return 1;
 			}else{
@@ -412,7 +429,7 @@ class IndexController extends HomeBaseController {
 				"edit_nums" => 0,
 				"c_time" => time (),
 				"port" => api_cheshouye,
-				"code" => -9999,
+				"code" => $has_error,
 				"state" => 1 
 			);
 			$jilu_id = $jilu_model->add ( $jilu_data );
@@ -478,11 +495,17 @@ class IndexController extends HomeBaseController {
 			$log = new Log ();
 			$log->write ( "aichefang:" . $output, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 			
+			$has_error = 0;
+			if(empty($output)){
+				$has_error = -9999;
+			}
+			$jsoninfo = json_decode($output, true);
+			$json_error = json_last_error();
+			if($json_error != JSON_ERROR_NONE){
+				$has_error = -9998;
+			}
 			$jilu_model = M ( "endorsement_jilu" );
-			if(!empty($output)){
-				$jsoninfo = json_decode ( $output, true );
-				$endorsement_model = M ( "Endorsement" );
-				$log_model = M ( "Endorsement_log" );
+			if( $has_error == 0){
 				$jilu_data = array (
 					"car_id" => $car['id'],
 					"city" => $region['city'],
@@ -498,6 +521,8 @@ class IndexController extends HomeBaseController {
 				);
 				$jilu_id = $jilu_model->add ( $jilu_data );
 				if ($jsoninfo ['code'] == 0) {
+					$endorsement_model = M ( "Endorsement" );
+					$log_model = M ( "Endorsement_log" );
 					foreach ( $jsoninfo ['data'] [0] ['result'] as $v ) {
 						$v ['violationPrice'] = isset($v ['violationPrice']) ? $v ['violationPrice'] : 0;
 						$v ['violationMark'] = isset($v ['violationMark']) ? $v ['violationMark'] : '-1';
@@ -550,6 +575,7 @@ class IndexController extends HomeBaseController {
 						"scan_state_time" => time (),
 						"scan_stop_query" => $jilu_id
 					);
+					$car_model = M ( "Car" );
 					$car_model->where ( "id={$car['id']}" )->save ( $car_scan_data );
 				}
 				else{
@@ -567,7 +593,7 @@ class IndexController extends HomeBaseController {
 					"edit_nums" => 0,
 					"c_time" => time (),
 					"port" => api_icar,
-					"code" => -9999,
+					"code" => $has_error,
 					"state" => 1 
 					);
 				$jilu_id = $jilu_model->add ( $jilu_data );
@@ -583,7 +609,11 @@ class IndexController extends HomeBaseController {
 		$log = new Log ();
 		$log->write ( "get_token:" . $output, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 		$jsoninfo = json_decode ( $output, true );
-		$token = $jsoninfo ['data'] [0] ['accessToken'];
+		$json_error = json_last_error();
+		$token = null;
+		if($json_error == JSON_ERROR_NONE){
+			$token = $jsoninfo ['data'] [0] ['accessToken'];
+		}
 		return $token;
 	}
 	
