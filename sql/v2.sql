@@ -468,6 +468,8 @@ insert into cw_region (level, province, city, abbreviation, nums, is_dredge, ord
 insert into cw_region (level, province, city, abbreviation, nums, is_dredge, orders) values (2, 'ÉÂÎ÷', 'ÉÂÎ÷È«Ê¡', 'ÉÂ', 'ÉÂ', 0, 50);
 insert into cw_region (level, province, city, abbreviation, nums, is_dredge, orders) values (2, '¹ãÎ÷', '¹ãÎ÷È«Ê¡', '¹ð', '¹ð', 0, 50);
 
+update cw_region set gb_code_p = null, gb_code_c = null where province = 'ÖØÇì' and level = 1;
+
 insert into cw_code (port, code, content) values ('cx580.com', '0', '³É¹¦');
 insert into cw_code (port, code, content) values ('cx580.com', '-1', 'È±ÉÙ±ØÒªµÄ²ÎÊý»òÕÒ²»µ½³µÅÆÇ°×ºËùÆ¥ÅäµÄ³ÇÊÐ');
 insert into cw_code (port, code, content) values ('cx580.com', '-3', '±¾ÏµÍ³ÔÝ²»Ìá¹©¸Ã³ÇÊÐÎ¥ÕÂ²éÑ¯ÇëÇó');
@@ -487,7 +489,6 @@ insert into cw_code (port, code, content) values ('cx580.com', '-63', 'ÊäÈë·¢¶¯»
 insert into cw_code (port, code, content) values ('cx580.com', '-66', '²»Ö§³ÖµÄ³µÁ¾ÀàÐÍ');
 insert into cw_code (port, code, content) values ('cx580.com', '-67', '¸ÃÊ¡·Ý£¨³ÇÊÐ£©²»Ö§³ÖÒìµØ³µÅÆ');
 
-
 insert into cw_code (port, code, content) values ('cx580.com', '-9999', 'Êý¾ÝÔ´²éÑ¯³¬Ê±');
 insert into cw_code (port, code, content) values ('cheshouye.com', '-9999', 'Êý¾ÝÔ´²éÑ¯³¬Ê±');
 insert into cw_code (port, code, content) values ('http://120.26.57.239/api/', '-9999', 'Êý¾ÝÔ´²éÑ¯³¬Ê±');
@@ -496,3 +497,68 @@ insert into cw_code (port, code, content) values ('cx580.com', '-9998', 'Êý¾ÝÔ´²
 insert into cw_code (port, code, content) values ('cheshouye.com', '-9998', 'Êý¾ÝÔ´²éÑ¯·µ»ØÒì³£');
 insert into cw_code (port, code, content) values ('http://120.26.57.239/api/', '-9998', 'Êý¾ÝÔ´²éÑ¯·µ»ØÒì³£');
 
+ALTER TABLE `cw_user`
+ADD COLUMN `bizid`  varchar(64) NULL AFTER `channel_key`;
+
+CREATE TABLE `cw_endorsement_stats` (
+`id`  int(11) NOT NULL AUTO_INCREMENT ,
+`port`  varchar(64) NOT NULL ,
+`day_time`  int(8) NOT NULL ,
+`day_stats`  int(11) NOT NULL ,
+`month_stats`  int(11) NOT NULL ,
+`year_stats`  int(11) NOT NULL ,
+`c_time`  int(11) NOT NULL ,
+PRIMARY KEY (`id`)
+);
+
+INSERT INTO `cw_menu` (`parentid`, `app`, `model`, `action`, `data`, `type`, `status`, `name`, `icon`, `remark`, `listorder`) VALUES
+(165, 'Weizhang', 'Xitong', 'stats_view', '', 1, 1, 'Î¥ÕÂAPIµ÷ÓÃÍ³¼Æ', '', '', 0);
+
+ALTER TABLE `cw_endorsement`
+ADD COLUMN `close_confirm`  int(1) NULL DEFAULT 0 COMMENT 'Î¥ÕÂ´¦ÀíÈ·ÈÏ£º1 ¹Ø±ÕÎ¥ÕÂ£»0 Î´¹Ø±Õ£»' AFTER `office`,
+ADD COLUMN `close_query_no`  varchar(32) NULL AFTER `close_confirm`,
+ADD COLUMN `close_time`  int(11) NULL AFTER `close_query_no`;
+
+INSERT INTO `cw_menu` (`parentid`, `app`, `model`, `action`, `data`, `type`, `status`, `name`, `icon`, `remark`, `listorder`) VALUES
+(163, 'Weizhang', 'Jiaoyi', 'close_endorsements', '', 1, 1, 'Î¥ÕÂÈ·ÈÏ', '', '', 50);
+
+ALTER TABLE `cw_message` ADD `order_id` INT(11) NULL COMMENT '¶©µ¥id' ;
+CREATE TABLE `cw_version` ( `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT '×ÔÔö³¤Ö÷¼ü' , `url` VARCHAR(128) NOT NULL COMMENT 'ÏÂÔØµØÖ·' , `version` VARCHAR(16) NOT NULL COMMENT '°æ±¾ºÅ' , `extra` VARCHAR(256) NOT NULL COMMENT '°æ±¾ËµÃ÷' , `is_must` INT(11) NOT NULL COMMENT 'ÊÇ·ñÇ¿ÖÆ¸üÐÂ£¬0·ñ 1ÊÇ' , `update_time` INT(11) NOT NULL COMMENT '¸üÐÂÊ±¼ä' , PRIMARY KEY (`id`) ) COMMENT = '°æ±¾¸üÐÂ';
+
+INSERT INTO `cw_menu` (`parentid`, `app`, `model`, `action`, `data`, `type`, `status`, `name`, `icon`, `remark`, `listorder`) VALUES
+(165, 'Admin_new', 'Xitong', 'yinhang', '', 1, 1, 'ÒøÐÐ¹ÜÀí(APP)', '', '', 0),
+(165, 'Admin_new', 'Xitong', 'version', '', 1, 1, '°æ±¾¹ÜÀí(APP)', '', '', 0);
+
+ALTER TABLE `cw_services` CHANGE `grade` `grade` DECIMAL(10,2) NULL COMMENT 'ÆÀ·Ö';
+ALTER TABLE `cw_services` ADD `status` INT(11) NULL COMMENT 'ÊÇ·ñ½Óµ¥×´Ì¬£º0ÊÇ£¬1·ñ' ;
+
+ALTER TABLE `cw_expend` ADD `card_number` VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'ÒøÐÐ¿¨ºÅ' AFTER `expend_sn`;
+ALTER TABLE `cw_expend` ADD `tixian_name` VARCHAR(32) NULL COMMENT 'ÌáÏÖ»§Ãû' AFTER `card_number`;
+
+ALTER TABLE `cw_turn_order`
+ADD COLUMN `so_type`  int(11) NULL DEFAULT 1 COMMENT '¶¨¼ÛÀàÐÍ£º1£¬¾²Ì¬¶¨¼Û£»2£¬¶¯Ì¬¶¨¼Û' AFTER `sod_id`;
+ALTER TABLE `cw_turn_order`
+ADD COLUMN `money`  decimal(10,2) NULL AFTER `so_type`;
+ALTER TABLE `cw_turn_order`
+ADD COLUMN `services_id`  int(11) NULL AFTER `order_id`;
+/*
+for dev
+update cw_turn_order as tos join cw_services_order as so on tos.sod_id = so.id set tos.services_id = so.services_id where tos.so_type = 1;
+update cw_turn_order as tos join cw_services_dyna as so on tos.sod_id = so.id set tos.services_id = so.services_id where tos.so_type = 2;
+// for production
+update cw_turn_order as t join cw_order as o on t.order_id = o.id set t.services_id = o.services_id, t.so_type = o.so_type, t.money = o.money 
+*/
+
+CREATE TABLE `cw_wx_token` (
+`id`  int(11) NOT NULL AUTO_INCREMENT ,
+`token`  varchar(512) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT 'weinxin token' ,
+`c_time`  int(11) NULL DEFAULT NULL COMMENT '»ñÈ¡Ê±¼ä' ,
+PRIMARY KEY (`id`)
+);
+
+ALTER TABLE cw_expend ADD user_bank VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '¿ª»§ÒøÐÐ' AFTER tixian_name;
+
+ALTER TABLE `cw_car`
+ADD UNIQUE INDEX `car_unique` (`license_number`, `frame_number`, `engine_number`) USING HASH ;
+
+ALTER TABLE `cw_endorsement_jilu` CHANGE `city` `city` VARCHAR(64) CHARACTER SET gbk COLLATE gbk_chinese_ci NULL COMMENT 'Î¥ÕÂ³ÇÊÐ';
