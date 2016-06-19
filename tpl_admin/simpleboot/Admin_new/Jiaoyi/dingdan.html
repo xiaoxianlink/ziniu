@@ -131,10 +131,11 @@ $(document).ready(function(){
 							<th>wechat</th>
 							</tr>
 							<tr >
-								<td colspan="3" style="background: #fff"></td>
+								<td colspan="2" style="background: #fff"></td>
 								<td>推单编号</td>
 		                        <td>服务商编号</td>
 		                        <td>服务商手机号</td>
+								<td>推单金额</td>
 		                        <td>推送时间</td>
 		                        <td>推单状态</td>
 		                        <td>状态计时</td>
@@ -143,10 +144,11 @@ $(document).ready(function(){
 	                        </tr>
 	                        <foreach name="vo.to_list" item="to">
 	                        <tr >
-								<td colspan="3" style="background: #fff"></td>
+								<td colspan="2" style="background: #fff"></td>
 								<td>{$to.so_id}</td>
 		                        <td>{$to.services_sn}</td>
 		                        <td>{$to.phone}</td>
+								<td>{$to.money}</td>
 		                        <td>{$to.c_time|date='Y/m/d H:i:s',###}</td>
 		                        <td><if condition="$to['state'] eq 0">订单推送
 									<elseif condition="$to['state'] eq 1"/>手动转单

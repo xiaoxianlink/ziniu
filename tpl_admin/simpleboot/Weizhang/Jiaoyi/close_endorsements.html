@@ -1,0 +1,232 @@
+<admintpl file="header" />
+<meta charset="UTF-8">
+<style>
+.btn {
+width: 120px;
+height: 30px;
+color: #fff;
+font-size: 16px;
+background: #6ad1df;
+border: 0;
+}
+</style>
+<script type="text/javascript">
+var timeout = 168 * 3600;
+function timer() {
+ var nowtime = Date.parse(new Date()) / 1000;
+ var obj = $("span[name='tmr']");
+ $.each(obj, function(){
+	 if ($(this).attr("lang") != '--') {
+		 var time = parseInt($(this).attr("lang")) + timeout - nowtime;//$(this).html();
+		 var hour = parseInt(time/3600);
+		 if (hour < 10 ) {
+			 hour = '0' + hour;
+		 }
+		 var minute = parseInt(time/60%60);
+		 if (minute < 10 ) {
+			 minute = '0' + minute;
+		 }
+		 var second = parseInt(time%60);
+		 if (second < 10 ) {
+			 second = '0' + second;
+		 }
+		 if (hour > 0 || minute > 0 || second > 0) {
+			 $(this).html(hour + ':' + minute + ':' + second);
+		 } else {
+			 $(this).html('--');
+			 $(this).attr("lang", '--')
+		 }
+	 }
+ });
+ var obj = $("span[name='tps']");
+ $.each(obj, function(){
+	 if ($(this).attr("lang") != '--') {
+		 var time = nowtime - $(this).attr("lang");//$(this).html();
+		 var hour = parseInt(time/3600);
+		 if (hour < 10 ) {
+			 hour = '0' + hour;
+		 }
+		 var minute = parseInt(time/60%60);
+		 if (minute < 10 ) {
+			 minute = '0' + minute;
+		 }
+		 var second = parseInt(time%60);
+		 if (second < 10 ) {
+			 second = '0' + second;
+		 }
+		 if (hour > 0 || minute > 0 || second > 0) {
+			 $(this).html(hour + ':' + minute + ':' + second);
+		 } else {
+			 $(this).html('--');
+			 $(this).attr("lang", '--')
+		 }
+	 }
+ });
+}
+setInterval("timer()",1000);
+window.onload = timer;
+
+function cancelClose(id){
+	if(confirm("确认违章未处理?")){
+		$("input[id=cancal_end_id]").val(id);
+		$("#end_cancel_form").submit();
+	}
+}
+
+function confirmClose(id){
+	if(confirm("确认违章已处理？")){
+		$("input[id=confirm_end_id]").val(id);
+		$("#end_confirm_form").submit();
+	}
+}
+
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('tr').click(function(){
+		$('tr').siblings().removeClass("tr_hover");
+		$(this).addClass("tr_hover");
+	});
+});
+</script>
+<body class="J_scroll_fixed">
+	<div class="wrap J_check_wrap">
+		<div id="cheliang_submit" class="top_div">
+			<form action="{:U('Jiaoyi/close_endorsements')} " method="post">
+			<input type="submit" id="cheliang_submit_input" class="query_btn"
+					value="查询" />
+				<div  class="query_div" > 
+					推单状态
+					<select name="order_state" id="order_state" class="query_txt"  >
+						<option value="0" ></option>
+						<option value="1" <?php if($order_state==1){echo "selected='selected'";}?>>无订单</option>
+						<option value="2" <?php if($order_state==2){echo "selected='selected'";}?>>有订单</option>
+				   </select>
+				</div>
+				<div  class="query_div" > 
+					查询编号 <input type="text" class="query_txt" name="query_no" id="query_no" value="{$query_no}"/> 
+				</div>
+				<div  class="query_div" > 
+					车牌号 <input type="text" class="query_txt" name="license_number" id="license_number" value="{$license_number}"/> 
+				</div>
+			</form>
+		</div>
+		<table class="table table-hover table-bordered table-list"
+			id="menus-table">
+			<?php $i = 1;?>
+			<?php $i = $pageIndex + $i;?>
+			<foreach name="str" item="vo">
+			<tr>
+				<th>#</th>
+				<th>车牌号</th>
+				<th>违章时间</th>
+				<th>违章地区</th>
+				<th>违章代码</th>
+				<th>罚金</th>
+				<th>罚分</th>
+				<th>违章处理状态</th>
+				<th>预判处理时间</th>
+				<th>查询编号</th>
+				<th>预判处理状态</th>
+				<th><if condition="$vo['o_list'] eq null">自动确认计时
+					<else/>判断计时
+					</if>
+				</th>
+			</tr>
+			<tr>
+				<th>{$i++}</th>
+				<td>{$vo.license_number}</td>
+				<td>{$vo.time|date='Y/m/d H:i:s',###}</td>
+				<td>{$vo.area}</td>
+				<td>{$vo.code}</td>
+				<td>{$vo.money}</td>
+				<td>{$vo.points}</td>
+				<td><if condition="$vo['is_manage'] eq 0">未处理
+					<elseif condition="$vo['is_manage'] eq 1"/>处理中
+					<elseif condition="$vo['is_manage'] eq 2"/>已处理
+					</if>
+				</td>
+				<td>{$vo.close_time|date='Y/m/d H:i:s',###}</td>
+				<td>{$vo.close_query_no}</td>
+				<td>已处理</td>
+				<td><if condition="$vo['o_list'] eq null">
+						<span name="tmr" lang="{$vo.close_time}"/>
+					<else/>
+						<span name="tps" lang="{$vo.close_time}" />
+					</if>
+				
+				</td>
+			</tr>
+			<foreach name="vo.o_list" item="to">
+			<tr>
+				<td style="background: #fff"></td>
+				<td>处理编号</td>
+				<td>推单编号</td>
+				<td>服务商编号</td>
+				<td>服务商手机号</td>
+				<td>推送时间</td>
+				<td>处理完成时间</td>
+				<td>用户支付金额</td>
+				<td>订单时间</td>
+				<td>推单状态</td>
+				<td>支付流水号</td>
+				<td>支付渠道</td>
+			</tr>
+			<tr >
+				<td style="background: #fff"></td>
+				<td>{$to.order_sn}</td>
+				<td><php>
+				if(!empty($to['to_c_time'])){
+					echo $to['order_sn'] . substr ( $to['to_c_time'], - 2 ) . $to['services_id'];
+				}
+				</php></td>
+				<td>{$to.services_sn}</td>
+				<td>{$to.phone}</td>
+				<td><notempty name="to['to_c_time']">{$to.to_c_time|date='Y/m/d H:i:s',###}</notempty></td>
+				<td><notempty name="to['to_finish_time']">{$to.to_finish_time|date='Y/m/d H:i:s',###}</notempty></td>
+				<td>{$to.pay_money}</td>
+				<td><notempty name="to['order_time']">{$to.order_time|date='Y/m/d H:i:s',###}</notempty></td>
+				<td><if condition="$to['to_state'] eq 0">订单推送
+					<elseif condition="$to['to_state'] eq 1"/>手动转单
+					<elseif condition="$to['to_state'] eq 2"/>超时转单
+					<elseif condition="$to['to_state'] eq 3"/>正在办理
+					<elseif condition="$to['to_state'] eq 4"/>办理完成
+					<elseif condition="$to['to_state'] eq 6"/>推单取消</if>
+				</td>
+				<td>{$to.pay_sn}</td>
+				<td>
+					<if condition="$to['pay_type'] eq 1">支付宝
+					<elseif condition="$to['pay_type'] eq 2"/>微信
+					</if>
+				</td>
+			</tr>
+			</foreach>
+			<tr>
+				<td style="background: #fff"></td>
+				<td colspan="7"></td>
+				<td colspan="2">
+					<if condition="$vo['o_list'] eq null">
+						<input type="submit" id="cheliang_submit_input" class="btn" onclick="cancelClose({$vo.id});" value="未处理确认" /> 
+					</if>
+				</td>
+				<td colspan="2">
+					<input type="submit" id="cheliang_submit_input" class="btn" onclick="confirmClose({$vo.id});" value="违章处理确认" /> 
+				</td>
+			</tr>
+			</foreach>
+		</table>
+		<div class="pagination">{$Page}</div>
+	</div>
+	<div style="display:none">
+		<form id="end_cancel_form" action="{:U('Jiaoyi/close_endorsement_cancel')}" method="post">
+			<input type="hidden" id="cancal_end_id" name="end_id" value=""/>
+		</form>
+		<form id="end_confirm_form" action="{:U('Jiaoyi/close_endorsement_confirm')}" method="post">
+			<input type="hidden" id="confirm_end_id" name="end_id" value=""/>
+		</form>
+	</div>
+</body>
+</html>
+
+
+

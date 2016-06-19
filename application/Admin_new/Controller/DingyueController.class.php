@@ -32,11 +32,17 @@ class DingyueController extends AdminbaseController {
 			$where = " license_number like '%$che_number%'";
 		}
 		if (! empty ( $che_num )) {
-			$where = " is_sub=$che_num-1";
+			$where = " is_sub = $che_num -1";
 		}
 		if (! empty ( $channel )) {
-			$where = " b.channel=$channel-1";
+			if($channel == 1){
+				$where = " c.channel = 0";
+			}
+			if($channel == 2){
+				$where = " c.channel = 99";
+			}
 		}
+		
 		if (empty ( $_order )) {
 			$_order = 'desc';
 		}
@@ -48,11 +54,11 @@ class DingyueController extends AdminbaseController {
 		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,b.id,b.license_number,a.c_time,a.create_time,a.is_sub,b.unsubscribe_time,c.channel,c.channel_key, c.nickname,b.engine_number,b.frame_number,c.openid,c.city,c.username" )->table ( "(SELECT @rownum:=0) r,cw_user_car as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_user as c on c.id=a.user_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
-		$d_number = $this->Dingyue_model->field ( "count(*)" )->table ( "cw_user_car as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_user as c on c.id=a.user_id" )->where ( "is_sub=0" )->select ();
+		$d_number = $this->Dingyue_model->field ( "count(*)" )->table ( "cw_user_car as a" )->where ( "is_sub=0" )->select ();
 		$this->assign ( 'd_number', $d_number );
-		$z_number = $this->Dingyue_model->field ( "count(*)" )->table ( "cw_user_car as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_user as c on c.id=a.user_id" )->select ();
+		$z_number = $this->Dingyue_model->field ( "count(*)" )->table ( "cw_user_car as a" )->select ();
 		$this->assign ( 'z_number', $z_number );
-		$typ_channel = $this->Dingyue_model->field ( "count(b.channel) as nums" )->table ( "cw_user_car as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_user as c on c.id=a.user_id" )->group ( "b.channel" )->select ();
+		$typ_channel = $this->Dingyue_model->field ( "count(c.channel) as nums" )->table ( "cw_user_car as a" )->join ( "cw_user as c on c.id=a.user_id" )->group ( "c.channel" )->select ();
 		$this->assign ( 'sum', $typ_channel );
 		$this->assign ( "pageIndex", $page->firstRow );
 		$this->display ();
@@ -329,49 +335,50 @@ class DingyueController extends AdminbaseController {
 	}
 	function users() {
 		$username = $_POST ['username'];
-		$type = $_POST ['type'];
 		$channel = $_GET ['channel'];
 		$concern = $_GET ['concern'];
 		if (IS_POST) {
 			$_SESSION ['dingyue'] = '';
 			$_SESSION ['dingyue'] ['username6'] = $username;
-			$_SESSION ['dingyue'] ['type6'] = $type;
-			$_SESSION ['dingyue'] ['channel6'] = $channel;
-			$_SESSION ['dingyue'] ['concern6'] = $concern;
 		} else {
 			$username = $_SESSION ['dingyue'] ['username6'];
-			$type = $_SESSION ['dingyue'] ['type6'];
-			$channel = $_SESSION ['dingyue'] ['channel6'];
-			$concern = $_SESSION ['dingyue'] ['concern6'];
 		}
 		$where = '1=1';
 		if (! empty ( $username )) {
-			$where .= " and username='$username'";
-		}
-		if (! empty ( $type )) {
-			$where .= " and  channel='$type'-1 ";
+			$where .= " and username = '$username'";
 		}
 		if (! empty ( $channel )) {
-			$where .= " and  channel='$channel'-1";
+			if($channel == 1){
+				$where .= " and channel = 0 ";
+			}
+			if($channel == 2){
+				$where .= " and channel = 99 ";
+			}
 		}
 		if (! empty ( $concern )) {
-			$where .= " and is_att='$concern'-1";
+			$att = $concern - 1;
+			$where .= " and is_att = $att";
 		}
-		$this->assign ( "input_sum", array (
-				$username,
-				$type 
-		) );
+		$this->assign ( "username", $username);
 		$count = $this->Dingyue_model->table ( "cw_user as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
 		$roles = $this->Dingyue_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.group_id,a.openid,a.username,a.channel, a.channel_key, a.nickname,is_att,a.create_time,a.city" )->table ( "(SELECT @rownum:=0) r,cw_user as a" )->where ( $where )->order ( "a.create_time desc" )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
-		$typ_roles = $this->Dingyue_model->field ( "count(is_att) as nums" )->table ( "cw_user as a" )->group ( "is_att" )->select ();
+		
+		$typ_roles = $this->Dingyue_model->field ( "count(a.is_att) as nums" )->table ( "cw_user as a" )->group ( "a.is_att" )->order("a.is_att")->select ();
 		$type_one = $typ_roles [0] [nums];
-		$type_two = $typ_roles [1] [nums] + $typ_roles [0] [nums];
+		$type_two = $typ_roles [0] [nums] + $typ_roles [1] [nums];
 		$this->assign ( "array_type", array (
 				$type_one,
 				$type_two 
+		) );
+		$typ_chs = $this->Dingyue_model->field ( "count(a.channel) as nums" )->table ( "cw_user as a" )->group ( "a.channel" )->order("a.channel")->select ();
+		$type_three = $typ_chs [0] [nums];
+		$type_four = $typ_chs [1] [nums];
+		$this->assign ( "user_type", array (
+				$type_three,
+				$type_four 
 		) );
 		$this->display ();
 	}

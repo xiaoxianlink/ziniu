@@ -70,6 +70,9 @@
 		divObj = document.getElementById("heidden_div");
 		divObj.style.visibility = "hidden";
 	}
+	function money_message(id,services_sn){
+		window.location.href="{:U('jiaoyi/fuwu_message?id=')}"+id+"&services_sn="+services_sn;
+	}
 	function ShowPrompt2(id,services_sn) {
 		var type = document.getElementById("type").value;
 		var time_start = document.getElementById("time_start").value;
@@ -201,7 +204,7 @@ $(document).ready(function(){
 				<th>#</th>
 				<th>服务商编号</th>
 				<th>手机号</th>
-				<th>状态</th>
+				<th>是否接单</th>
 				<th>账户余额</th>
 				<th>可提现金额</th>
 				<th>未结算金额</th>
@@ -218,9 +221,11 @@ $(document).ready(function(){
 				<td>{$i++}</td>
 				<td>{$vo.services_sn}</td>
 				<td>{$vo.phone}</td>
-				<td><if condition="$vo['state'] eq 0">正常<else />封存</if></td>
-				<td><span id="jiaoyi_fuwu_link" class="sview"
-					onclick="ShowPrompt2('{$vo.bank_id}','{$vo.services_sn}')">{$vo.money}</span></td>
+				<td><if condition="$vo['status'] eq 0">是<else />否</if></td>
+			    <td><a href="{:U('Jiaoyi/fuwu_message?id=')}{$vo.bank_id}&services_sn={$vo.services_sn}">{$vo.money}</a><!-- <span id="jiaoyi_fuwu_link" class="sview"
+					onclick="money_message('{$vo.bank_id}','{$vo.services_sn}')">{$vo.money}</span> --></td>
+				<!-- <td><span id="jiaoyi_fuwu_link" class="sview"
+					onclick="ShowPrompt2('{$vo.bank_id}','{$vo.services_sn}')">{$vo.money}</span></td> -->
 				<td>{$vo.user_money}</td>
 				<td>{$vo.end_money}</td>
 				<td><if condition="$vo['type'] eq 2">公司账户<else />个人账户</if></td>

@@ -3,6 +3,7 @@
 namespace Admin_new\Controller;
 
 use Common\Controller\AdminbaseController;
+use Weixin\Controller\IndexController;
 
 class FuwuController extends AdminbaseController {
 	protected $Fuwu_model;
@@ -40,7 +41,7 @@ class FuwuController extends AdminbaseController {
 		$this->assign ( 'order', $_order );
 		$count = $this->Fuwu_model->table ( "cw_services as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.phone,a. create_time,a.state,a.time,a.services_sn" )->table ( "(SELECT @rownum:=0) r,cw_services as a" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.phone,a.status,a.create_time,a.state,a.time,a.services_sn" )->table ( "(SELECT @rownum:=0) r,cw_services as a" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$model = M ( "services_city" );
 		$region_model = M ( "region" );
 		foreach ( $roles as $k => $v ) {
@@ -78,7 +79,7 @@ class FuwuController extends AdminbaseController {
 		$state = $_REQUEST ['state'];
 		if ($state == 0) {
 			$time = strtotime ( date ( "Y-m-d H:i:s" ) );
-			if ($this->Fuwu_model->execute ( "update cw_services set state=1,time=$time where id=$id" ) > 0) {
+			if ($this->Fuwu_model->execute ( "update cw_services set state=1,time=$time,status=1 where id=$id" ) > 0) {
 				$this->ajaxReturn ( 1 );
 			} else {
 				$this->ajaxReturn ( 2 );
@@ -680,6 +681,15 @@ class FuwuController extends AdminbaseController {
 			} else {
 				$model->where ( "id='{$info['id']}'" )->save ( $data );
 			}
+			/* start 增加帮助与规则更新提醒推送 */
+			if($re > 0){
+			    //推送消息
+			    $model_push = new IndexController();
+			    $model_push->pushMessageToApp(content8, title8,content8);
+			    //插入消息表
+			    $model_push->add_message('', 3, 8, '', content8);
+			}
+			/* end */
 		}
 		$info = $model->find ();
 		$this->assign ( 'info', $info );

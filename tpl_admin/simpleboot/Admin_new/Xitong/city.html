@@ -19,8 +19,8 @@
 #city_add{
 	position:absolute;	
 	width:60%;;
-	height:70%;
-	margin-top:110px;
+	height:100%;
+	margin-top:80px;
 	background:#EDF2F4;
 	border-radius:5px;
 	z-index:1100;
@@ -101,15 +101,16 @@ $(document).ready(function(){
 				<th>省份简称</th>
 				<th>城市编码</th>
 				<th>城市名称</th>
+				<th>车行易CityID</th>
 				<th>车首页CityID</th>
 				<th>爱车坊CityID</th>
 				<th>车牌头前两位</th>
+				<th>车行易发动机号位数</th>
+				<th>车行易VIN(车架)位数</th>
 				<th>车首页发动机号位数</th>
 				<th>车首页VIN(车架)位数</th>
 				<th>爱车坊发动机号位数</th>
 				<th>爱车坊VIN(车架)位数</th>
-				<th>Registno</th>
-				<th>vcode</th>
 				<th>是否开通</th>
 			</tr>
 			<?php $i = 1;?>
@@ -122,15 +123,16 @@ $(document).ready(function(){
 				<td>{$vo.abbreviation}</td>
 				<td>{$vo.id}</td>
 				<td>{$vo.city}</td>
+				<td>{$vo.gb_code_c}</td>
 				<td>{$vo.code}</td>
 				<td>{$vo.acode}</td>
 				<td>{$vo.nums}</td>
+				<td>{$vo.cxy_engine_nums}</td>
+				<td>{$vo.cxy_frame_nums}</td>
 				<td>{$vo.c_engine_nums}</td>
 				<td>{$vo.c_frame_nums}</td>
 				<td>{$vo.engine_nums}</td>
 				<td>{$vo.frame_nums}</td>
-				<td>{$vo.registno}</td>
-				<td>{$vo.vcode}</td>
 				<td class="iftd"><if condition="$vo['is_dredge'] neq 0"> <a
 						onclick="city_update('{$vo.id}','{$vo.is_dredge}')" href="#">是</a><a style="background: #f77462; color: #fff;">否</a>
 					<else />
@@ -150,12 +152,17 @@ $(document).ready(function(){
 				action="{:U('Xitong/city_add')}">
 				<table id="city_tab1" width="100%">
 					<tr>
-						<td class="td1">省份编码</td>
-						<td class="td2"><input type="text" class="input" name="sf_id"
+						<td class="td1">省份名称</td>
+						<td class="td2"><input type="text" class="input"
+							name="province" id="app" value=""></td>
+						<td class="td1">省份简称</td>
+						<td class="td2"><input type="text" class="input"
+							name="abbreviation" id="model" value=""></td>
+					</tr>
+					<tr>
+						<td class="td1">城市名称</td>
+						<td class="td2"><input type="text" class="input" name="city"
 							id="model" value=""></td>
-						<!-- <td class="td1">城市编码</td>
-						<td class="td2"><input type="text" class="input" name="code"
-							value=""></td> -->
 						<td class="td1">是否开通</td>
 						<td class="td2"><input type="radio" class="input"
 							name="is_dredge" value="0" checked="checked"> 是 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input
@@ -163,31 +170,38 @@ $(document).ready(function(){
 							checked="checked"> 否</td>
 					</tr>
 					<tr>
+						<td class="td1">车行易CityID</td>
+						<td class="td2"><input type="text" class="input" name="cxy_code"
+							id="cxy_code" value=""></td>
 						<td class="td1">车首页CityID</td>
 						<td class="td2"><input type="text" class="input"
 							name="code" id="code" value=""></td>
+					</tr>
+					
+					<tr>
 						<td class="td1">爱车坊CityID</td>
 						<td class="td2"><input type="text" class="input" name="acode"
 							id="acode" value=""></td>
-					</tr>
-					<tr>
-						<td class="td1">省份名称</td>
-						<td class="td2"><input type="text" class="input"
-							name="province" id="app" value=""></td>
-						<td class="td1">城市名称</td>
-						<td class="td2"><input type="text" class="input" name="city"
-							id="model" value=""></td>
-					</tr>
-					<tr>
-						<td class="td1">省份简称</td>
-						<td class="td2"><input type="text" class="input"
-							name="abbreviation" id="model" value=""></td>
 						<td class="td1">车牌头前两位</td>
 						<td class="td2"><input type="text" class="input" name="nums"
 							id="action" value=""></td>
 					</tr>
 				</table>
 				<table id="city_tab2">
+					<tr>
+						<td class="td1">车行易发动机号位数</td>
+						<td><input type="text" class="input" name="cxy_engine_nums"
+							id="action" value=""></td>
+						<td class="td3">需要输入发动机号尾数（"99": 全部输入，"0":
+							不需要输入，其他的显示几位输入发动机号后面几位）</td>
+					</tr>
+					<tr>
+						<td class="td1">车行易VIN(车架)位数</td>
+						<td><input type="text" class="input" name="cxy_frame_nums"
+							id="action" value=""></td>
+						<td class="td3">需要输入车架号位数（"99": 全部输入，"0":
+							不需要输入，其他的显示几位输入车架号后面几位）</td>
+					</tr>
 					<tr>
 						<td class="td1">车首页发动机号位数</td>
 						<td><input type="text" class="input" name="c_engine_nums"
@@ -215,19 +229,6 @@ $(document).ready(function(){
 							id="action" value=""></td>
 						<td class="td3">需要输入车架号位数（"-1": 全部输入，"0":
 							不需要输入，其他的显示几位输入车架号后面几位）</td>
-					</tr>
-					<tr>
-						<td class="td1">registno(证书编号)</td>
-						<td><input type="text" class="input" name="registno"
-							id="model" value=""></td>
-						<td class="td3">需要输入证书编号位数（"-1": 全部输入，"0":
-							不需要输入，其他的显示几位输入证书编号后面几位）</td>
-					</tr>
-					<tr>
-						<td class="td1">vcode</td>
-						<td><input type="text" class="input" name="vcode" id="action"
-							value=""></td>
-						<td></td>
 					</tr>
 				</table>
 				<div>

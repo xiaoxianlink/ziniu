@@ -1,0 +1,45 @@
+<admintpl file="header"/>
+</head>
+<body class="J_scroll_fixed">
+<div class="wrap J_check_wrap">
+  <ul class="nav nav-tabs">
+     <li><a href="{:U('xitong/yinhang')}">银行管理</a></li>
+     <li class="active"><a href="{:U('xitong/yh_add')}">添加银行</a></li>
+  </ul>
+  <form class="form-horizontal J_ajaxForm" action="{:U('xitong/yhadd_post')}" method="post" id="myform" enctype="multipart/form-data">
+  <div class="table_full">
+      <table width="100%" cellpadding="2" cellspacing="2">
+        <tr>
+          <th width="180">银行名称</th>
+          <td><input type="text" name="bank_name" value="" class="input" id="rolename"></input></td>
+        </tr>
+        <tr>
+          <th>缩略图</th>
+          <td><input type="file" name="bank_img" value="" class="input"></input></td>
+        </tr>
+        <tr>
+          <th>排序</th>
+          <td><input type="text" name="sort" value="" class="input"></input></td>
+        </tr>
+        <tr>
+          <th>是否启用</th>
+          <td>
+          	<label class="radio inline" for="active_true">
+            		<input type="radio" name="state" value="0" checked id="active_true"/>开启
+            </label>
+            <label class="radio inline" for="active_false">
+            		<input type="radio" name="state" value="1" id="active_false">禁止
+            </label>
+          </td>
+        </tr>
+      </table>
+  </div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn_submit  J_ajax_submit_btn">提交</button>
+        <a class="btn" href="{:U('xitong/yinhang')}">返回</a>
+    </div>
+    </form>
+</div>
+<script src="__ROOT__/statics/js/common.js"></script>
+</body>
+</html>

@@ -60,7 +60,7 @@ $(document).ready(function(){
 <div class="count_div">
 		<div class="count_txt">总订阅数：<a href="{:U('Dingyue/cheliang?user_is_sub=1')}">{$d_number.0.count(*)}</a></div>
 		<div class="count_txt">全部：<a href="{:U('Dingyue/cheliang')}">{$z_number.0.count(*)}</a></div>
-		<div class="count_txt" style="width: 500px;">订阅渠道：&nbsp;&nbsp;微信&nbsp;&nbsp;&nbsp;&nbsp;<a href="{:U('Dingyue/cheliang?channel=1')}"><if condition="$sum['0']['nums'] eq ''">0<else />{$sum.0.nums}</if></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alipay&nbsp;&nbsp;&nbsp;&nbsp;<a href="{:U('Dingyue/cheliang?channel=2')}"><if condition="$sum['1']['nums'] eq ''">0<else />{$sum.1.nums}</if></a></div>
+		<div class="count_txt" style="width: 500px;">订阅渠道：&nbsp;&nbsp;微信&nbsp;&nbsp;&nbsp;&nbsp;<a href="{:U('Dingyue/cheliang?channel=1')}"><if condition="$sum['0']['nums'] eq ''">0<else />{$sum.0.nums}</if></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bizapi&nbsp;&nbsp;&nbsp;&nbsp;<a href="{:U('Dingyue/cheliang?channel=2')}"><if condition="$sum['1']['nums'] eq ''">0<else />{$sum.1.nums}</if></a></div>
 </div>
 <table class="table table-hover table-bordered table-list" id="menus-table">
 	<tr>
@@ -85,7 +85,7 @@ $(document).ready(function(){
 			<td><if condition="$vo['is_sub'] eq 0">是<else />否</if></td>
 			<td>{$vo.username}</td>
 			<td><if condition="$vo['c_time'] eq 0"><else />{$vo.c_time|date='Y-m-d H:i:s',###}</if></td>
-			<td><if condition="$vo['channel'] eq 0">wechat<elseif condition="$vo['channel'] eq 99"/>{$vo.channel_key}<else />alipay</if></td>
+			<td><if condition="$vo['channel'] eq 0">wechat<elseif condition="$vo['channel'] eq 99"/>{$vo.channel_key}</if></td>
 			<td><span class="sview" onmouseover="ShowPrompt2(event,'{$vo.nickname}','{$vo.openid}','{$vo.city}','{$vo.create_time|date='Y-m-d H:i:s',###}')" onmouseout="HiddenPrompt()">{$vo.nickname}</span></td>
 		</tr>
 	</foreach>

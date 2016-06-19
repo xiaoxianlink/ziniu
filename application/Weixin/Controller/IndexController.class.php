@@ -10,6 +10,7 @@ namespace Weixin\Controller;
 
 use Common\Controller\HomeBaseController;
 use Think\Log;
+require_once "application/Common/getui/IGt.Push.php";
 
 class IndexController extends HomeBaseController {
 	public function index() {
@@ -1074,4 +1075,86 @@ class IndexController extends HomeBaseController {
 		$token = $jsoninfo ['data'] [0] ['accessToken'];
 		return $token;
 	}
+	
+	/* start 增加推送方法*/
+	
+	//单推接口案例（个推）
+	function pushMessageToSingle($content,$title,$tz_content,$alias){
+	
+	    $igt = new \IGeTui(NULL,APPKEY,MASTERSECRET,false);
+	
+	    $template = $this->IGtNotificationTemplateDemo($content,$title,$tz_content);
+	
+	    //个推信息体
+	    $message = new \IGtSingleMessage();
+	
+	    $message->set_isOffline(true);//是否离线
+	    $message->set_offlineExpireTime(3600*12*1000);//离线时间
+	    $message->set_data($template);//设置推送消息类型
+	    //接收方
+	    $target = new \IGtTarget();
+	    $target->set_appId(appid);
+	    $target->set_alias($alias);
+	
+	    try {
+	        $rep = $igt->pushMessageToSingle($message, $target);
+	
+	    }catch(\RequestException $e){
+	        $requstId =e.getRequestId();
+	        $rep = $igt->pushMessageToSingle($message, $target,$requstId);
+	    }
+	
+	}
+	//群推接口案例
+	function pushMessageToApp($content, $title,$tz_content){
+	    $igt = new \IGeTui(HOST,APPKEY,MASTERSECRET);
+	    $template = $this->IGtNotificationTemplateDemo($content,$title,$tz_content);
+	    //个推信息体
+	    //基于应用消息体
+	    $message = new \IGtAppMessage();
+	    $message->set_isOffline(true);
+	    $message->set_offlineExpireTime(10 * 60 * 1000);//离线时间单位为毫秒，例，两个小时离线为3600*1000*2
+	    $message->set_data($template);
+	
+	    $appIdList=array(appid);
+	    $phoneTypeList=array('ANDROID');
+	
+	    $message->set_appIdList($appIdList);
+	
+	    $igt->pushMessageToApp($message);
+	
+	}
+	
+	function IGtNotificationTemplateDemo($content,$title,$tz_content){
+	    $template =  new \IGtNotificationTemplate();
+	    $template->set_appId(appid);//应用appid
+	    $template->set_appkey(APPKEY);//应用appkey
+	    $template->set_transmissionType(1);//透传消息类型
+	    $template->set_transmissionContent($content);//透传内容
+	    $template->set_title($title);//通知栏标题
+	    $template->set_text($tz_content);//通知栏内容
+	    $template->set_logo("");//通知栏logo
+	    $template->set_isRing(true);//是否响铃
+	    $template->set_isVibrate(true);//是否震动
+	    $template->set_isClearable(true);//通知栏是否可清除
+	    return $template;
+	}
+	/**
+	 * 插入消息表
+	 */
+	public function add_message($services_id, $msg_type, $tixing_type, $zhangwu_type, $content){
+	    $model_msg = M ("message");
+	    $data = array(
+	        'from_userid'=>0,
+	        'openid'=>$services_id,
+	        'msg_type'=>$msg_type,
+	        'tixing_type'=>$tixing_type,
+	        'zhangwu_type'=>$zhangwu_type,
+	        'create_time'=>time(),
+	        'content'=>$content,
+	        'is_readed'=>0
+	    );
+	    $model_msg->add($data);
+	}
+	/* end */
 }

@@ -3,12 +3,12 @@
 namespace Admin_new\Controller;
 
 use Common\Controller\AdminbaseController;
-use Weixin\Controller\IndexController;
 use Think\Model;
 use Think\Log;
-use Weixin\Controller\ApiController;
-
+use Weixin\Controller\IndexController;
+use Weizhang\Controller\JiaoyiController;
 include_once 'application/Weixin/Conf/config.php';
+
 class XitongController extends AdminbaseController {
 	protected $xitong_model;
 	public function _initialize() {
@@ -48,7 +48,7 @@ class XitongController extends AdminbaseController {
 		$this->assign ( 'order', $_order );
 		$count = $this->xitong_model->table ( "cw_region as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.sf_id,a.level,a.province,a.abbreviation,a.code,a.acode,a.city,a.nums,a.engine_nums,a.frame_nums,a.c_engine_nums,a.c_frame_nums,a.registno,a.vcode,a.is_dredge " )->table ( "(SELECT @rownum:=0) r,cw_region as a" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.sf_id,a.level,a.province,a.abbreviation,a.code,a.acode,a.city,a.nums,a.engine_nums,a.frame_nums,a.c_engine_nums,a.c_frame_nums,a.gb_code_c,a.cxy_frame_nums,a.cxy_engine_nums,a.is_dredge " )->table ( "(SELECT @rownum:=0) r,cw_region as a" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$is_dredge = $this->xitong_model->field ( "count(*) as num" )->table ( "cw_region" )->where ( " is_dredge=0" )->select ();
 		$no_dredge = $this->xitong_model->field ( "count(*) as nums" )->table ( "cw_region" )->where ( " is_dredge=1" )->select ();
@@ -61,7 +61,7 @@ class XitongController extends AdminbaseController {
 		$this->display ();
 	}
 	function city_add() {
-		$sf_id = $_POST ['sf_id'];
+		$cxy_code = $_POST ['cxy_code'];
 		$acode = $_POST ['acode'];
 		$code = $_POST ['code'];
 		$level = 2;
@@ -70,14 +70,14 @@ class XitongController extends AdminbaseController {
 		$city = $_POST ['city'];
 		$abbreviation = $_POST ['abbreviation'];
 		$nums = $_POST ['nums'];
+		$cxy_engine_nums = $_POST ['cxy_engine_nums'];
+		$cxy_frame_nums = $_POST ['cxy_frame_nums'];
 		$engine_nums = $_POST ['engine_nums'];
 		$frame_nums = $_POST ['frame_nums'];
 		$c_engine_nums = $_POST ['c_engine_nums'];
 		$c_frame_nums = $_POST ['c_frame_nums'];
-		$registno = $_POST ['registno'];
-		$vcode = $_POST ['vcode'];
 		if (! empty ( $province )) {
-			$roles = $this->xitong_model->execute ( "insert into cw_region (code,level,province,city,abbreviation,nums,engine_nums,frame_nums,c_engine_nums,c_frame_nums,registno,vcode,is_dredge,orders,sf_id,acode)  values('$code','$level','$province','$city','$abbreviation','$nums','$engine_nums','$frame_nums','$c_engine_nums','$c_frame_nums','$registno','$vcode',$is_dredge,'50','$sf_id','$acode')" );
+			$roles = $this->xitong_model->execute ( "insert into cw_region (level,province,city,abbreviation,nums,engine_nums,frame_nums,c_engine_nums,c_frame_nums,cxy_engine_nums,cxy_frame_nums,is_dredge,orders,gb_code_c,code,acode)  values('$level','$province','$city','$abbreviation','$nums','$engine_nums','$frame_nums','$c_engine_nums','$c_frame_nums','$cxy_engine_nums','$cxy_frame_nums',$is_dredge,'50','$cxy_code','$code','$acode')" );
 			if ($roles > 0) {
 				$this->success ( "添加成功！" );
 			} else {
@@ -100,6 +100,7 @@ class XitongController extends AdminbaseController {
 			}
 		}
 	}
+	
 	function daima() {
 		$code = $_POST ['wei_code'];
 		$range = $_POST ['wei_range'];
@@ -180,6 +181,7 @@ class XitongController extends AdminbaseController {
 		$this->assign ( "pageIndex", $page->firstRow );
 		$this->display ();
 	}
+	
 	function dai_add() {
 		$id = $_POST ['id'];
 		$code = $_POST ['code'];
@@ -365,7 +367,7 @@ class XitongController extends AdminbaseController {
 		$this->assign ( 'order', $_order );
 		$count = $this->xitong_model->table ( "cw_endorsement_log as l" )->join ( "cw_endorsement as a on a.id=l.end_id" )->join ( "cw_car as b on a.car_id=b.id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,b.license_number,a.time,a.area,a.code,a.money,a.points,a.query_no,a.certificate_no,a.address,a.content,a.office,a.is_manage,a.manage_time,a.create_time,l.state as l_state,l.c_time as l_c_time,l.type as l_type" )->table ( "(SELECT @rownum:=0) r,cw_endorsement_log as l" )->join ( "cw_endorsement as a on a.id=l.end_id" )->join ( "cw_car as b on a.car_id=b.id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,b.license_number,a.time,a.area,a.code,a.money,a.points,a.query_no,a.certificate_no,a.address,a.content,a.office,a.is_manage,a.manage_time,a.create_time,a.close_query_no,l.state as l_state,l.c_time as l_c_time,l.type as l_type" )->table ( "(SELECT @rownum:=0) r,cw_endorsement_log as l" )->join ( "cw_endorsement as a on a.id=l.end_id" )->join ( "cw_car as b on a.car_id=b.id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$roles_a = $this->xitong_model->query ( "select count(id) as numbers from cw_endorsement_log " );
@@ -482,9 +484,9 @@ class XitongController extends AdminbaseController {
 			}
 			$where .= " and t.state='$type' ";
 		}
-		$count = $this->xitong_model->table ( "cw_turn_order as t" )->join ( "cw_services_order as so on t.sod_id=so.id" )->join ( "cw_order as b on b.id=t.order_id" )->join ( "cw_car as c on b.car_id=c.id" )->join ( "cw_endorsement as d on b.endorsement_id=d.id" )->join ( "cw_services as s on s.id = so.services_id" )->where ( $where )->count ();
+		$count = $this->xitong_model->table ( "cw_turn_order as t" )->join ( "cw_order as b on b.id=t.order_id" )->join ( "cw_car as c on b.car_id=c.id" )->join ( "cw_endorsement as d on b.endorsement_id=d.id" )->join ( "cw_services as s on s.id = b.services_id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,t.id,b.order_sn,s.id as s_id,s.phone,t.c_time,b.last_time,t.state,so.money,b.pay_money,b.pay_sn,c.license_number,c.frame_number,c.engine_number,d.code,d.time,d.area,d.points,d.money,t.l_time,s.services_sn" )->table ( "(SELECT @rownum:=0) r,cw_turn_order as t" )->join ( "cw_services_order as so on t.sod_id=so.id" )->join ( "cw_order as b on b.id=t.order_id" )->join ( "cw_car as c on b.car_id=c.id" )->join ( "cw_endorsement as d on b.endorsement_id=d.id" )->join ( "cw_services as s on s.id = so.services_id" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,t.id,b.order_sn,s.id as s_id,s.phone,t.c_time,b.last_time,t.state,b.money,b.pay_money,b.pay_sn,c.license_number,c.frame_number,c.engine_number,d.code,d.time,d.area,d.points,d.money,t.l_time,s.services_sn" )->table ( "(SELECT @rownum:=0) r,cw_turn_order as t" )->join ( "cw_order as b on b.id=t.order_id" )->join ( "cw_car as c on b.car_id=c.id" )->join ( "cw_endorsement as d on b.endorsement_id=d.id" )->join ( "cw_services as s on s.id = b.services_id" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		foreach ( $roles as $k => $v ) {
 			$roles [$k] ['so_id'] = $v ['order_sn'] . substr ( $v ['c_time'], - 2 ) . $v ['s_id'];
 			$time = '--';
@@ -507,129 +509,164 @@ class XitongController extends AdminbaseController {
 	public function manage() {
 		$state = $_REQUEST ['state'];
 		$id = $_REQUEST ['id'];
-		$model = M ( "turn_order" );
-		$info = $model->where ( "id='$id'" )->find ();
-		$to_list = $model->field ( "tos.id,so.id as so_id,s.id as s_id,s.phone,tos.c_time,tos.state,tos.l_time" )->table ( "cw_turn_order as tos" )->join ( "cw_services_order as so on so.id=tos.sod_id", 'left' )->join ( "cw_services as s on s.id=so.services_id", 'left' )->where ( "tos.order_id = '{$info['order_id']}'" )->select ();
-		$s_ids = "0";
-		foreach ( $to_list as $c => $p ) {
-			$s_ids .= ",{$p['s_id']}";
+		
+		$turn_order_model = M ( "turn_order" );
+		$info = $turn_order_model->where ( "id='$id' and state in (0,3,4)" )->find ();
+		
+		if(empty($info)){
+			$this->redirect ( "Xitong/window" );
 		}
-		$order_model = M ( "order" );
-		$order_info = $order_model->where ( "id='{$info['order_id']}'" )->find ();
-		$so_model = M ( "services_order" );
-		$so_info = $so_model->where ( "id='{$info['sod_id']}'" )->find ();
+		
+		$latest_info = $turn_order_model->where ( "order_id='{$info['order_id']}'" )->order("id desc")->find ();
+		if($latest_info['id'] <> $info['id']){
+			$this->redirect ( "Xitong/window" );
+		}
+		
+		$model = M ();
+		$v = $model->field ( "a.id as order_id,a.pay_sn,a.order_sn,b.id as car_id,b.license_number,c.time,c.area,c.code,c.money,c.points,a.last_time,a.pay_money,a.order_status,a.pay_type,d.id as user_id,d.phone,a.services_id,a.money as order_money,a.endorsement_id,a.user_id" )->table ( "cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "a.id = '{$info['order_id']}'" )->find ();
+		
+		$to_list = $turn_order_model->field ( "tos.id,tos.c_time,tos.state,tos.l_time,tos.services_id as s_id,tos.money" )->table ( "cw_turn_order as tos" )->where ( "tos.order_id = '{$info['order_id']}'" )->select ();
+		$s_ids = array();
+		foreach ( $to_list as $c => $p ) {
+			if($p["s_id"] != null){
+				$s_ids[] = $p["s_id"];
+			}
+		}
 		
 		$user_model = M ("User");
-		$user = $user_model->where ( "id = '{$order_info['user_id']}'" )->find ();
+		$user = $user_model->where ( "id = '{$v['user_id']}'" )->find ();
 		
-		$car_model = M ("Car");
-		$car = $user_model->where ( "id = '{$order_info['car_id']}'" )->find ();
-		
+		$order_model = M ( "Order" );
 		switch ($state) {
 			case 1 : // 办不了
-				$so_id = $this->screen ( $so_info ['violation'], $s_ids, $order_info ['endorsement_id'] );
-				if (! empty ( $so_id )) {
+				$fuwu = $this->find_fuwu($v["car_id"], $v["code"], $v["money"],$v["points"], $v["area"], $s_ids);
+				if (! empty ( $fuwu )) {
 					$data = array (
-							"last_time" => time (),
-							"so_id" => $so_id 
+							"state" => 1,
+							"l_time" => time () 
 					);
-					$order_model->where ( "id='{$order_info['id']}'" )->save ( $data );
+					$turn_order_model->where ( "id='{$info['id']}'" )->save ( $data );
 					$data = array (
-							"order_id" => $order_info ['id'],
-							"sod_id" => $so_id,
+							"order_id" => $v ['order_id'],
+							"services_id" => $fuwu ['s_id'],
+							"sod_id" => $fuwu ['so_id'],
+							"so_type" => $fuwu ['so_type'],
+							"money" => $fuwu ['so_money'],
 							"state" => 0,
 							"c_time" => time (),
 							"l_time" => time () 
 					);
-					$model->add ( $data );
+					$turn_order_model->add ( $data );
 					$data = array (
-							"state" => 1 
+							"services_id" => $fuwu ['s_id'],
+							"so_id" => $fuwu ['so_id'],
+							"so_type" => $fuwu ['so_type']
 					);
-					$model->where ( "id='{$info['id']}'" )->save ( $data );
-					$so_info2 = $so_model->where ( "id='$so_id'" )->find ();
-					$data = array (
-							"services_id" => $so_info2 ['services_id'],
-							"so_id" => $so_id 
-					);
-					$order_model->where ( "id='{$info['order_id']}'" )->save ( $data );
+					$order_model->where ( "id='{$v['order_id']}'" )->save ( $data );
 					
 					$services_model = M ( "services" );
-					$services_info = $services_model->where ( "id='{$so_info2['services_id']}'" )->find ();
+					$services_info = $services_model->where ( "id='{$fuwu['s_id']}'" )->find ();
 					if (! empty ( $services_info )) {
 						$data = array (
 								"all_nums" => $services_info ['all_nums'] + 1 
 						);
-						$services_model->where ( "id='{$so_info2['services_id']}'" )->save ();
+						$services_model->where ( "id='{$fuwu['s_id']}'" )->save ();
 					}
-					// 转钱
-					$bank_model = M ( "bank" );
-					$bank_info_older = $bank_model->where ( "bank_id='{$so_info['services_id']}'" )->find ();
-					if (! empty ( $bank_info_older )) {
-						$data = array (
-								"money" => ($bank_info_older ['money'] - $order_info ['money']) > 0 ? ($bank_info_older ['money'] - $order_info ['money']) : 0,
-								"balance_money" => ($bank_info_older ['balance_money'] - $order_info ['money']) > 0 ? ($bank_info_older ['balance_money'] - $order_info ['money']) : 0,
-								"end_money" => ($bank_info_older ['end_money'] - $order_info ['money']) > 0 ? ($bank_info_older ['end_money'] - $order_info ['money']) : 0,
-								"income_money" => ($bank_info_older ['income_money'] - $order_info ['money']) > 0 ? ($bank_info_older ['income_money'] - $order_info ['money']) : 0 
-						);
-						$bank_model->where ( "id='{$bank_info_older['id']}'" )->save ( $data );
-					}
-					// 记录
-					$bank_info_older = $bank_model->where ( "bank_id='{$so_info['services_id']}'" )->find ();
-					$data = array (
-							"services_id" => $bank_info_older ['bank_id'],
-							"income_money" => $bank_info_older ['income_money'],
-							"pay_money" => $bank_info_older ['pay_money'],
-							"end_money" => $bank_info_older ['end_money'],
-							"user_money" => $bank_info_older ['user_money'],
-							"money" => $bank_info_older ['money'],
-							"order_id" => $info ['order_id'],
-							"c_time" => time ()
-					);
-					$jl_model = M ( "services_jilu" );
-					$jl_model->add ( $data );
 					
-					$bank_info = $bank_model->where ( "bank_id='{$so_info2['bank_id']}'" )->find ();
+					if($info['state'] == 3 or $info['state'] == 4){
+						// 转钱
+						$bank_model = M ( "bank" );
+						$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
+						if (! empty ( $bank_info_older )) {
+							$data = array (
+									"money" => ($bank_info_older ['money'] - $info['money']) > 0 ? ($bank_info_older ['money'] - $info['money']) : 0,
+									"end_money" => ($bank_info_older ['end_money'] - $info['money']) > 0 ? ($bank_info_older ['end_money'] - $info['money']) : 0
+							);
+							$bank_model->where ( "id='{$bank_info_older['id']}'" )->save ( $data );
+						}
+						// 记录
+						$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
+						$data = array (
+								"services_id" => $bank_info_older ['bank_id'],
+								"income_money" => 0,
+								"pay_money" => $info['money'],
+								"end_money" => $bank_info_older ['end_money'],
+								"user_money" => $bank_info_older ['user_money'],
+								"money" => $bank_info_older ['money'],
+								"order_id" => $v ['order_id'],
+								"c_time" => time ()
+						);
+						$jl_model = M ( "services_jilu" );
+						$jl_model->add ( $data );
+					}
+					/*
+					$bank_info = $bank_model->where ( "bank_id='{$fuwu['s_id']}'" )->find ();
 					if (! empty ( $bank_info )) {
 						$data = array (
-								"money" => $bank_info ['money'] + $order_info ['money'],
-								"balance_money" => $bank_info ['balance_money'] + $order_info ['money'],
-								"end_money" => $bank_info ['end_money'] + $order_info ['money'],
-								"income_money" => $bank_info ['income_money'] + $order_info ['money'] 
+								"money" => $bank_info ['money'] + $fuwu['so_money'],
+								"end_money" => $bank_info ['end_money'] + $fuwu['so_money']
 						);
 						$bank_model->where ( "id='{$bank_info['id']}'" )->save ( $data );
 					}
 					// 记录
-					$bank_info = $bank_model->where ( "bank_id='{$so_info2['bank_id']}'" )->find ();
+					$bank_info = $bank_model->where ( "bank_id='{$fuwu['s_id']}'" )->find ();
 					$data = array (
 							"services_id" => $bank_info ['bank_id'],
-							"income_money" => $bank_info ['income_money'],
-							"pay_money" => $bank_info ['pay_money'],
+							"income_money" => $fuwu['so_money'],
+							"pay_money" => 0,
 							"end_money" => $bank_info ['end_money'],
 							"user_money" => $bank_info ['user_money'],
 							"money" => $bank_info ['money'],
-							"order_id" => $info ['order_id'],
+							"order_id" => $v ['order_id'],
 							"c_time" => time ()
 					);
 					$jl_model = M ( "services_jilu" );
 					$jl_model->add ( $data );
+					*/
 				} else {
 					$data = array (
-							"last_time" => time (),
+							"state" => 6,
+							"l_time" => time () 
+					);
+					$turn_order_model->where ( "id='{$info['id']}'" )->save ( $data );
+					$data = array (
 							"order_status" => 8 
 					);
-					$order_model->where ( "id='{$order_info['id']}'" )->save ( $data );
-					$data = array (
-							"state" => 6 
-					);
-					$model->where ( "id='{$info['id']}'" )->save ( $data );
-					
+					$order_model->where ( "id='{$v['order_id']}'" )->save ( $data );
 					// 修改违章状态
 					$data = array (
 							"is_manage" => 0,
 							"manage_time" => time () 
 					);
 					$endorsement_model = M ( "Endorsement" );
-					$endorsement_model->where ( "id={$order_info['endorsement_id']}" )->save ( $data );
+					$endorsement_model->where ( "id={$v['endorsement_id']}" )->save ( $data );
+					
+					if($info['state'] == 3 or $info['state'] == 4){
+						//扣钱
+						$bank_model = M ( "bank" );
+						$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
+						if (! empty ( $bank_info_older )) {
+							$data = array (
+									"money" => ($bank_info_older ['money'] - $info['money']) > 0 ? ($bank_info_older ['money'] - $info['money']) : 0,
+									"end_money" => ($bank_info_older ['end_money'] - $info['money']) > 0 ? ($bank_info_older ['end_money'] - $info['money']) : 0
+							);
+							$bank_model->where ( "id='{$bank_info_older['id']}'" )->save ( $data );
+						}
+						// 记录
+						$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
+						$data = array (
+								"services_id" => $bank_info_older ['bank_id'],
+								"income_money" => 0,
+								"pay_money" => $info['money'],
+								"end_money" => $bank_info_older ['end_money'],
+								"user_money" => $bank_info_older ['user_money'],
+								"money" => $bank_info_older ['money'],
+								"order_id" => $v ['order_id'],
+								"c_time" => time ()
+						);
+						$jl_model = M ( "services_jilu" );
+						$jl_model->add ( $data );
+					}
 				}
 				//$this->postBizApi($order_info, $user, 1);
 				break;
@@ -639,35 +676,69 @@ class XitongController extends AdminbaseController {
 						'l_time' => time (),
 						'do_time' => time () 
 				);
-				$model->where ( "id='{$info['id']}'" )->save ( $data );
+				$turn_order_model->where ( "id='{$info['id']}'" )->save ( $data );
 				$data = array (
 						"last_time" => time (),
 						"order_status" => 3 
 				);
-				$order_model->where ( "id='{$order_info['id']}'" )->save ( $data );
+				$order_model->where ( "id='{$v['order_id']}'" )->save ( $data );
 				// 评估
 				$services_model = M ( "services" );
-				$services_info = $services_model->where ( "id='{$order_info['services_id']}'" )->find ();
+				$services_info = $services_model->where ( "id='{$v['services_id']}'" )->find ();
 				if (! empty ( $services_info )) {
 					$data = array (
 							"nums" => $services_info ['nums'] + 1 
 					);
-					$services_model->where ( "id='{$order_info['services_id']}'" )->save ( $data );
+					$services_model->where ( "id='{$v['services_id']}'" )->save ( $data );
 				}
+				$bank_model = M ( "bank" );
+				$bank_info = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
+				if (! empty ( $bank_info )) {
+					$data = array (
+							"money" => $bank_info ['money'] + $info['money'],
+							"end_money" => $bank_info ['end_money'] + $info['money']
+					);
+					$bank_model->where ( "id='{$bank_info['id']}'" )->save ( $data );
+				}
+				else{
+					$data = array (
+						"bank_id" => $v['services_id'],
+						"name" => 0,
+						"user_bank" => 0,
+						"user_number" => 0,
+						"money" => $info ['money'],
+						"end_money" => $info ['money'],
+						"user_money" => 0,
+						"create_time" => time ()
+					);
+					$bank_model->add ( $data );
+				}
+				$bank_info = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
+				$data = array (
+					"services_id" => $v['services_id'],
+					"income_money" => $info ['money'],
+					"pay_money" => 0,
+					"end_money" => $bank_info ['end_money'],
+					"user_money" => $bank_info ['user_money'],
+					"money" => $bank_info ['money'],
+					"order_id" => $info ['order_id'],
+					"c_time" => time () 
+				);
+				$jl_model = M ( "services_jilu" );
+				$jl_model->add ( $data );
 				// 推送消息
-				if ($user['channel'] == 0) {
-					$model = new IndexController ();
+				if ($user["is_att"] == 0 && $user['channel'] == 0) {
 					$data = array (
 							'first' => array (
 									'value' => urlencode ( first_key ),
 									'color' => "#000000" 
 							),
 							'keyword1' => array (
-									'value' => urlencode ( "{$order_info ['order_sn']}" ),
+									'value' => urlencode ( "{$v['order_sn']}" ),
 									'color' => '#000000' 
 							),
 							'keyword2' => array (
-									'value' => urlencode ( "{$car['license_number']}" ),
+									'value' => urlencode ( "{$v['license_number']}" ),
 									'color' => '#000000' 
 							),
 							'keyword3' => array (
@@ -680,7 +751,18 @@ class XitongController extends AdminbaseController {
 							) 
 					);
 					include_once 'application/Weixin/Conf/config.php';
-					$model->doSend ( 0, '', $user ['openid'], MUBAN3, URL2, $data );
+					$model = new IndexController ();
+					$msgurl = "/index.php?g=weixin&m=order&a=index"; 
+					if(runEnv == 'production'){
+						$weixin_url = "http://weixin.xiaoxianlink.com" . $msgurl;
+					}
+					elseif(runEnv == 'test'){
+						$weixin_url = "http://wxdev.xiaoxianlink.com" . $msgurl;
+					}
+					else{
+						$weixin_url = "http://wx.xiaoxian.com" . $msgurl;
+					}
+					$model->doSend ( 0, '', $user ['openid'], MUBAN3, $weixin_url, $data );
 				}
 				$this->postBizApi($order_info, $user, 3);
 				break;
@@ -690,7 +772,7 @@ class XitongController extends AdminbaseController {
 						'l_time' => time (),
 						'finish_time' => time () 
 				);
-				$model->where ( "id='{$info['id']}'" )->save ( $data );
+				$turn_order_model->where ( "id='{$info['id']}'" )->save ( $data );
 				/*
 				$data = array (
 						"last_time" => time (),
@@ -770,21 +852,25 @@ class XitongController extends AdminbaseController {
 		return $data;
 	}
 	
-	function screen($code, $s_ids, $e_id) {
-		$endorsement_model = M ( "Endorsement" );
-		$endorsemen_info = $endorsement_model->where ( "id='$e_id'" )->find ();
-		$city = $endorsemen_info ['area'];
+	function find_fuwu($car_id, $code, $money, $points, $area, $exclude_list = null){
+		$log = new Log ();
+		$fuwu = Array();
 		$region_model = M ( "Region" );
 		$where = array (
-				"city" => $city,
+				"city" => $area,
 				"level" => 2,
 				"is_dredge" => 0 
 		);
 		$region = $region_model->where ( $where )->order ( 'id' )->find ();
-		$city_id1 = $region ['id'];
+		if (empty ( $region )) {
+			$city_id1 = 0;
+		}
+		else{
+			$city_id1 = $region ['id'];
+		}
 		
 		$where = array (
-				"id" => $endorsemen_info ['car_id'] 
+				"id" => $car_id
 		);
 		$car_model = M ( "Car" );
 		$car = $car_model->where ( $where )->find ();
@@ -797,54 +883,117 @@ class XitongController extends AdminbaseController {
 		} else {
 			$city_id2 = $region ['id'];
 		}
-		// 筛选服务商
-		$so_model = M ( "Services_order" ); // 1
-		$solist = $so_model->where ( "violation = '$code' and services_id not in ($s_ids) and (code = '$city_id1' or code = '$city_id2')" )->order ( "money asc" )->group ( "services_id" )->limit ( NUMS1 )->select ();
-		$services_model = M ( "Services" ); // 2
-		$where = "state = 0";
-		if (! empty ( $solist )) {
-			foreach ( $solist as $p => $c ) {
-				if ($p == 0) {
-					$where .= " and (id = '{$c['services_id']}'";
-				} else {
-					$where .= " or id = '{$c['services_id']}'";
+		
+		$violation_model = M("violation");
+		$violation = $violation_model->field("money, points")->where("code = '$code'")->find();
+		if(empty($violation) || $violation['state'] == 1){
+			return $fuwu;
+		}
+		
+		$where = "";
+		if(!empty($exclude_list)){
+			$where = "srv.id not in (" . implode(",", $exclude_list) . ") and ";
+		}
+		$s_code = substr($code, 0, 4);
+		
+		$so_model = M(''); // 1.a
+		$so_sql = "select srv.id as services_id, so.id as so_id, so.money from cw_services as srv, cw_services_city as scity, cw_services_code as scode, cw_services_order as so where $where srv.id = scity.services_id and srv.id = scode.services_id and srv.id = so.services_id and srv.state = 0 and srv.grade > 4 and ((scity.code = $city_id1 and scity.state = 0) or (scity.code = $city_id2 and scity.state = 0)) and ((scode.code = '$code' or scode.code = '$s_code') and scode.state = 0 ) and so.violation = '$code' and (so.code = $city_id1 or so.code = $city_id2)group by srv.id order by money asc ";
+		$log->write ( $so_sql );
+		$solist = $so_model->query($so_sql);
+		
+		$sd_model = M(''); // 1.b
+		$sd_sql = "select * from (select dyna.services_id, dyna.id as so_id, ($money + dyna.fee + dyna.point_fee * $points) dyna_fee from cw_services as srv, cw_services_city as scity, cw_services_code as scode, cw_services_dyna as dyna where   $where srv.id = scity.services_id and srv.id = scode.services_id and srv.id = dyna.services_id and srv.state = 0 and srv.grade > 4 and ((scity.code = $city_id1 and scity.state = 0) or (scity.code = $city_id2 and scity.state = 0)) and (scode.code = '$code' or scode.code = '$s_code') and scode.state = 0 and (dyna.code = $city_id1 or dyna.code = $city_id2) ORDER BY dyna_fee ASC) as service_dyna group by services_id order by dyna_fee asc";
+		$log->write ( $sd_sql );
+		$sdlist = $sd_model->query($sd_sql);
+		
+		// we now get the lowest price
+		$lowest_price = -1;
+		$so_id = -1;
+		$so_type = -1;
+		if( ! empty($solist)){
+			$lowest_price = $solist[0]['money'];
+			$so_id = $solist[0]['so_id'];
+			$so_type = 1;
+		}
+		if( ! empty($sdlist)){
+			if($lowest_price > -1 ){
+				if($lowest_price > $sdlist[0]['dyna_fee']){
+					$lowest_price = $sdlist[0]['dyna_fee'];
+					$so_id = $sdlist[0]['so_id'];
+					$so_type = 2;
 				}
 			}
-			$where .= ")";
-			$serviceslist = $services_model->field ( "id" )->where ( $where )->order ( "`grade` desc" )->limit ( NUMS2 )->select ();
-			
-			$order_model = new Model (); // 3
-			$where = "(order_status = 2 or order_status = 3)";
-			$services_id1 = array ();
-			if (! empty ( $serviceslist )) {
-				foreach ( $serviceslist as $p => $c ) {
-					if ($p == 0) {
-						$where .= " and (services_id = '{$c['id']}'";
-					} else {
-						$where .= " or services_id = '{$c['id']}'";
-					}
-					
-					$services_id1 [] = $c ['id'];
-				}
-				$where .= ")";
-				$sql = "SELECT COUNT(*) as nums, `services_id` FROM `cw_order` WHERE $where GROUP BY `services_id` ORDER BY nums";
-				$orderlist = $order_model->query ( $sql );
-				$services_id2 = array ();
-				foreach ( $orderlist as $p => $c ) {
-					$services_id2 [] = $c ['services_id'];
-				}
-				$services = array_diff ( $services_id1, $services_id2 );
-				if (! empty ( $services )) {
-					$services_id = $services [0];
-				} else {
-					$services_id = $orderlist [0] ['services_id'];
-				}
-				// 4
-				$so = $so_model->where ( "violation = '$code' and services_id = '$services_id' and (code = '$city_id1' or code = '$city_id2')" )->order ( "money asc" )->find ();
-				return $so ['id'];
+			else{
+				$lowest_price = $sdlist[0]['dyna_fee'];
+				$so_id = $sdlist[0]['so_id'];
+				$so_type = 2;
 			}
 		}
-		return false;
+		//$log->write ( "lowest_price=". $lowest_price );
+		if($lowest_price == -1){
+			return $fuwu;
+		}
+		
+		$where = "";
+		$firstCondition = false;
+		$services_id_by_money = array ();
+		if( ! empty($solist)){
+			foreach ( $solist as $p => $c ) {
+				if($c['money'] == $lowest_price){
+					if ($firstCondition == false) {
+						$where .= " services_id = {$c['services_id']}";
+						$firstCondition = true;
+					} else {
+						$where .= " or services_id = {$c['services_id']}";
+					}
+					$services_id_by_money[] = $c['services_id'];
+				}
+				else{
+					break;
+				}
+			}
+		}
+		if( ! empty($sdlist)){
+			foreach ( $sdlist as $p => $c ) {
+				if($c['dyna_fee'] == $lowest_price){
+					if ($firstCondition == false) {
+						$where .= " services_id = '{$c['services_id']}'";
+						$firstCondition = true;
+					} else {
+						$where .= " or services_id = '{$c['services_id']}'";
+					}
+					$services_id_by_money[] = $c['services_id'];
+				}
+				else{
+					break;
+				}
+			}
+		}
+		$order_model = M(''); // 2
+		$sql = "SELECT COUNT(*) as nums, `services_id` FROM `cw_order` WHERE $where GROUP BY `services_id` ORDER BY nums";
+		//$log->write ( $sql);
+		$orderlist = $order_model->query ( $sql );
+		$services_id_by_ordernum = array ();
+		foreach ( $orderlist as $p => $c ) {
+			$services_id_by_ordernum [] = $c ['services_id'];
+		}
+		$services = array_diff ( $services_id_by_money, $services_id_by_ordernum );
+		if (! empty ( $services )) {
+			foreach ( $services as $r ) {
+				$services_id = $r;
+				break;
+			}
+		} else {
+			$services_id = $orderlist [0] ['services_id'];
+		}
+		//$log->write ( "services_id=". $services_id );
+		// 3
+		$fuwu['s_id'] = $services_id;
+		$fuwu['so_id'] = $so_id;
+		$fuwu['so_type'] = $so_type;
+		$fuwu['so_money'] = $lowest_price;
+		
+		return $fuwu;
 	}
 	// 违章已处理
 	function e_finish() {
@@ -852,21 +1001,233 @@ class XitongController extends AdminbaseController {
 		$endorsement_model = M ( "Endorsement" );
 		$log_model = M ( "Endorsement_log" );
 		if ($e_id != 0) {
-			$data = array (
-					"manage_time" => time (),
-					"is_manage" => 2 
-			);
-			$endorsement_model->where ( "id = '{$e_id}'" )->save ( $data );
-			$api = new ApiController();
+			// TODO fixme
+			$api = new JiaoyiController();
+			$api->close_endorsement ( $e_id );
 			$api->finish_order ( $e_id );
-			$data = array (
-					"end_id" => $e_id,
-					"state" => 2,
-					"c_time" => time (),
-					"type" => 2 
-			);
-			$log_model->add ( $data );
 		}
 		$this->ajaxReturn ( 1 );
 	}
+	
+	/* start 后台添加银行管理和版本管理*/
+	//银行管理
+	public function yinhang(){
+	    $model = M ('yinhang');
+	    $order = "sort desc";
+	    $count = $model->count ();
+	    $page = $this->page ( $count, 50 );
+	    $roles = $model->field ( "@rownum:=@rownum+1 AS iid,id,sort,bank_name,bank_img,state " )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+	    $this->assign ( "str", $roles );
+	    $this->assign ( "Page", $page->show ( 'Admin' ) );
+	    $this->assign ( "pageIndex", $page->firstRow );
+	    $this->display ();
+	}
+	function yh_add(){
+	    $this->display();
+	}
+	function yhadd_post() {
+	    $sort = $_POST ['sort'];
+	    $bank_name = $_POST ['bank_name'];
+	    $state = $_POST ['state'];
+	    if($sort == ''){
+	        $this->error("排序不能为空！");
+	    }
+	    if($bank_name == ''){
+	        $this->error("银行名称不能为空！");
+	    }
+	    $config = array (
+	        'FILE_UPLOAD_TYPE' => sp_is_sae () ? "Sae" : 'Local', // TODO 其它存储类型暂不考虑
+	        'rootPath' => './' . C ( "UPLOADPATH" ),
+	        'savePath' => './file/',
+	        'maxSize' => 2097152, // 2M
+	        'saveName' => array (
+	            'uniqid',
+	            ''
+	        ),
+	        'exts' => array (
+	            'jpg',
+	            'png',
+	            'jpeg'
+	        ),
+	        'autoSub' => false
+	    );
+	    $upload = new \Think\Upload ( $config ); //
+	    $info = $upload->upload ( $_FILES );
+	        $data = array (
+	            "sort" => $sort,
+	            "bank_name" => $bank_name,
+	            "bank_img" =>  'file/'.$info ['bank_img'] ['savename'],
+	            "state" => strtr ( $state, "，", "," )
+	        );
+	        $model = M ( "yinhang" );
+	        if ($model->add ( $data )) {
+	            $this->success ( "添加成功！" );
+	        } else {
+	            $this->error ( "添加失败！" );
+	        }
+	}
+	/**
+	 * 编辑
+	 */
+	public function yh_edit() {
+	    $id = $_REQUEST['id'];
+	    $model = M ( "yinhang" );
+	    $data = $model->where(array("id" => $id))->find();
+	    $this->assign("data", $data);
+	    $this->display();
+	}
+	
+	/**
+	 * 编辑
+	 */
+	public function yhedit_post() {
+	    $id = $_REQUEST['id'];  
+		$sort = $_POST ['sort'];  
+		$bank_name = $_POST ['bank_name'];  
+		$state = $_POST ['state'];  
+		if($sort == ''){  
+			$this->error("排序不能为空！"); 
+		}  
+		if($bank_name == ''){  
+			$this->error("银行名称不能为空！");  
+		}  
+		$config = array (  
+			'FILE_UPLOAD_TYPE' => sp_is_sae () ? "Sae" : 'Local', // TODO 其它存储类型暂不考虑  
+			'rootPath' => './' . C ( "UPLOADPATH" ),  
+			'savePath' => './file/',  
+			'maxSize' => 2097152, // 2M  
+			'saveName' => array (  
+			 'uniqid',  
+			 ''  
+			),  
+			'exts' => array (  
+			 'jpg',  
+			 'png',  
+			 'jpeg'  
+			),  
+			'autoSub' => false  
+		);  
+		$upload = new \Think\Upload ( $config ); //  
+		$info = $upload->upload ( $_FILES );  
+		$data = array (  
+			"sort" => $sort,  
+			"bank_name" => $bank_name,  
+			"bank_img" =>  'file/'.$info ['bank_img'] ['savename'],  
+			"state" => strtr ( $state, "，", "," )  
+		);  
+		$model = M ( "yinhang" );  
+		if ($model->where ( "id='$id'" )->save ( $data )) {  
+			$this->success("修改成功！", U('xitong/yinhang'));  
+		} else {  
+			$this->error ( "修改失败！" );  
+		}  
+	}
+	/**
+	 * 删除
+	 */
+	public function yh_delete() {
+	    $id = intval(I("get.id"));
+	    $model = M ( "yinhang" );
+	   
+	        $status = $model->delete($id);
+	        if ($status!==false) {
+	            $this->success("删除成功！", U('xitong/yinhang'));
+	        } else {
+	            $this->error("删除失败！");
+	        }
+	    }
+	/**
+	 * 版本管理
+	 */
+	public function version(){
+	    $model = M ('version');
+	    $order = "version desc";
+	    $count = $model->count ();
+	    $page = $this->page ( $count, 50 );
+	    $roles = $model->field ( "@rownum:=@rownum+1 AS iid,id,url,version,extra,is_must,update_time " )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+	    $this->assign ( "str", $roles );
+	    $this->assign ( "Page", $page->show ( 'Admin' ) );
+	    $this->assign ( "pageIndex", $page->firstRow );
+	    $this->display ();
+	}
+	function version_add(){
+	    $this->display();
+	}
+	function versionadd_post() {
+	    $url = $_POST ['url'];
+	    $version = $_POST ['version'];
+	    $extra = $_POST ['extra'];
+	    $is_must = $_POST ['is_must'];
+	    $update_time = $_POST['update_time'];
+	    if($url == ''){
+	        $this->error("下载地址不能为空！");
+	    }
+	    if($version == ''){
+	        $this->error("版本号不能为空！");
+	    }
+	    $data = array (
+	        "url" => $url,
+	        "version" => $version,
+	        "extra" =>  $extra,
+	        "is_must" => $is_must,
+	        "update_time"=>time()
+	    );
+	    $model = M ( "version" );
+	    if ($model->add ( $data )) {
+	        $this->success ( "添加成功！" );
+	    } else {
+	        $this->error ( "添加失败！" );
+	    }
+	}
+	/**
+	 * 修改版本
+	 */
+	public function version_edit() {
+	    $id = $_REQUEST['id'];
+	    $model = M ( "version" );
+	    $data = $model->where(array("id" => $id))->find();
+	    $this->assign("data", $data);
+	    $this->display();
+	}
+	public function versionedit_post() {
+	    $id = $_REQUEST['id'];
+	    $url = $_POST ['url'];
+	    $extra = $_POST ['extra'];
+	    $version = $_POST ['version'];
+	    $is_must = $_POST ['is_must'];
+	    if($url == ''){
+	        $this->error("下载地址不能为空！");
+	    }
+	    if($version == ''){
+	        $this->error("版本号不能为空！");
+	    }
+	    $data = array (
+	        "url" => $url,
+	        "version" => $version,
+	        "extra" =>  $extra,
+	        "is_must" => $is_must,
+	        "update_time"=>time()
+	    );
+	    $model = M ( "version" );
+	    if ($model->where ( "id='$id'" )->save ( $data )) {
+	        $this->success("修改成功！", U('xitong/version'));
+	    } else {
+	        $this->error ( "修改失败！" );
+	    }
+	}
+	/**
+	 * 删除
+	 */
+	public function version_delete() {
+	    $id = intval(I("get.id"));
+	    $model = M ( "version" );
+	
+	    $status = $model->delete($id);
+	    if ($status!==false) {
+	        $this->success("删除成功！", U('xitong/version'));
+	    } else {
+	        $this->error("删除失败！");
+	    }
+	}
+	/* end */
 }

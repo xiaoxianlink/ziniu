@@ -1,0 +1,67 @@
+<admintpl file="header" />
+<meta charset="UTF-8">
+<script type="text/javascript">
+$(document).ready(function(){
+	$('tr').click(function(){
+		$('tr').siblings().removeClass("tr_hover");
+		$(this).addClass("tr_hover");
+	});
+});
+</script>
+<body class="J_scroll_fixed">
+	<div class="wrap J_check_wrap">
+		<div id="cheliang_submit" class="top_div">
+			<form action="{:U('Xitong/stats_view')} " method="post">
+				<div class="query_div" id="elect" style="margin-right: 50px;">
+					<input type="submit" id="submit_query" class="query_btn"
+					value="查询" />
+					<div class="query_div">
+						到
+						<input type="text" class="input length_3 J_date" name="query_end" id="query_end" value="{$query_end}">
+					</div>
+					<div class="query_div">
+						日期从
+						<input type="text" class="input length_3 J_date" name="query_start" id="query_start" value="{$query_start}">
+					</div>
+					<div class="query_div">
+						查询接口
+						<input type="text" class="query_txt" name="query_port"
+							id="query_port" value="{$query_port}" />
+					</div>
+				</div>
+			</form>
+		</div>
+		<table class="table table-hover table-bordered table-list"
+			id="menus-table">
+			<tr>
+				<th>#</th>
+				<th>接口名称</th>
+				<th>日期</th>
+				<th>API调用次数/日</th>
+				<th>API调用累计/月</th>
+				<th>API调用累计/年</th>
+			</tr>
+			<?php $i = 1;?>
+			<?php $i = $pageIndex + $i;?>
+			<foreach name="str" item="vo">
+			<tr>
+				<td>{$i++}</td>
+				<td>{$vo.port}</td>
+				<td>{$vo.day_time}</td>
+				<td>{$vo.day_stats}</td>
+				<td>{$vo.month_stats}</td>
+				<td>{$vo.year_stats}</td>
+			</tr>
+			</foreach>
+		</table>
+		<div class="pagination">{$Page}</div>
+	</div>
+	<script type="text/javascript" src="__ROOT__/statics/js/common.js"></script>
+</body>
+</html>
+
+
+
+
+
+
