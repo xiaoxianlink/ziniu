@@ -88,7 +88,7 @@ $(document).ready(function(){
 				<td>{$vo.port}</td>
 				<td>{$vo.code}</td>
 				<td>{$vo.content}</td>
-				<td><if condition="$vo['state'] eq '0'">自动<elseif condition="$vo['state'] eq '1'"/>手动<else />未知</if></td>
+				<td><if condition="$vo['state'] eq '0'"><font color="red">&frac12;自动</font><elseif condition="$vo['state'] eq '1'"/>手动<else />未知</if></td>
 				<td>{$vo.points}</td>
 				<td>{$vo.money}</td>
 				<td>{$vo.all_nums}</td>
