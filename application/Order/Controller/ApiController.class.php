@@ -14,7 +14,7 @@ class ApiController extends HomeBaseController {
 		$log->write ( "examine_order", 'DEBUG', '', '/data/Logs/xiaoxianlink.com/ziniu/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 		//echo "test";
 		$model = M();
-		$roles = $model->field ( "a.id as order_id,a.pay_sn,a.order_sn,b.id as car_id,b.license_number,c.car_id,c.time,c.area,c.code,c.money,c.points,a.last_time,a.pay_money,a.order_status,a.pay_type,d.id as user_id,d.phone,a.services_id,a.money as order_money,a.endorsement_id" )->table ( "cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "a.order_status = 1 or a.order_status = 2 or a.order_status = 3" )->select ();
+		$roles = $model->field ( "a.id as order_id,a.pay_sn,a.order_sn,a.car_idc.license_number,c.time,c.area,c.code,c.money,c.points,a.last_time,a.pay_money,a.order_status,a.pay_type,d.id as user_id,d.phone,a.services_id,a.money as order_money,a.endorsement_id" )->table ( "cw_order as a" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "a.order_status = 1 or a.order_status = 2 or a.order_status = 3" )->select ();
 		foreach ( $roles as $k => $v ) {
 			$turn_order_model = M ( "turn_order" );
 			$to_list = $turn_order_model->field ( "tos.id,tos.c_time,tos.state,tos.l_time,tos.services_id as s_id,tos.money" )->table ( "cw_turn_order as tos" )->where ( "tos.order_id = '{$v['order_id']}'" )->select ();
@@ -313,7 +313,16 @@ class ApiController extends HomeBaseController {
 		);
 		$car_model = M ( "Car" );
 		$car = $car_model->where ( $where )->find ();
-		$l_nums = mb_substr ( $car ['license_number'], 0, 2, 'utf-8' );
+		
+		$a_class = array("京", "沪", "津", "渝");
+		$l_nums = "";
+		$l_nums_a = mb_substr ( $car ['license_number'], 0, 1, 'utf-8' );
+		if(in_array($l_nums_a, $a_class)){
+			$l_nums = $l_nums_a;
+		}
+		else{
+			$l_nums = mb_substr ( $car ['license_number'], 0, 2, 'utf-8' );
+		}
 		$region_model = M ( "Region" );
 		$region = $region_model->where ( "nums = '$l_nums'" )->find ();
 		$region = $region_model->where ( "city = '{$region['city']}'" )->order ( "id" )->find ();

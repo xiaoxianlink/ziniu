@@ -62,9 +62,9 @@ class JiaoyiController extends AdminbaseController {
 		}
 		$order = "a.last_time $_order";
 		$this->assign ( 'order', $_order );
-		$count = $this->jiaoyi_model->table ( "cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->where ( $where )->count ();
+		$count = $this->jiaoyi_model->table ( "cw_order as a" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->jiaoyi_model->field ( "@rownum:=@rownum+1 AS iid,a.id as order_id,a.pay_sn,a.order_sn,b.license_number,c.time,c.area,c.code,c.money,c.points,a.last_time,a.pay_money,a.order_status,a.pay_type" )->table ( "(SELECT @rownum:=0) r,cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->jiaoyi_model->field ( "a.id as order_id,a.pay_sn,a.order_sn,c.license_number,c.time,c.area,c.code,c.money,c.points,a.last_time,a.pay_money,a.order_status,a.pay_type" )->table ( "cw_order as a" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		//$this->examine_order (); // 查询 订单是否超时
 		foreach ( $roles as $k => $v ) {
 			$turn_order_model = M ();
@@ -90,285 +90,6 @@ class JiaoyiController extends AdminbaseController {
 		$hour = $time / 3600;
 		return 1;
 	}
-	// 检查点单接口
-	public function examine_order() {
-		$log = new Log ();
-		$roles = $this->jiaoyi_model->field ( "a.id as order_id,a.pay_sn,a.order_sn,b.id as car_id,b.license_number,c.car_id,c.time,c.area,c.code,c.money,c.points,a.last_time,a.pay_money,a.order_status,a.pay_type,d.id as user_id,d.phone,a.services_id,a.money as order_money,a.endorsement_id" )->table ( "cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "a.order_status = 1 or a.order_status = 2 or a.order_status = 3" )->select ();
-		foreach ( $roles as $k => $v ) {
-			$turn_order_model = M ( "turn_order" );
-			$to_list = $turn_order_model->field ( "tos.id,tos.c_time,tos.state,tos.l_time,tos.services_id as s_id,tos.money" )->table ( "cw_turn_order as tos" )->where ( "tos.order_id = '{$v['order_id']}'" )->select ();
-			foreach ( $to_list as $c => $p ) {
-				if($p["s_id"] != null){
-					$s_ids[] = $p["s_id"];
-				}
-			}
-			$order_model = M ( "Order" );
-			foreach ( $to_list as $c => $p ) { // 推单状态处理
-				if ($p ['state'] == 0) {
-					$time = jishi1 - (time () - $p ['l_time']);
-					if ($time <= 0) { // 超时
-						$fuwu = $this->find_fuwu($v["car_id"], $v["code"], $v["money"],$v["points"], $v["area"], $s_ids);
-						if (! empty ( $fuwu )) { // 转单
-							$data = array (
-									"state" => 2,
-									"l_time" => time () 
-							);
-							$turn_order_model->where ( "id='{$p['id']}'" )->save ( $data );
-							$data = array (
-									"order_id" => $v ['order_id'],
-									"services_id" => $fuwu ['s_id'],
-									"sod_id" => $fuwu ['so_id'],
-									"so_type" => $fuwu ['so_type'],
-									"money" => $fuwu ['so_money'],
-									"state" => 0,
-									"c_time" => time (),
-									"l_time" => time () 
-							);
-							$turn_order_model->add ( $data );
-							$data = array (
-									"services_id" => $fuwu ['s_id'],
-									"so_id" => $fuwu ['so_id'],
-									"so_type" => $fuwu ['so_type']
-							);
-							$order_model->where ( "id='{$v['order_id']}'" )->save ( $data );
-							
-							$services_model = M ( "services" );
-							$services_info = $services_model->where ( "id='{$fuwu['s_id']}'" )->find ();
-							if (! empty ( $services_info )) {
-								$data = array (
-										"all_nums" => $services_info ['all_nums'] + 1 
-								);
-								$services_model->where ( "id='{$fuwu['services_id']}'" )->save ();
-							}
-							/*
-							// 转钱
-							$bank_model = M ( "bank" );
-							$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
-							if (! empty ( $bank_info_older )) {
-								$data = array (
-										"money" => ($bank_info_older ['money'] - $p['money']) > 0 ? ($bank_info_older ['money'] - $p['money']) : 0,
-										"end_money" => ($bank_info_older ['end_money'] - $p['money']) > 0 ? ($bank_info_older ['end_money'] - $p ['money']) : 0
-								);
-								$bank_model->where ( "id='{$bank_info_older['id']}'" )->save ( $data );
-							}
-							// 记录
-							$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
-							$data = array (
-									"services_id" => $bank_info_older ['bank_id'],
-									"income_money" => 0,
-									"pay_money" => $p['money'],
-									"end_money" => $bank_info_older ['end_money'],
-									"user_money" => $bank_info_older ['user_money'],
-									"money" => $bank_info_older ['money'],
-									"order_id" => $v ['order_id'],
-									"c_time" => time ()
-							);
-							$jl_model = M ( "services_jilu" );
-							$jl_model->add ( $data );
-							
-							$bank_info = $bank_model->where ( "bank_id='{$fuwu['s_id']}'" )->find ();
-							if (! empty ( $bank_info )) {
-								$data = array (
-										"money" => $bank_info ['money'] + $fuwu['so_money'],
-										"end_money" => $bank_info ['end_money'] + $fuwu['so_money']
-								);
-								$bank_model->where ( "id='{$bank_info['id']}'" )->save ( $data );
-							}
-							// 记录
-							$bank_info = $bank_model->where ( "bank_id='{$fuwu['s_id']}'" )->find ();
-							$data = array (
-									"services_id" => $bank_info ['bank_id'],
-									"income_money" => $fuwu['so_money'],
-									"pay_money" => 0,
-									"end_money" => $bank_info ['end_money'],
-									"user_money" => $bank_info ['user_money'],
-									"money" => $bank_info ['money'],
-									"order_id" => $v ['order_id'],
-									"c_time" => time ()
-							);
-							$jl_model = M ( "services_jilu" );
-							$jl_model->add ( $data );
-							*/
-						} else { // 取消订单
-							$data = array (
-									"state" => 6,
-									"l_time" => time () 
-							);
-							$turn_order_model->where ( "id='{$p['id']}'" )->save ( $data );
-							$data = array (
-									"order_status" => 8 
-							);
-							$order_model->where ( "id='{$v['order_id']}'" )->save ( $data );
-							// 修改违章状态
-							$data = array (
-									"is_manage" => 0,
-									"manage_time" => time () 
-							);
-							$endorsement_model = M ( "Endorsement" );
-							$endorsement_model->where ( "id={$v['endorsement_id']}" )->save ( $data );
-							/*
-							//扣钱
-							$bank_model = M ( "bank" );
-							$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
-							if (! empty ( $bank_info_older )) {
-								$data = array (
-										"money" => ($bank_info_older ['money'] - $p['money']) > 0 ? ($bank_info_older ['money'] - $p['money']) : 0,
-										"end_money" => ($bank_info_older ['end_money'] - $p['money']) > 0 ? ($bank_info_older ['end_money'] - $p['money']) : 0
-								);
-								$bank_model->where ( "id='{$bank_info_older['id']}'" )->save ( $data );
-							}
-							// 记录
-							$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
-							$data = array (
-									"services_id" => $bank_info_older ['bank_id'],
-									"income_money" => 0,
-									"pay_money" => $p['money'],
-									"end_money" => $bank_info_older ['end_money'],
-									"user_money" => $bank_info_older ['user_money'],
-									"money" => $bank_info_older ['money'],
-									"order_id" => $v ['order_id'],
-									"c_time" => time ()
-							);
-							$jl_model = M ( "services_jilu" );
-							$jl_model->add ( $data );
-							*/
-						}
-					}
-				} else if ($p ['state'] == 3) {
-					$time = jishi2 - (time () - $p ['l_time']);
-					if ($time <= 0) { // 超时
-						$fuwu = $this->find_fuwu($v["car_id"], $v["code"], $v["money"],$v["points"], $v["area"], $s_ids);
-						if (! empty ( $fuwu )) { // 转单
-							$data = array (
-									"state" => 2,
-									"l_time" => time () 
-							);
-							$turn_order_model->where ( "id='{$p['id']}'" )->save ( $data );
-							$data = array (
-									"order_id" => $v ['order_id'],
-									"services_id" => $fuwu ['s_id'],
-									"sod_id" => $fuwu ['so_id'],
-									"so_type" => $fuwu ['so_type'],
-									"money" => $fuwu ['money'],
-									"state" => 0,
-									"c_time" => time (),
-									"l_time" => time () 
-							);
-							$turn_order_model->add ( $data );
-							$data = array (
-									"services_id" => $fuwu ['s_id'],
-									"so_id" => $fuwu ['so_id'],
-									"so_type" => $fuwu ['so_type']
-							);
-							$order_model->where ( "id='{$v['order_id']}'" )->save ( $data );
-							
-							$services_model = M ( "services" );
-							$services_info = $services_model->where ( "id='{$fuwu ['s_id']}'" )->find ();
-							if (! empty ( $services_info )) {
-								$data = array (
-										"all_nums" => $services_info ['all_nums'] + 1 
-								);
-								$services_model->where ( "id='{$fuwu['s_id']}'" )->save ();
-							}
-							// 转钱
-							$bank_model = M ( "bank" );
-							$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
-							if (! empty ( $bank_info_older )) {
-								$data = array (
-										"money" => ($bank_info_older ['money'] - $p['money']) > 0 ? ($bank_info_older ['money'] - $p['money']) : 0,
-										"end_money" => ($bank_info_older ['end_money'] - $p['money']) > 0 ? ($bank_info_older ['end_money'] - $p['money']) : 0
-								);
-								$bank_model->where ( "id='{$bank_info_older['id']}'" )->save ( $data );
-							}
-							// 记录
-							$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
-							$data = array (
-									"services_id" => $bank_info_older ['bank_id'],
-									"income_money" => 0,
-									"pay_money" => $p['money'],
-									"end_money" => $bank_info_older ['end_money'],
-									"user_money" => $bank_info_older ['user_money'],
-									"money" => $bank_info_older ['money'],
-									"order_id" => $v ['order_id'],
-									"c_time" => time ()
-							);
-							$jl_model = M ( "services_jilu" );
-							$jl_model->add ( $data );
-							/*
-							$bank_info = $bank_model->where ( "bank_id='{$fuwu['s_id']}'" )->find ();
-							if (! empty ( $bank_info )) {
-								$data = array (
-										"money" => $bank_info ['money'] + $fuwu['so_money'],
-										"end_money" => $bank_info ['end_money'] + $fuwu['so_money'] 
-								);
-								$bank_model->where ( "id='{$bank_info['id']}'" )->save ( $data );
-							}
-							// 记录
-							$bank_info = $bank_model->where ( "bank_id='{$fuwu['s_id']}'" )->find ();
-							$data = array (
-									"services_id" => $bank_info ['bank_id'],
-									"income_money" => $fuwu['so_money'],
-									"pay_money" => 0,
-									"end_money" => $bank_info ['end_money'],
-									"user_money" => $bank_info ['user_money'],
-									"money" => $bank_info ['money'],
-									"order_id" => $v ['order_id'],
-									"c_time" => time ()
-							);
-							$jl_model = M ( "services_jilu" );
-							$jl_model->add ( $data );
-							*/
-						} else { // 取消订单
-							$data = array (
-									"state" => 2,
-									"l_time" => time () 
-							);
-							$turn_order_model->where ( "id='{$p['id']}'" )->save ( $data );
-							$data = array (
-									"order_status" => 8 
-							);
-							$order_model->where ( "id='{$v['order_id']}'" )->save ( $data );
-							$data = array (
-									"state" => 6
-							);
-							$turn_order_model->where ( "id='{$p['id']}'" )->save ( $data );
-							// 修改违章状态
-							$data = array (
-									"is_manage" => 0,
-									"manage_time" => time () 
-							);
-							$endorsement_model = M ( "Endorsement" );
-							$endorsement_model->where ( "id={$v['endorsement_id']}" )->save ( $data );
-							//扣钱
-							$bank_model = M ( "bank" );
-							$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
-							if (! empty ( $bank_info_older )) {
-								$data = array (
-										"money" => ($bank_info_older ['money'] - $p['money']) > 0 ? ($bank_info_older ['money'] - $p['money']) : 0,
-										"end_money" => ($bank_info_older ['end_money'] - $p['money']) > 0 ? ($bank_info_older ['end_money'] - $p['money']) : 0
-								);
-								$bank_model->where ( "id='{$bank_info_older['id']}'" )->save ( $data );
-							}
-							// 记录
-							$bank_info_older = $bank_model->where ( "bank_id='{$v['services_id']}'" )->find ();
-							$data = array (
-									"services_id" => $bank_info_older ['bank_id'],
-									"income_money" => 0,
-									"pay_money" => $p['money'],
-									"end_money" => $bank_info_older ['end_money'],
-									"user_money" => $bank_info_older ['user_money'],
-									"money" => $bank_info_older ['money'],
-									"order_id" => $v ['order_id'],
-									"c_time" => time ()
-							);
-							$jl_model = M ( "services_jilu" );
-							$jl_model->add ( $data );
-						}
-					}
-				}
-			}
-		}
-	}
 	
 	function find_fuwu($car_id, $code, $money, $points, $area, $exclude_list = null){
 		$log = new Log ();
@@ -392,7 +113,16 @@ class JiaoyiController extends AdminbaseController {
 		);
 		$car_model = M ( "Car" );
 		$car = $car_model->where ( $where )->find ();
-		$l_nums = mb_substr ( $car ['license_number'], 0, 2, 'utf-8' );
+		
+		$a_class = array("京", "沪", "津", "渝");
+		$l_nums = "";
+		$l_nums_a = mb_substr ( $car ['license_number'], 0, 1, 'utf-8' );
+		if(in_array($l_nums_a, $a_class)){
+			$l_nums = $l_nums_a;
+		}
+		else{
+			$l_nums = mb_substr ( $car ['license_number'], 0, 2, 'utf-8' );
+		}
 		$region_model = M ( "Region" );
 		$region = $region_model->where ( "nums = '$l_nums'" )->find ();
 		$region = $region_model->where ( "city = '{$region['city']}'" )->order ( "id" )->find ();
@@ -555,7 +285,7 @@ class JiaoyiController extends AdminbaseController {
 		}
 		$count = $this->jiaoyi_model->table ( "cw_services as a" )->join ( "cw_bank as b on a.id=b.bank_id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->jiaoyi_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.phone,a.status,b.name,b.user_bank,b.user_number,b.user_money,b.end_money,b.money,a.state,b.bank_id,a.services_sn,b.type" )->table ( "(SELECT @rownum:=0) r,cw_services as a" )->join ( "cw_bank as b on a.id=b.bank_id" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->jiaoyi_model->field ( "a.id,a.phone,a.status,b.name,b.user_bank,b.user_number,b.user_money,b.end_money,b.money,a.state,b.bank_id,a.services_sn,b.type" )->table ( "cw_services as a" )->join ( "cw_bank as b on a.id=b.bank_id" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( 'str', $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$roles_state = $this->jiaoyi_model->field ( "count(a.state) as sum" )->table ( "cw_services as a" )->join ( "cw_bank as b on a.id=b.bank_id" )->group ( "state" )->select ();
@@ -744,7 +474,7 @@ class JiaoyiController extends AdminbaseController {
 			$where = " order_status=$order_status";
 		}
 		if (! empty ( $code )) {
-			$where .= " and b.license_number like '%$code%'";
+			$where .= " and c.license_number like '%$code%'";
 		}
 		if (! empty ( $time_start ) && ! empty ( $time_end )) {
 			$where .= " and (a.last_time between $time_start and $time_end)";
@@ -767,9 +497,9 @@ class JiaoyiController extends AdminbaseController {
 		}
 		$order = "a.last_time $_order";
 		$this->assign ( 'order', $_order );
-		$count = $this->jiaoyi_model->table ( "cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( $where )->count ();
+		$count = $this->jiaoyi_model->table ( "cw_order as a" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->jiaoyi_model->field ( "@rownum:=@rownum+1 AS iid,a.id as order_id,a.pay_sn,a.order_sn,b.license_number,c.time,c.area,c.code,c.money,c.points,a.last_time,a.pay_money,a.money as end_money,a.order_status,a.pay_type,d.id as user_id,d.phone,d.services_sn,a.so_id,a.c_time as o_time" )->table ( "(SELECT @rownum:=0) r,cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->jiaoyi_model->field ( "a.id as order_id,a.pay_sn,a.order_sn,c.license_number,c.time,c.area,c.code,c.money,c.points,a.last_time,a.pay_money,a.money as end_money,a.order_status,a.pay_type,d.id as user_id,d.phone,d.services_sn,a.so_id,a.c_time as o_time" )->table ( "cw_order as a" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		foreach ( $roles as $k => $v ) {
 			$true_order_model = M ();
 			$to_list = $true_order_model->field ( "tos.id,so.id as so_id,s.id as s_id,s.phone,tos.c_time,tos.state,tos.l_time,s.services_sn" )->table ( "cw_turn_order as tos" )->join ( "cw_services_order as so on so.id=tos.sod_id", 'left' )->join ( "cw_services as s on s.id=so.services_id", 'left' )->where ( "tos.order_id = '{$v['order_id']}' and tos.sod_id = '{$v['so_id']}'" )->find ();
@@ -777,9 +507,9 @@ class JiaoyiController extends AdminbaseController {
 		}
 		$this->assign ( 'str', $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
-		$roles_finish = $this->jiaoyi_model->field ( "count(order_status) as counts" )->table ( "cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "order_status=5" )->select ();
-		$roles_undo = $this->jiaoyi_model->field ( "count(order_status) as counts" )->table ( "cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "order_status=7" )->select ();
-		$roles_counts = $this->jiaoyi_model->field ( "count(order_status) as counts" )->table ( "cw_order as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "order_status = 5 or order_status = 7" )->select ();
+		$roles_finish = $this->jiaoyi_model->field ( "count(order_status) as counts" )->table ( "cw_order as a" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "order_status=5" )->select ();
+		$roles_undo = $this->jiaoyi_model->field ( "count(order_status) as counts" )->table ( "cw_order as a" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "order_status=7" )->select ();
+		$roles_counts = $this->jiaoyi_model->field ( "count(order_status) as counts" )->table ( "cw_order as a" )->join ( "cw_endorsement as c on c.id=a.endorsement_id" )->join ( "cw_services as d on a.services_id=d.id" )->where ( "order_status = 5 or order_status = 7" )->select ();
 		$this->assign ( "order_status", array (
 				$roles_counts [0] [counts],
 				$roles_finish [0] [counts],
@@ -841,7 +571,7 @@ class JiaoyiController extends AdminbaseController {
 		$this->assign ( 'order', $_order );
 		$count = $this->jiaoyi_model->table ( "cw_expend as c" )->join ( "cw_bank as b on c.expend_id=b.id" )->join ( "cw_services as a on a.id=b.bank_id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->jiaoyi_model->field ( "@rownum:=@rownum+1 AS iid,c.id as ex_id,a.id,c.please_money,c.please_time,c.operate,c.dispose_user,c.dispose_time,a.phone,c.type,c.bank_state,b.name,c.user_bank,b.user_number,b.user_money,b.end_money,b.money,a.services_sn,c.expend_sn,c.card_number,c.tixian_name" )->table ( "(SELECT @rownum:=0) r,cw_expend as c" )->join ( "cw_bank as b on c.expend_id=b.id" )->join ( "cw_services as a on a.id=b.bank_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->jiaoyi_model->field ( "c.id as ex_id,a.id,c.please_money,c.please_time,c.operate,c.dispose_user,c.dispose_time,a.phone,c.type,c.bank_state,b.name,c.user_bank,b.user_number,b.user_money,b.end_money,b.money,a.services_sn,c.expend_sn,c.card_number,c.tixian_name" )->table ( "cw_expend as c" )->join ( "cw_bank as b on c.expend_id=b.id" )->join ( "cw_services as a on a.id=b.bank_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		/* start*/
 		foreach($roles as $k=>$r){
 		    $roles[$k]['expend_sn'] = $r['id'] . $r['ex_id'] . time();
@@ -897,7 +627,7 @@ class JiaoyiController extends AdminbaseController {
 		}
 		$count = $this->jiaoyi_model->table ( "cw_user_coupon as b" )->join ( "cw_coupon as a on b.coupon_id=a.id" )->join ( "cw_user as c on b.user_id=c.id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->jiaoyi_model->field ( "@rownum:=@rownum+1 AS iid,a.state,a.id,a.name,a.condition,a.money,a.start_time,a.expiration_time,c.username,b.is_used,b.use_time,b.card" )->table ( "(SELECT @rownum:=0) r,cw_user_coupon as b" )->join ( "cw_coupon as a on b.coupon_id=a.id" )->join ( "cw_user as c on b.user_id=c.id" )->where ( $where )->order ( "b.id desc" )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->jiaoyi_model->field ( "a.state,a.id,a.name,a.condition,a.money,a.start_time,a.expiration_time,c.username,b.is_used,b.use_time,b.card" )->table ( "cw_user_coupon as b" )->join ( "cw_coupon as a on b.coupon_id=a.id" )->join ( "cw_user as c on b.user_id=c.id" )->where ( $where )->order ( "b.id desc" )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->assign ( 'str', $roles );
 		$this->assign ( "pageIndex", $page->firstRow );
@@ -998,7 +728,7 @@ class JiaoyiController extends AdminbaseController {
 		$this->assign ( 'order', $_order );
 		$count = $this->jiaoyi_model->table ( "cw_order as o" )->join ( "cw_turn_order as tod on o.id = tod.order_id" )->join ( "cw_services as s on s.id = o.services_id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->jiaoyi_model->field ( "o.order_sn,o.services_id,s.phone,tod.c_time,tod.order_id,tod.id,s.services_sn,tod.sod_id,o.order_status,c.license_number,e.time as e_time,e.area as e_area,e.code as e_code,e.money as e_money,e.points as e_points,o.pay_money,tod.l_time,tod.state" )->table ( "cw_order as o" )->join ( "cw_endorsement as e on e.id = o.endorsement_id" )->join ( "cw_car as c on c.id = o.car_id" )->join ( "cw_turn_order as tod on o.id = tod.order_id" )->join ( "cw_services as s on s.id = o.services_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->jiaoyi_model->field ( "o.order_sn,o.services_id,s.phone,tod.c_time,tod.order_id,tod.id,s.services_sn,tod.sod_id,o.order_status,e.license_number,e.time as e_time,e.area as e_area,e.code as e_code,e.money as e_money,e.points as e_points,o.pay_money,tod.l_time,tod.state" )->table ( "cw_order as o" )->join ( "cw_endorsement as e on e.id = o.endorsement_id" )->join ( "cw_turn_order as tod on o.id = tod.order_id" )->join ( "cw_services as s on s.id = o.services_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		foreach ( $roles as $k => $v ) {
 			$roles [$k] ['sod_id'] = $v ['order_sn'] . substr ( $v ['c_time'], - 2 ) . $v ['services_id'];
 			$tod_model = M ( "turn_order" );

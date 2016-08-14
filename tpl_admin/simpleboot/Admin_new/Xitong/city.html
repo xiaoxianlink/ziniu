@@ -27,19 +27,6 @@
 }
 </style>
 <script type="text/javascript">
-	$(function() {
-		$('#city_add').hide();
-		$('#city_link').click(function() {
-			$('body').append('<div class="mask" id="mask"></div>');
-			$('#city_add').css('left', Math.ceil(($('body').width()) / 5) + 'px');
-			$('#city_add').css('top', Math.round($(this).position().top) + 'px');
-			$('#city_add').show();
-		});
-		$('.closebtn').click(function() {
-			$('#city_add').hide();
-			$('#mask').remove();
-		});
-	});
 	function order(order) {
 		 if (order=='desc') {
 			 order = 'asc';
@@ -68,10 +55,14 @@ $(document).ready(function(){
 </script>
 <body class="J_scroll_fixed">
 	<div class="wrap J_check_wrap">
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="{:U('Xitong/city')}">开通城市</a></li>
+			<li><a href="{:U('Xitong/city_cxy')}">车行易查询条件</a></li>
+			<li><a href="{:U('Xitong/city_icar')}">爱车坊查询条件</a></li>
+		</ul>
 		<div id="cheliang_submit" class="top_div">
 			<form action="{:U('Xitong/city')} " method="post">
-				<input type="button" id="city_link" class="query_btn"
-					style="background: #f77462; width: 150px;" value="添加城市" /> <input
+				<input
 					type="submit" id="cheliang_submit_input" class="query_btn"
 					value="查询" />
 				<div class="query_div" id="elect" style="margin-right: 50px;">
@@ -96,147 +87,45 @@ $(document).ready(function(){
 			id="menus-table">
 			<tr>
 				<th>#</th>
-				<th onclick="order('{$order}')">省份编码<?php if ($order == 'desc'){?>↓<?php }else{ ?>↑<?php } ?></th>
+				<th>省份ID</th>
 				<th>省份名称</th>
-				<th>省份简称</th>
-				<th>城市编码</th>
+				<th>城市ID</th>
 				<th>城市名称</th>
-				<th>车行易CityID</th>
-				<th>车首页CityID</th>
-				<th>爱车坊CityID</th>
-				<th>车牌头前两位</th>
-				<th>车行易发动机号位数</th>
-				<th>车行易VIN(车架)位数</th>
-				<th>车首页发动机号位数</th>
-				<th>车首页VIN(车架)位数</th>
-				<th>爱车坊发动机号位数</th>
-				<th>爱车坊VIN(车架)位数</th>
+				<th>车牌头</th>
 				<th>是否开通</th>
+				<th>车行易是否可用</th>
+				<th>车行易同步时间</th>
+				<th>爱车坊是否可用</th>
+				<th>爱车坊同步时间</th>
 			</tr>
 			<?php $i = 1;?>
 			<?php $i = $pageIndex + $i;?>
 			<foreach name="str" item="vo">
 			<tr>
 				<td>{$i++}</td>
-				<td>{$vo.sf_id}</td>
+				<td>{$vo.gb_code_p}</td>
 				<td>{$vo.province}</td>
-				<td>{$vo.abbreviation}</td>
-				<td>{$vo.id}</td>
-				<td>{$vo.city}</td>
 				<td>{$vo.gb_code_c}</td>
-				<td>{$vo.code}</td>
-				<td>{$vo.acode}</td>
+				<td>{$vo.city}</td>
 				<td>{$vo.nums}</td>
-				<td>{$vo.cxy_engine_nums}</td>
-				<td>{$vo.cxy_frame_nums}</td>
-				<td>{$vo.c_engine_nums}</td>
-				<td>{$vo.c_frame_nums}</td>
-				<td>{$vo.engine_nums}</td>
-				<td>{$vo.frame_nums}</td>
 				<td class="iftd"><if condition="$vo['is_dredge'] neq 0"> <a
 						onclick="city_update('{$vo.id}','{$vo.is_dredge}')" href="#">是</a><a style="background: #f77462; color: #fff;">否</a>
 					<else />
 					<a style="background: #66d99f; color: #fff;">是</a><a
 						onclick="city_update('{$vo.id}','{$vo.is_dredge}')" href="#">否</a></if>
 				</td>
+				<td>
+					<if condition="isset($vo['cxy_frame_nums'])">是<else/><a style="background: #f77462; color: #fff;">否</a></if>
+				</td>
+				<td><if condition="isset($vo['cxy_time'])">{$vo.cxy_time|date='Y-m-d H:i:s',###}</if></td>
+				<td>
+					<if condition="isset($vo['icar_frame_nums'])">是<else/><a style="background: #f77462; color: #fff;">否</a></if>
+				</td>
+				<td><if condition="isset($vo['icar_time'])">{$vo.icar_time|date='Y-m-d H:i:s',###}</if></td>
 			</tr>
 			</foreach>
 		</table>
 		<div class="pagination">{$Page}</div>
-		<div id="city_add">
-			<div class="city_top">
-				<span class="city_span">添加城市</span><a href="{:U('Xitong/city')}"
-					class="city_close closebtn">X</a>
-			</div>
-			<form method="post" class="form-horizontal J_ajaxForm"
-				action="{:U('Xitong/city_add')}">
-				<table id="city_tab1" width="100%">
-					<tr>
-						<td class="td1">省份名称</td>
-						<td class="td2"><input type="text" class="input"
-							name="province" id="app" value=""></td>
-						<td class="td1">省份简称</td>
-						<td class="td2"><input type="text" class="input"
-							name="abbreviation" id="model" value=""></td>
-					</tr>
-					<tr>
-						<td class="td1">城市名称</td>
-						<td class="td2"><input type="text" class="input" name="city"
-							id="model" value=""></td>
-						<td class="td1">是否开通</td>
-						<td class="td2"><input type="radio" class="input"
-							name="is_dredge" value="0" checked="checked"> 是 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input
-							type="radio" class="input" name="is_dredge" value="1"
-							checked="checked"> 否</td>
-					</tr>
-					<tr>
-						<td class="td1">车行易CityID</td>
-						<td class="td2"><input type="text" class="input" name="cxy_code"
-							id="cxy_code" value=""></td>
-						<td class="td1">车首页CityID</td>
-						<td class="td2"><input type="text" class="input"
-							name="code" id="code" value=""></td>
-					</tr>
-					
-					<tr>
-						<td class="td1">爱车坊CityID</td>
-						<td class="td2"><input type="text" class="input" name="acode"
-							id="acode" value=""></td>
-						<td class="td1">车牌头前两位</td>
-						<td class="td2"><input type="text" class="input" name="nums"
-							id="action" value=""></td>
-					</tr>
-				</table>
-				<table id="city_tab2">
-					<tr>
-						<td class="td1">车行易发动机号位数</td>
-						<td><input type="text" class="input" name="cxy_engine_nums"
-							id="action" value=""></td>
-						<td class="td3">需要输入发动机号尾数（"99": 全部输入，"0":
-							不需要输入，其他的显示几位输入发动机号后面几位）</td>
-					</tr>
-					<tr>
-						<td class="td1">车行易VIN(车架)位数</td>
-						<td><input type="text" class="input" name="cxy_frame_nums"
-							id="action" value=""></td>
-						<td class="td3">需要输入车架号位数（"99": 全部输入，"0":
-							不需要输入，其他的显示几位输入车架号后面几位）</td>
-					</tr>
-					<tr>
-						<td class="td1">车首页发动机号位数</td>
-						<td><input type="text" class="input" name="c_engine_nums"
-							id="action" value=""></td>
-						<td class="td3">需要输入发动机号尾数（"-1": 全部输入，"0":
-							不需要输入，其他的显示几位输入发动机号后面几位）</td>
-					</tr>
-					<tr>
-						<td class="td1">车首页VIN(车架)位数</td>
-						<td><input type="text" class="input" name="c_frame_nums"
-							id="action" value=""></td>
-						<td class="td3">需要输入车架号位数（"-1": 全部输入，"0":
-							不需要输入，其他的显示几位输入车架号后面几位）</td>
-					</tr>
-					<tr>
-						<td class="td1">爱车坊发动机号位数</td>
-						<td><input type="text" class="input" name="engine_nums"
-							id="action" value=""></td>
-						<td class="td3">需要输入发动机号尾数（"-1": 全部输入，"0":
-							不需要输入，其他的显示几位输入发动机号后面几位）</td>
-					</tr>
-					<tr>
-						<td class="td1">爱车坊VIN(车架)位数</td>
-						<td><input type="text" class="input" name="frame_nums"
-							id="action" value=""></td>
-						<td class="td3">需要输入车架号位数（"-1": 全部输入，"0":
-							不需要输入，其他的显示几位输入车架号后面几位）</td>
-					</tr>
-				</table>
-				<div>
-					<input type="submit" style="background:#66d99f;" class="query_btn" value="添加" /> <input
-						type="button" style="background:#ffa600;" class="query_btn closebtn" value="取消" />
-				</div>
-			</form>
-		</div>
 	</div>
 </body>
 </html>

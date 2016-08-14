@@ -1,0 +1,112 @@
+<admintpl file="header" />
+<meta charset="UTF-8">
+<style type="text/css">
+#mask{
+	position:fixed;
+}
+.mask{
+	left:0;
+	top:;
+	right:0;
+	bottom:0;
+	width:100%;
+	height:100%;
+	background:#000;
+	filter:alpha(opacity=30);
+	opacity:.3;
+	z-index:999;
+}
+#city_add{
+	position:absolute;	
+	width:60%;;
+	height:100%;
+	margin-top:80px;
+	background:#EDF2F4;
+	border-radius:5px;
+	z-index:1100;
+}
+</style>
+<script type="text/javascript">
+	$(function() {
+		$('#city_add').hide();
+		$('#city_link').click(function() {
+			$('body').append('<div class="mask" id="mask"></div>');
+			$('#city_add').css('left', Math.ceil(($('body').width()) / 5) + 'px');
+			$('#city_add').css('top', Math.round($(this).position().top) + 'px');
+			$('#city_add').show();
+		});
+		$('.closebtn').click(function() {
+			$('#city_add').hide();
+			$('#mask').remove();
+		});
+	});
+	function order(order) {
+		 if (order=='desc') {
+			 order = 'asc';
+		 } else {
+			 order = 'desc';
+		 }
+		 var province_name = $("#province_name").val();
+		 window.location.href="{:U('Xitong/city')}&order="+order+"&province_name="+province_name; 
+	 }
+	function city_update(id, is_dredge) {
+		$.post('{:U("Xitong/city_update")}', {
+			id : id,
+			is_dredge : is_dredge
+		}, function(data) {
+			location.reload();
+		});
+	}
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('tr').click(function(){
+		$('tr').siblings().removeClass("tr_hover");
+		$(this).addClass("tr_hover");
+	});
+});
+</script>
+<body class="J_scroll_fixed">
+	<div class="wrap J_check_wrap">
+		<ul class="nav nav-tabs">
+			<li><a href="{:U('Xitong/city')}">开通城市</a></li>
+			<li><a href="{:U('Xitong/city_cxy')}">车行易查询条件</a></li>
+			<li class="active"><a href="{:U('Xitong/city_icar')}">爱车坊查询条件</a></li>
+		</ul>
+		<table class="table table-hover table-bordered table-list"
+			id="menus-table">
+			<tr>
+				<th>#</th>
+				<th>城市ID</th>
+				<th>城市名称</th>
+				<th>爱车坊CityID</th>
+				<th>爱车坊发动机号位数</th>
+				<th>爱车坊VIN(车架)位数</th>
+				<th>needEngine</th>
+				<th>needFrame</th>
+			</tr>
+			<?php $i = 1;?>
+			<?php $i = $pageIndex + $i;?>
+			<foreach name="str" item="vo">
+			<tr>
+				<td>{$i++}</td>
+				<td>{$vo.gb_code_c}</td>
+				<td>{$vo.province}{$vo.city}</td>
+				<td>{$vo.icar_code}</td>
+				<td>{$vo.icar_engine_nums}</td>
+				<td>{$vo.icar_frame_nums}</td>
+				<td>{$vo.icar_need_engine}</td>
+				<td>{$vo.icar_need_frame}</td>
+			</tr>
+			</foreach>
+		</table>
+		<div class="pagination">{$Page}</div>
+	</div>
+</body>
+</html>
+
+
+
+
+
+

@@ -13,22 +13,90 @@ use Think\Log;
 
 class IndexController extends HomeBaseController {
 
+	protected $a_class;
+	
+	function _initialize() {
+		parent::_initialize();
+		$this->a_class = array("粤", "冀", "陕", "吉", "京", "沪", "苏", "鄂","琼", "渝", "甘", "黑", "宁", "青", "贵", "新", "浙", "皖", "湘");
+	}
+
 	public function chexingyi(){
 		$url = "http://chaxun.cx580.com:9008/InputsCondition.aspx";
 		$output = $this->invokeHttpApi($url);
 		$json_info = json_decode($output, true);
-		$region_model = M ( "Region" );
-		foreach ( $json_info as $province ) {
-			//echo "+" . $province['ProvinceName'] . "_" . $province['ProvinceID'] . "<br>";
-			foreach ( $province["Cities"] as $city ) {
-				$data = array (
-					"cxy_frame_nums" => $city['CarCodeLen'],
-					"cxy_engine_nums" => $city['CarEngineLen']
-					);
-				$region_model -> where ( "gb_code_c = {$city['CityID']}" ) ->save($data);
+		$has_error = 0;
+		if(empty($output)){
+			$has_error = -9999;
+		}
+		$json_error = json_last_error();
+		if($json_error != JSON_ERROR_NONE){
+			$has_error = -9998;
+		}
+		if( $has_error == 0){
+			$now = time();
+			$region_model = M ( "Region" );
+			foreach ( $json_info as $province ) {
+				//echo "+" . $province['ProvinceName'] . "_" . $province['ProvinceID'] . "<br>";
+				foreach ( $province["Cities"] as $city ) {
+					$data = array (
+						"cxy_time" => $now,
+						"cxy_frame_nums" => $city['CarCodeLen'],
+						"cxy_engine_nums" => $city['CarEngineLen']
+						);
+					$ret = $region_model -> where ( "gb_code_c = {$city['CityID']}" ) ->save($data);
+					if($ret == false || $ret == 0){
+						$data["gb_code_c"] = $city['CityID'];
+						$ret = $region_model -> where ( "city = '{$city['Name']}'" ) ->save($data);
+					}
+				}
+			}
+			$region_model -> execute ( "update __TABLE__ set cxy_frame_nums = null, cxy_engine_nums = null where cxy_time < $now");
+		}
+	}
+	
+	public function icar(){
+		$url = "http://120.26.57.239/api/getVoiQueryConfig";
+		$token = $this->get_icar_token ();
+		if ($token != '' && $token != null) {
+			$header = array (
+					"token: $token" 
+				);
+			$output = $this->invokeHttpApi ( $url , null, $header);
+			$log = new Log ();
+			$log->write ( "icar:" . $output, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+			$json_info = json_decode($output, true);
+			$has_error = 0;
+			if(empty($output)){
+				$has_error = -9999;
+			}
+			$json_error = json_last_error();
+			if($json_error != JSON_ERROR_NONE){
+				$has_error = -9998;
+			}
+			if( $has_error == 0){
+				$now = time();
+				$region_model = M ( "Region" );
+				foreach ( $json_info["data"] as $province ) {
+					//echo $province['province'] . "<br>";
+					foreach ( $province["cities"] as $city ) {
+						$data = array (
+							"icar_time" => $now,
+							"icar_need_engine" => $city['needEngine'],
+							"icar_engine_nums" => $city['engineLen'],
+							"icar_need_frame" => $city['needFrame'],
+							"icar_frame_nums" => $city['frameLen']
+							);
+						//echo "+" . $city['city'] . "_" . $city['cityCode'] . "_" . $city['frameLen'] . "_" . $city['engineLen'] . "<br>";
+						$ret = $region_model -> where ( "icar_code = '{$city['cityCode']}'" ) ->save($data);
+						if($ret == false || $ret == 0){
+							$data["icar_code"] = $city['cityCode'];
+							$ret = $region_model -> where ( "city = '{$city['city']}'" ) ->save($data);
+						}
+					}
+				}
+				$region_model -> execute ( "update __TABLE__ set icar_need_engine = null, icar_engine_nums = null, icar_need_frame = null, icar_frame_nums = null where icar_time < $now");
 			}
 		}
-		exit;
 	}
 	
 	public function stats(){
@@ -128,6 +196,47 @@ class IndexController extends HomeBaseController {
 			$stats_model->add($data);
 		}
 	}
+	
+	function close_endorsement_commit(){
+		$now = time();
+		$now_168 = $now - 48 * 3600; 
+		$end_model = M ( "Endorsement" );
+		$ends = $end_model->field("e.*")->table("cw_endorsement as e ")->join("cw_order as o on e.id = o.endorsement_id", "left")->where ("e.is_manage = 0 and e.close_confirm = 1 and e.close_time <= $now_168 and o.id is null")->limit(100)->select();
+		foreach ( $ends as $k => $v ) {
+			$end_id = $v["id"];
+			$data = array(
+				"is_manage" => 2,
+				"manage_time" => $now
+			);
+			$end_model->where("id=$end_id")->save($data);
+			
+			$log_model = M ( "Endorsement_log" );
+			$data = array (
+					"end_id" => $end_id,
+					"state" => 2,
+					"log_id" => $v["close_query_no"],
+					"c_time" => $now,
+					"type" => 2 
+			);
+			$log_model->add ( $data );
+			$this->push_confirm($end_id);
+		}
+	}
+	
+	function close_endorsement_prepare($license_number, $query_no, $cxy_city = 0, $exclude_list = null){
+		$endorsement_model = M ( "Endorsement" );
+		$where = "license_number = '$license_number' and is_manage <> 2 and close_confirm = 0 and cxy_city = $cxy_city";
+		if(!empty($exclude_list)){
+			$where .= " and id not in (" . implode(",", $exclude_list) . ")";
+		}
+		$now = time();
+		$sql = " update __TABLE__ set close_confirm = 1, close_query_no = $query_no, close_time = $now where " . $where ;
+		$log = new Log ();
+		$log->write ( "cheyixing: " . $sql, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+		$num = $endorsement_model->execute ( $sql );
+		$log->write ( "cheyixing: " . $num, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+		return $num;
+	}
 
 	public function week() {
 		$prefer = $_REQUEST['prefer'];
@@ -158,60 +267,80 @@ class IndexController extends HomeBaseController {
 		$week = date ( "w" );
 		$num = $car_array [$week];
 		$car_model = M ( "Car" );
-		$car = $car_model->where ( "right(license_number,1) in ($num) and scan_state = 1" )->limit ( $count . ',' . timing_count )->select ();
-		if (empty ( $car )) {
-			return 0; // 查完了
-			exit ();
+		$cars = $car_model->where ( "right(license_number,1) in ($num) and scan_state = 1" )->limit ( $count . ',' . timing_count )->select ();
+		if (!empty ( $cars )) {
+			$i = 0;
+			foreach ( $cars as $k => $v ) {
+				$i++;
+				$result = $this->scan_api($v, 0, $prefer);
+				$data = array (
+						"nums" => $count + $i 
+				);
+				$timing_model->where ( "id='$id'" )->save ( $data );
+			}
+			return 1;
 		}
-		$i = 0;
-		foreach ( $car as $k => $v ) {
-			$i++;
-			$result = $this->scan_api($v, 0, $prefer);
-			$data = array (
-					"nums" => $count + $i 
-			);
-			$timing_model->where ( "id='$id'" )->save ( $data );
-		}
-		return 1;
-		exit ();
-	}
-	
-	function close_endorsement_commit(){
-		$now = time();
-		$now_168 = $now - 168 * 3600; 
-		$end_model = M ( "Endorsement" );
-		$ends = $end_model->field("e.*")->table("cw_endorsement as e ")->join("cw_order as o on e.id = o.endorsement_id", "left")->where ("e.is_manage = 0 and e.close_confirm = 1 and e.close_time <= $now_168 and o.id is null")->limit(100)->select();
-		foreach ( $ends as $k => $v ) {
-			$end_id = $v["id"];
-			$data = array(
-				"is_manage" => 2,
-				"manage_time" => $now
-			);
-			$end_model->where("id=$end_id")->save($data);
-			
-			$log_model = M ( "Endorsement_log" );
-			$data = array (
-					"end_id" => $end_id,
-					"state" => 2,
-					"c_time" => $now,
-					"type" => 2 
-			);
-			$log_model->add ( $data );
-			$this->push_confirm($end_id);
+		else{
+			$this->retry();
 		}
 	}
 	
-	function close_endorsement_prepare($car_id, $query_no, $exclude_list = null){
-		$endorsement_model = M ( "Endorsement" );
-		$where = "car_id = $car_id and is_manage <> 2 and close_confirm = 0";
-		if(!empty($exclude_list)){
-			$where .= " and id not in (" . implode(",", $exclude_list) . ")";
-		}
-		$now = time();
-		$sql = " update __TABLE__ set close_confirm = 1, close_query_no = $query_no, close_time = $now where " . $where ;
+	function retry(){
 		$log = new Log ();
-		$log->write ( "cheyixing: " . $sql, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
-		$endorsement = $endorsement_model->execute ( $sql );
+		$today = strtotime(date("Ymd"));
+		$retry_model = M("");
+		$retry_cars = $retry_model->query("select c.*,r.id as rid, r.port,r.city from cw_endorsement_retry as r join cw_car as c on r.car_id = c.id where c.scan_state = 1 and r.c_time >= $today order by r.retry_cnt, r.id limit ". timing_count);
+		if (!empty ( $retry_cars )) {
+			$lock = dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/data/runtime/retry.' . date ( 'y_m_d' ) . '.lock';
+			//$log->write ( "" .$lock, '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+			if(file_exists($lock)){
+				$time = file_get_contents($lock);
+				$log->write ( "an retry is running: $time", 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+				return 0;
+			}
+			$time = time();
+			$r = file_put_contents($lock, $time, LOCK_EX);
+			$log->write ( "an retry begin: $time, $r", 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+			foreach ( $retry_cars as $k => $car ) {
+				$result = -1;
+				if($car['port'] == api_chexingyi){
+					$special = true;
+					if(!empty($car['city'])){
+						$region_model = M ( "Region" );
+						$region = $region_model->where ( "city = '{$car['city']}' and level = 2" )->find ();
+					}
+					else{
+						$license_number = $car ['license_number'];
+						$a_group = array("京", "沪", "津", "渝");
+						$l_nums_a = mb_substr ( $license_number, 0, 1, 'utf-8' );
+						if(in_array($l_nums_a, $a_group)){
+							$l_nums = $l_nums_a;
+						}
+						else{
+							$l_nums = mb_substr ( $license_number, 0, 2, 'utf-8' );
+						}
+						$region_model = M ( "Region" );
+						$region = $region_model->where ( "nums = '$l_nums' and level = 2" )->find ();
+						$special = false;
+					}
+					$result = $this->scan_api_chexingyi_one($car, $region, $special, 2);
+				}
+				elseif($car['port'] == api_icar){
+					$region_model = M ( "Region" );
+					$region = $region_model->where ( "city = '{$car['city']}' and level = 2" )->find ();
+					$result = $this->scan_api_icar_one($car, $region, 2);
+				}
+				else{
+				}
+				if($result < 0){
+					$retry_model->execute("update cw_endorsement_retry set retry_cnt = retry_cnt + 1 where id = {$car['rid']}");
+				}
+			}
+			$r = unlink($lock);
+			$log->write ( "an retry finish: $time, $r", 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+			return 1;
+		}
+		return 0;
 	}
 
 	public function index() {
@@ -222,37 +351,83 @@ class IndexController extends HomeBaseController {
 		$car = $car_model->where ( "id = $car_id" )->find ();
 		
 		$result = $this->scan_api($car, 1, $prefer);
-		if($result > 0){
-			$data = array (
-					"last_time" => time () 
-			);
-			$car_model->where ( "id = '$car_id'" )->save ( $data );
-			return $result;
-		}
-		return 0;
-		exit;
+		echo $result;
 	}
 	
 	function scan_api($car, $scan_type = 1, $prefer = null){
+		$log = new Log ();
 		$result = -1;
 		
-		if(runEnv == 'production' || $prefer == 'chexingyi'){
-			echo "chexingyi";
-			$result = $this->scan_api_chexingyi($car, $scan_type);
+		$car_id = $car ['id'];
+		$license_number = $car ['license_number'];
+
+		$a_group = array("京", "沪", "津", "渝");
+		$l_nums_a = mb_substr ( $license_number, 0, 1, 'utf-8' );
+		if(in_array($l_nums_a, $a_group)){
+			$l_nums = $l_nums_a;
 		}
 		else{
-			echo "cheshouye";
-			$result = $this->scan_api_cheshouye($car, $scan_type);
+			$l_nums = mb_substr ( $license_number, 0, 2, 'utf-8' );
 		}
-		/*
-		echo "chexingyi";
-		$result = $this->scan_api_chexingyi($car, $scan_type);
-		*/
+		$region_model = M ( "Region" );
+		$region = $region_model->where ( "nums = '$l_nums' and level = 2" )->find ();
+		$special = true;
+		if(! empty ( $region )){
+			if(in_array($l_nums_a, $this->a_class )){
+				$special = false;
+			}
+		}
+		$primary_cxy = true;
+		try{
+			$result = $this->scan_api_chexingyi_one($car, $region, $special, $scan_type);
+		}
+		catch (\Exception $e) {
+			$log->write ( "car:" . $car["id"]. ", region:" . $region['city'] . ", scan_type:" . $scan_type .", cheyixing:" . $e->getMessage(), 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+		}
 		if($result < 0){
-			echo "icar";
-			$result = $this->scan_api_icar($car, $scan_type);
+			try{
+				$primary_cxy = false;
+				$result = $this->scan_api_icar_one($car, $region, $scan_type);
+			}
+			catch (\Exception $e) {
+				$log->write ( "car:" . $car_id. ", region:" . $region['city'] . ", scan_type:" . $scan_type .", icar:" . $e->getMessage(), 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+			}
 		}
-		return $result;
+		
+		$result_s = 0;
+		$model = M ();
+		$list = $model->table ( "cw_user_car as uc" )->join ( "cw_user as u on u.id = uc.user_id" )->field ( "u.city" )->where ( "uc.car_id='{$car['id']}'" )->group ( "u.city" )->select ();
+		foreach ( $list as $u ) {
+			if ($u ['city'] != '' && $u ['city'] != null && $u ['city'] != $region ['city']) {
+				$region_s = $region_model->where ( "city = '{$u['city']}' and level = 2" )->find ();
+				if(! empty ( $region_s )){
+					if(!in_array($region_s['abbreviation'], $this->a_class ) || !in_array($l_nums_a, $this->a_class ) || $primary_cxy != true){
+						$r = -1;
+						try{
+							$r = $this->scan_api_chexingyi_one($car, $region_s, true, $scan_type);
+						}
+						catch (\Exception $e) {
+							$log->write ( "car:" . $car_id. ", region:" . $region['city'] . ", scan_type:" . $scan_type .", cheyixing:" . $e->getMessage(), 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+						}
+						if($r < 0){
+							try{
+								$r = $this->scan_api_icar_one($car, $region_s, $scan_type);
+							}
+							catch (\Exception $e) {
+								$log->write ( "car:" . $car_id. ", region:" . $region['city'] . ", scan_type:" . $scan_type .", icar:" . $e->getMessage(), 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+							}
+						}
+						if($r > 0 ){
+							$result_s = 1;
+						}
+					}
+				}
+			}
+		}
+		if($result < 1 && $result_s < 1){
+			return -1;
+		}
+		return 1;
 	}
 	
 	function scan_api_chexingyi($car, $scan_type = 1){
@@ -263,13 +438,11 @@ class IndexController extends HomeBaseController {
 			$l_nums = '桂A';
 		}
 		
-		$a_class = array("粤", "冀", "陕", "吉", "京", "沪", "苏", "鄂","琼", "渝", "甘", "黑", "宁", "青", "贵", "新", "浙", "皖", "湘");
-		
 		$region_model = M ( "Region" );
-		$region = $region_model->where ( "nums = '$l_nums'" )->find ();
+		$region = $region_model->where ( "nums = '$l_nums' and level = 2" )->find ();
 		
 		if(! empty ( $region )){
-			if(in_array($l_nums_a, $a_class )){
+			if(in_array($l_nums_a, $this->a_class )){
 				$result = $this->scan_api_chexingyi_one($car, $region, false, $scan_type);
 			}
 			else{
@@ -282,9 +455,9 @@ class IndexController extends HomeBaseController {
 		$list = $model->table ( "cw_user_car as uc" )->join ( "cw_user as u on u.id = uc.user_id" )->field ( "u.city" )->where ( "uc.car_id='{$car['id']}'" )->group ( "u.city" )->select ();
 		foreach ( $list as $u ) {
 			if ($u ['city'] != '' && $u ['city'] != null && $u ['city'] != $region ['city']) {
-				$region_s = $region_model->where ( "city = '{$u['city']}'" )->find ();
+				$region_s = $region_model->where ( "city = '{$u['city']}' and level = 2" )->find ();
 				if(! empty ( $region_s )){
-					if(!in_array($region_s['abbreviation'], $a_class ) || !in_array($l_nums_a, $a_class )){
+					if(!in_array($region_s['abbreviation'], $this->a_class ) || !in_array($l_nums_a, $this->a_class )){
 						$r = $this->scan_api_chexingyi_one ( $car, $region_s, true, $scan_type);
 						if($r < 0 ){
 							$result_s = $r;
@@ -300,11 +473,44 @@ class IndexController extends HomeBaseController {
 	}
 	
 	function scan_api_chexingyi_one($car, $region, $special = false, $scan_type = 1){
+		$log = new Log ();
+		
+		$car_id = $car ['id'];
+		$license_number = $car ['license_number'];
+		
+		if($scan_type < 2){
+			$where = "license_number = '$license_number' and port = '" . api_chexingyi . "'";
+			if($special){
+				$where .= " and city = '" . $region["city"] . "'";
+			}
+			else{
+				$where .= " and city is null";
+			}
+			$now_72 = time() - 72 * 3600;
+			$jilu_model = M ( "endorsement_jilu" );
+			$jilu = $jilu_model->where( $where )->order("c_time desc")->find();
+			if(!empty($jilu)){
+				$result = $jilu["c_time"] - $now_72;
+				if($result >= 0	&& $jilu["code"] == 0){
+					$l_city = $region['city'];
+					if(!$special){
+						$l_city = "null";
+					}
+					$log->write ( "car: $car_id, license_number: $license_number, city: $l_city, scan_port: cx580, scan_type: $scan_type, has a success scan in 72h; jilu:{$jilu['id']}, c_time:{$jilu['c_time']}", 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+					return 1;
+				}
+			}
+		}
+		
+		if($region['cxy_frame_nums'] == null && $region['cxy_engine_nums'] == null){
+			return -1;
+		}
 		$app_id = app_id_chexingyi;
         $app_key = urlencode(app_key_chexingyi);
 		$carnumber = urlencode($car['license_number']);
 		$url = "http://chaxun.cx580.com:9008/queryindex.aspx?userid=$app_id&userpwd=$app_key&carnumber=$carnumber";
 		$engineLen = $region ['cxy_engine_nums'];
+		$cxy_city = 0;
 		if ($engineLen > 0) {
 			$cardrivenumber = substr ( $car ['engine_number'], - $engineLen );
 			$url = $url . "&cardrivenumber=$cardrivenumber";
@@ -318,9 +524,9 @@ class IndexController extends HomeBaseController {
 			$provinceid = $region['gb_code_p'];
 			$cityid = $region['gb_code_c'];
 			$url = $url . "&provinceid=$provinceid&cityid=$cityid";
+			$cxy_city = $region['gb_code_c'];
 		}
 		$output = $this->invokeHttpApi($url);
-		$log = new Log ();
 		$log->write ( "cheyixing: " . $url, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 		$log->write ( "cheyixing: " . $output, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 		
@@ -333,10 +539,12 @@ class IndexController extends HomeBaseController {
 		if($json_error != JSON_ERROR_NONE){
 			$has_error = -9998;
 		}
+		$license_number = $car['license_number'];
 		$jilu_model = M ( "endorsement_jilu" );
 		if( $has_error == 0){
 			$jilu_data = array (
 					"car_id" => $car['id'],
+					"license_number" => $license_number,
 					"money" => 0,
 					"points" => 0,
 					"all_nums" => 0,
@@ -351,10 +559,23 @@ class IndexController extends HomeBaseController {
 				$jilu_data["city"] = $region['city'];
 			}
 			$jilu_id = $jilu_model->add ( $jilu_data );
-			
+			$edit_num = 0;
+			$close_num = 0;
 			$errorCodes = array (-6, -61, -62, -63);
 			if ($jsoninfo ['ErrorCode'] == 0) {
+				if($scan_type == 2){
+					$retry_model = M("endorsement_retry");
+					$sql = "car_id = {$car['id']} and port = '" . api_chexingyi . "'";
+					if($special){
+						$sql .= " and city = '{$region['city']}'";
+					}
+					else{
+						$sql .= " and city is null";
+					}
+					$retry_model->where($sql)->delete();
+				}
 				if (isset($jsoninfo['Records']) && $jsoninfo['Records']) {
+					$now = time();
 					$endorsement_model = M ( "Endorsement" );
 					$log_model = M ( "Endorsement_log" );
 					$end_list = array();
@@ -363,12 +584,13 @@ class IndexController extends HomeBaseController {
 						$jilu_data ['money'] += $v ['count'];
 						$jilu_data ['points'] += $v['Degree'];
 						$time = strtotime ( $v ['Time'] );
-						$endorsement = $endorsement_model->where ( "car_id = '{$car['id']}' and time = '$time'" )->find ();
+						$hash = md5($license_number . $time);
+						$endorsement = $endorsement_model->where ( "hash = '$hash'")->find ();
 						if (empty ( $endorsement )) {
 							$city = $region['city'];
 							if(isset ( $v ['Locationid'] )){
 								$region_model = M("region");
-								$v_region = $region_model->where("gb_code_c = {$v ['Locationid']}")->find();
+								$v_region = $region_model->where("gb_code_c = {$v ['Locationid']} and level = 2 ")->find();
 								if(!empty($v_region) && !empty($v_region["city"])){
 									$city = $v_region["city"];
 								}
@@ -378,7 +600,8 @@ class IndexController extends HomeBaseController {
 								$code = $v ['Code'];
 							}
 							$data = array (
-									"car_id" => $car['id'],
+									"hash" => $hash,
+									"license_number" => $license_number,
 									"area" => $city,
 									"query_port" => api_chexingyi,
 									"code" => $code,
@@ -387,10 +610,12 @@ class IndexController extends HomeBaseController {
 									"points" => $v ['Degree'],
 									"address" => $v ['Location'],
 									"content" => $v ['Reason'],
-									"create_time" => time (),
-									"manage_time" => time (),
+									"create_time" => $now,
+									"manage_time" => $now,
 									"query_no" => $jilu_id,
-									"office" => $v ['department'] 
+									"office" => $v ['department'],
+									"certificate_no" => $v ['Archive'],
+									"cxy_city" => $cxy_city
 							);
 							$endorsement_model->add ( $data );
 							$end_id = $endorsement_model->getLastInsID ();
@@ -401,36 +626,73 @@ class IndexController extends HomeBaseController {
 							$data = array (
 									"end_id" => $end_id,
 									"state" => 1,
-									"c_time" => time (),
+									"log_id" => $jilu_id, 
+									"c_time" => $now,
 									"type" => 0 
 							);
 							$log_model->add ( $data );
-							if($scan_type == 0){
+							if($scan_type == 0 || $scan_type == 2){
 								$this->push($car['id'], $end_id);
 							}
 						}
 						else{
 							if($v['status'] == 0){
 								$end_list[] = $endorsement["id"];
-								if($endorsement["close_confirm"] == 1){
+								if($endorsement["close_confirm"] == 1 || $endorsement["is_manage"] == 2){
 									$data = array(
 										"close_confirm" => 0, 
 										"close_query_no" => $jilu_id, 
-										"close_time" => time() 
+										"close_time" => $now 
 									);
+									if($endorsement["is_manage"] == 2){
+										$data["is_manage"] = 0;
+										$data["manage_time"] = $now;
+									}
 									$endorsement_model->where("id = '{$endorsement['id']}'")->save($data);
+									if($endorsement["is_manage"] == 2){
+										$data = array (
+												"end_id" => $endorsement["id"],
+												"state" => 3,
+												"log_id" => $jilu_id, 
+												"c_time" => $now,
+												"type" => 0 
+										);
+										$log_model->add ( $data );
+									}
+									$edit_num++;
 								}
 							}
 						}
 					}
-					$jilu_model->where ( "id='$jilu_id'" )->save ( $jilu_data );
-					$this->close_endorsement_prepare($car['id'], $jilu_id, $end_list);
+					$close_num = $this->close_endorsement_prepare($license_number, $jilu_id, $cxy_city, $end_list);
 				}
 				else{
-					$this->close_endorsement_prepare($car['id'], $jilu_id);
+					$close_num = $this->close_endorsement_prepare($license_number, $jilu_id, $cxy_city);
 				}
+				//$endorsement_model->execute("select * from __TABLE__ where car_id = $car_id and is_manage <> 2 and close_confirm = 1 and cxy_city = $cxy_city");
+				$jilu_data["edit_nums"] = $edit_num;
+				$jilu_data["close_nums"] = $close_num;
+				$jilu_model->where ( "id='$jilu_id'" )->save ( $jilu_data );
+				
+				$data = array (
+						"last_scan_time" => time () 
+					);
+				$car_model = M("car");
+				$car_model->where ( "id = '$car_id'" )->save ( $data );
+				
 				return 1;
 			} elseif(in_array($jsoninfo ['ErrorCode'], $errorCodes)){
+				if($scan_type == 2){
+					$retry_model = M("endorsement_retry");
+					$sql = "car_id = {$car['id']} and port = '" . api_chexingyi . "'";
+					if($special){
+						$sql .= " and city is null";
+					}
+					else{
+						$sql .= " and city = '{$region['city']}'";
+					}
+					$retry_model->where($sql)->delete();
+				}
 				$car_scan_data = array (
 					"scan_state" => 0,
 					"scan_state_desc" => "输入的车辆信息有误，请查证后重新输入",
@@ -439,13 +701,30 @@ class IndexController extends HomeBaseController {
 				);
 				$car_model = M ( "Car" );
 				$car_model->where ( "id={$car['id']}" )->save ( $car_scan_data );
-				return 1;
+				return 0;
+			}
+			elseif($jsoninfo ['ErrorCode'] == -5){
+				if($scan_type < 2){
+					$retry_model = M("endorsement_retry");
+					$retry_data = array (
+						"car_id" => $car['id'],
+						"port" => api_chexingyi,
+						"c_time" => time (),
+						"code" => $jsoninfo ['ErrorCode']
+						);
+					if($special){
+						$retry_data["city"] = $region['city'];
+					}
+					$retry_model->add($retry_data);
+				}
+				return -1;
 			}else{
 				return -1;
 			}
 		}else{
 			$jilu_data = array (
 				"car_id" => $car['id'],
+				"license_number" => $license_number,
 				"money" => 0,
 				"points" => 0,
 				"all_nums" => 0,
@@ -460,6 +739,19 @@ class IndexController extends HomeBaseController {
 				$jilu_data["city"] = $region['city'];
 			}
 			$jilu_id = $jilu_model->add ( $jilu_data );
+			if($scan_type < 2){
+				$retry_model = M("endorsement_retry");
+				$retry_data = array (
+					"car_id" => $car['id'],
+					"port" => api_chexingyi,
+					"c_time" => time (),
+					"code" => $has_error
+					);
+				if($special){
+					$retry_data["city"] = $region['city'];
+				}
+				$retry_model->add($retry_data);
+			}
 			return -1;
 		}
 		return -1;
@@ -469,7 +761,7 @@ class IndexController extends HomeBaseController {
 		$result = 0;
 		$l_nums = mb_substr ( $car ['license_number'], 0, 2, 'utf-8' );
 		$region_model = M ( "Region" );
-		$region = $region_model->where ( "nums = '$l_nums'" )->find ();
+		$region = $region_model->where ( "nums = '$l_nums' and level = 2" )->find ();
 		if (! empty ( $region )) {
 			$result = $this->scan_api_cheshouye_one ( $car, $region, $scan_type );
 		}
@@ -478,7 +770,7 @@ class IndexController extends HomeBaseController {
 		$list = $model->table ( "cw_user_car as uc" )->join ( "cw_user as u on u.id = uc.user_id" )->field ( "u.city" )->where ( "uc.car_id='{$car['id']}'" )->group ( "u.city" )->select ();
 		foreach ( $list as $u ) {
 			if ($u ['city'] != '' && $u ['city'] != null && $u ['city'] != $region ['city']) {
-				$region = $region_model->where ( "city = '{$u['city']}'" )->find ();
+				$region = $region_model->where ( "city = '{$u['city']}' and level = 2" )->find ();
 				if(! empty ( $region )){
 					$r = $this->scan_api_cheshouye_one ( $car, $region, $scan_type );
 					if($r < 0 ){
@@ -595,10 +887,8 @@ class IndexController extends HomeBaseController {
 					}
 				}
 				$jilu_model->where ( "id='$jilu_id'" )->save ( $jilu_data );
-				//$this->close_endorsement_prepare($car['id'], $jilu_id, $end_list);
 				return 1;
 			} elseif ($jsoninfo ['status'] == 2000) {
-				//$this->close_endorsement_prepare($car['id'], $jilu_id);
 				return 1;
 			} elseif($jsoninfo ['status'] == 5008){
 				/*
@@ -639,7 +929,7 @@ class IndexController extends HomeBaseController {
 		$result = 0;
 		$l_nums = mb_substr ( $car ['license_number'], 0, 2, 'utf-8' );
 		$region_model = M ( "Region" );
-		$region = $region_model->where ( "nums = '$l_nums'" )->find ();
+		$region = $region_model->where ( "nums = '$l_nums' and level = 2" )->find ();
 		if (! empty ( $region )) {
 			$result = $this->scan_api_icar_one ( $car, $region, $scan_type);
 		}
@@ -648,7 +938,7 @@ class IndexController extends HomeBaseController {
 		$list = $model->table ( "cw_user_car as uc" )->join ( "cw_user as u on u.id = uc.user_id" )->field ( "u.city" )->where ( "uc.car_id='{$car['id']}'" )->group ( "u.city" )->select ();
 		foreach ( $list as $u ) {
 			if ($u ['city'] != '' && $u ['city'] != null && $u ['city'] != $region ['city']) {
-				$region = $region_model->where ( "city = '{$u['city']}'" )->find ();
+				$region = $region_model->where ( "city = '{$u['city']}' and level = 2" )->find ();
 				if(! empty ( $region )){
 					$r = $this->scan_api_icar_one ( $car, $region, $scan_type);
 					if($r < 0 ){
@@ -665,25 +955,61 @@ class IndexController extends HomeBaseController {
 	
 	// 爱车坊接口
 	function scan_api_icar_one($car, $region, $scan_type = 1) {
+		$log = new Log ();
+		
+		$car_id = $car ['id'];
+		$license_number = $car ['license_number'];
+		
+		if($scan_type < 2){
+			$where = "license_number = '$license_number' and port = '" . api_icar . "' and city = '" . $region["city"] . "'";
+			$now_72 = time() - 72 *3600;
+			$jilu_model = M ( "endorsement_jilu" );
+			$jilu = $jilu_model->where( $where )->order("c_time desc")->find();
+			if(!empty($jilu)){
+				$result = $jilu["c_time"] - $now_72;
+				if($result >= 0	&& $jilu["code"] == 0){
+					$log->write ( "car: $car_id, license_number: $license_number, city: {$region['city']}, scan_port: icar, scan_type: $scan_type, has a success scan in 72h; jilu: {$jilu['id']}, c_time: {$jilu['c_time']}" , 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
+					return 1;
+				}
+			}
+		}
+	
+		if($region['icar_frame_nums'] == null && $region['icar_engine_nums'] == null){
+			return -1;
+		}
 		$token = $this->get_icar_token ();
 		if ($token != '' && $token != null) {
 			$license_nums = $car ['license_number'];
 			$provinceCode = urlencode ( mb_substr ( $license_nums, 0, 1, 'utf-8' ) );
 			$carNumber = mb_substr ( $license_nums, 1, strlen ( $license_nums ), 'utf-8' );
-			$engineLen = $region ['engine_nums'];
-			if ($engineLen > 0) {
-				$engine_number = substr ( $car ['engine_number'], - $engineLen );
-			} else {
-				$engine_number = $car ['engine_number'];
+			
+			$l_nums_a = mb_substr ( $car ['license_number'], 0, 1, 'utf-8' );
+			$cxy_city = $region['gb_code_c'];
+			if(in_array($l_nums_a, $this->a_class )){
+				$cxy_city = 0;
 			}
-			$frameLen = $region ['frame_nums'];
-			if ($frameLen > 0) {
-				$frame_number = substr ( $car ['frame_number'], - $frameLen );
-			} else {
-				$frame_number = $car ['frame_number'];
+			
+			$engine_number = "";
+			if($region ['icar_need_engine']  == 1){
+				$engineLen = $region ['icar_engine_nums'];
+				if ($engineLen > 0) {
+					$engine_number = substr ( $car ['engine_number'], - $engineLen );
+				} else {
+					$engine_number = $car ['engine_number'];
+				}
 			}
-			$url = "http://120.26.57.239/api/queryCarViolateInfo?provinceCode=$provinceCode&carNumber=$carNumber&vioCityCode={$region['acode']}&carType=0&carFrame={$frame_number}&carEngine={$engine_number}";
-			$log = new Log ();
+			
+			$frame_number = "";
+			if($region ['icar_need_frame']  == 1){
+				$frameLen = $region ['icar_frame_nums'];
+				if ($frameLen > 0) {
+					$frame_number = substr ( $car ['frame_number'], - $frameLen );
+				} else {
+					$frame_number = $car ['frame_number'];
+				}
+			}
+			$url = "http://120.26.57.239/api/queryCarViolateInfo?provinceCode=$provinceCode&carNumber=$carNumber&vioCityCode={$region['icar_code']}&carType=0&carFrame={$frame_number}&carEngine={$engine_number}";
+			
 			$log->write ( $url, 'DEBUG', '', dirname ( $_SERVER ['SCRIPT_FILENAME'] ) . '/Logs/Weizhang/' . date ( 'y_m_d' ) . '.log' );
 			$header = array (
 					"token: $token" 
@@ -701,10 +1027,12 @@ class IndexController extends HomeBaseController {
 			if($json_error != JSON_ERROR_NONE){
 				$has_error = -9998;
 			}
+			$license_number = $car ['license_number'];
 			$jilu_model = M ( "endorsement_jilu" );
 			if( $has_error == 0){
 				$jilu_data = array (
 					"car_id" => $car['id'],
+					"license_number" => $license_number,
 					"city" => $region['city'],
 					"money" => 0,
 					"points" => 0,
@@ -718,6 +1046,10 @@ class IndexController extends HomeBaseController {
 				);
 				$jilu_id = $jilu_model->add ( $jilu_data );
 				if ($jsoninfo ['code'] == 0) {
+					if($scan_type == 2){
+						$retry_model = M("endorsement_retry");
+						$retry_model->where("car_id = {$car['id']} and port = '" . api_icar . "' and city = '{$region['city']}'")->delete();
+					}
 					$endorsement_model = M ( "Endorsement" );
 					$log_model = M ( "Endorsement_log" );
 					$end_list = array();
@@ -734,11 +1066,13 @@ class IndexController extends HomeBaseController {
 							$jilu_data ['money'] += $v ['violationPrice'];
 							$jilu_data ['points'] += $v ['violationMark'];
 							$time = strtotime ( $v ['violationTime'] );
-							$endorsement = $endorsement_model->where ( "car_id = '{$car['id']}' and time = '$time'" )->find ();
+							$hash = md5($license_number . $time);
+							$endorsement = $endorsement_model->where ( "hash = '$hash'")->find ();
 							if (empty ( $endorsement )) {
 								$city = isset ( $v ['violationCity'] ) ? $v ['violationCity'] : $region['city'];
 								$data = array (
-										"car_id" => $car['id'],
+										"hash" => $hash,
+										"license_number" => $license_number,
 										"area" => $city,
 										"query_port" => api_icar,
 										"code" => $v ['violationCode'],
@@ -750,7 +1084,8 @@ class IndexController extends HomeBaseController {
 										"create_time" => time (),
 										"manage_time" => time (),
 										"query_no" => $jilu_id,
-										"office" => $v ['officeName']
+										"office" => $v ['officeName'],
+										"cxy_city" => $cxy_city
 								);
 								$endorsement_model->add ( $data );
 								$end_id = $endorsement_model->getLastInsID ();
@@ -763,7 +1098,7 @@ class IndexController extends HomeBaseController {
 										"type" => 0 
 								);
 								$log_model->add ( $data );
-								if($scan_type == 0){
+								if($scan_type == 0 || $scan_type == 2){
 									$this->push($car['id'], $end_id);
 								}
 							}
@@ -773,7 +1108,15 @@ class IndexController extends HomeBaseController {
 						}
 					}
 					$jilu_model->where ( "id='$jilu_id'" )->save ( $jilu_data );
-					//$this->close_endorsement_prepare($car['id'], $jilu_id, $end_list);
+					
+					$car_id = $car['id'];
+					$data = array (
+							"last_scan_time" => time () 
+						);
+					$car_model = M("car");
+					$car_model->where ( "id = '$car_id'" )->save ( $data );
+					
+					return 1;
 				}
 				elseif($jsoninfo ['code'] == 29 || ($jsoninfo ['code'] >= 31 && $jsoninfo ['code'] <= 34)){
 					/*
@@ -786,14 +1129,29 @@ class IndexController extends HomeBaseController {
 					$car_model = M ( "Car" );
 					$car_model->where ( "id={$car['id']}" )->save ( $car_scan_data );
 					*/
+					return 0;
+				}
+				elseif($jsoninfo ['code'] == 6 || $jsoninfo ['code'] == 17){
+					if($scan_type < 2){
+						$retry_model = M("endorsement_retry");
+						$retry_data = array (
+							"car_id" => $car['id'],
+							"port" => api_icar,
+							"city" => $region['city'],
+							"c_time" => time (),
+							"code" => $jsoninfo ['code']
+							);
+						$retry_model->add($retry_data);
+					}
+					return -1;
 				}
 				else{
 					return -1;
 				}
-				return 1;
 			} else {
 				$jilu_data = array (
 					"car_id" => $car['id'],
+					"license_number" => $license_number,
 					"city" => $region['city'],
 					"money" => 0,
 					"points" => 0,
@@ -806,6 +1164,17 @@ class IndexController extends HomeBaseController {
 					"state" => $scan_type 
 					);
 				$jilu_id = $jilu_model->add ( $jilu_data );
+				if($scan_type < 2){
+					$retry_model = M("endorsement_retry");
+					$retry_data = array (
+						"car_id" => $car['id'],
+						"port" => api_icar,
+						"city" => $region['city'],
+						"c_time" => time (),
+						"code" => $has_error
+						);
+					$retry_model->add($retry_data);
+				}
 				return -1;
 			}
 		}

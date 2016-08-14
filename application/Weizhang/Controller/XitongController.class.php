@@ -42,7 +42,7 @@ class XitongController extends AdminbaseController {
 		$model = M();
 		$count = $model->table ( "cw_endorsement_stats as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $model->field ( "@rownum:=@rownum+1 AS iid,a.*" )->table ( "(SELECT @rownum:=0) r,cw_endorsement_stats as a" )->where ( $where )->order ( "day_time desc" )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $model->field ( "a.*" )->table ( "cw_endorsement_stats as a" )->where ( $where )->order ( "day_time desc" )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->assign ( "pageIndex", $page->firstRow );

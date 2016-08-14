@@ -97,88 +97,116 @@ function changeScanState() {
 	});
 	$('#scanStatePanel').hide();
 }
+ function order(order) {
+	 if (order=='desc') {
+		 order = 'asc';
+	 } else {
+		 order = 'desc';
+	 }
+	 window.location.href="{:U('Dingyue/shuju')}&order="+order; 
+ }
 </script>
 <body class="J_scroll_fixed">
 <div class="wrap J_check_wrap">
 	<div id="cheliang_submit" class="top_div">
 		<form id="car_query" action="{:U('Dingyue/shuju')} " method="post">
-			<input type="submit"   class="query_btn"  value="查询"/>
+			<input type="submit" class="query_btn" value="查询"/>
 			<div  class="query_div" > 
-					车牌号 <input type="text"   name="che_number"  class="query_txt"   value="{$number}"/> 
+				车牌号 <input type="text" name="che_number" class="query_txt" value="{$number}"/> 
 			</div>
 			<div class="query_div" > 
-					发动机号 <input type="text" name="che_engine"  class="query_txt"    value="{$engine}"/> 
+				发动机号 <input type="text" name="che_engine" class="query_txt" value="{$engine}"/> 
 			</div>
 			<div class="query_div" > 
-					车架号 <input type="text" name="che_table"  class="query_txt"   value="{$table}"/> 
+				车架号 <input type="text" name="che_table" class="query_txt" value="{$table}"/> 
+			</div>
+			<div class="query_div" > 
+				扫描状态
+					<select name="state" id="state" class="query_txt"  >
+						<option value=""></option>
+						<option value="0" <?php if($state === "0"){echo "selected='selected'";}?>>停扫</option>
+						<option value="1" <?php if($state === "1"){echo "selected='selected'";}?>>扫描</option>
+					</select>
 			</div>
 		</form>
 	</div>
-<table class="table table-hover table-bordered table-list" id="menus-table">
-	<tr>
-		<th>#</th>
-		<th>车辆编号</th>
-		<th>车牌号</th>
-		<th>VIN(车架号)</th>
-		<th>发动机号</th>
-		<th>车辆所属省</th>
-		<th>车辆所属市</th>
-		<th>添加时间</th>
-		<th>是否扫描</th>
-		<th>停查原因</th>
-	</tr>
-	<?php $i = 1;?>
-	<?php $i = $pageIndex + $i;?>
-	<foreach name="str" item="vo">
+	<table class="table table-hover table-bordered table-list" id="menus-table">
 		<tr>
-			<td>{$i++}</td>
-			<td>{$vo.id}</td>
-			<td>{$vo.license_number}</td>
-			<td>{$vo.frame_number}</td>
-			<td>{$vo.engine_number}</td>
-			<td>{$vo.province}</td>
-            <td>{$vo.city}</td>
-			<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
-			<td>
-				<if condition="$vo['scan_state'] eq 1">
-					<a href="javascript:;" onclick="showScanState({$vo.id},'{$vo.license_number}',{$vo.scan_state})">扫描</a>
-				<else />
-					<a href="javascript:;" onclick="showScanState({$vo.id},'{$vo.license_number}',{$vo.scan_state})">停止</a>
-				</if>
-			</td>
-			<td>{$vo.scan_state_desc}</td>
+			<th>#</th>
+			<th>车辆编号</th>
+			<th>车牌号</th>
+			<th>VIN(车架号)</th>
+			<th>发动机号</th>
+			<th>车辆所属省</th>
+			<th>车辆所属市</th>
+			<th>添加时间</th>
+			<th>是否扫描</th>
+			<th>停查原因</th>
+			<th>车辆指纹</th>
+			<th onclick="order('{$order}')">最后扫描时间<?php if ($order == 'desc'){?>↓<?php }else if ($order == 'asc'){ ?>↑<?php } ?></th>
 		</tr>
-	</foreach>
-</table>
-<div class="pagination">{$Page}</div>
-</div>
-<div id="scanStatePanel" style="display:none" class="PopupPanel">
-	<div id="popop_header" class="Popup-header">
-		<input id="car_id" type="hidden"/>
-		<div id="car_license" style="display:inline;align-self:center;width:95%"></div>
-		<span class="Popup-close" onclick="closeScanState()">X</span>
+		<?php $i = 1;?>
+		<?php $i = $pageIndex + $i;?>
+		<foreach name="str" item="vo">
+			<tr>
+				<td>{$i++}</td>
+				<td>{$vo.id}</td>
+				<td>{$vo.license_number}</td>
+				<td>{$vo.frame_number}</td>
+				<td>{$vo.engine_number}</td>
+				<td>{$vo.province}</td>
+				<td>{$vo.city}</td>
+				<td>{$vo.create_time|date='Y-m-d H:i:s',###}</td>
+				<td>
+					<if condition="$vo['scan_state'] eq 1">
+						<a href="javascript:;" onclick="showScanState({$vo.id},'{$vo.license_number}',{$vo.scan_state})">扫描</a>
+					<else />
+						<a href="javascript:;" onclick="showScanState({$vo.id},'{$vo.license_number}',{$vo.scan_state})">停止</a>
+					</if>
+				</td>
+				<td>{$vo.scan_state_desc}</td>
+				<td>{$vo.hash}</td>
+				<td>
+					<if condition="$vo['last_scan_time'] neq ''">
+						<if condition="$vo['last_scan_flag'] lt 0">
+							<span style="color: red">{$vo.last_scan_time|date='Y-m-d H:i:s',### }</span>
+						<else/>
+							{$vo.last_scan_time|date='Y-m-d H:i:s',### }
+						</if>
+					</if>
+				</td>
+			</tr>
+		</foreach>
+	</table>
+	<div class="pagination">{$Page}</div>
 	</div>
-	<div id="popup_content" class="Popup-body">
-		<div style="height: 50%; display: flex;">
-			<div id="car_scan_state_label" style="display:inline;align-self:center;width:30%">是否启动扫描</div>
-			<div style="display:inline;align-self:center;">
-				<input id="car_scan_state" class="cmn-toggle cmn-toggle-round" type="checkbox">
-				<label for="car_scan_state"></label>
+	<div id="scanStatePanel" style="display:none" class="PopupPanel">
+		<div id="popop_header" class="Popup-header">
+			<input id="car_id" type="hidden"/>
+			<div id="car_license" style="display:inline;align-self:center;width:95%"></div>
+			<span class="Popup-close" onclick="closeScanState()">X</span>
+		</div>
+		<div id="popup_content" class="Popup-body">
+			<div style="height: 50%; display: flex;">
+				<div id="car_scan_state_label" style="display:inline;align-self:center;width:30%">是否启动扫描</div>
+				<div style="display:inline;align-self:center;">
+					<input id="car_scan_state" class="cmn-toggle cmn-toggle-round" type="checkbox">
+					<label for="car_scan_state"></label>
+				</div>
+			</div>
+			<div style="height: 50%; display: flex;">
+				<div id="car_scan_desc_label" style="display:inline;align-self:center;width:30%">停扫原因</div>
+				<div style="display:inline;align-self:center;">
+					<input id="car_scan_desc" type="area"/>
+				</div>
 			</div>
 		</div>
-		<div style="height: 50%; display: flex;">
-			<div id="car_scan_desc_label" style="display:inline;align-self:center;width:30%">停扫原因</div>
-			<div style="display:inline;align-self:center;">
-				<input id="car_scan_desc" type="area"/>
+		<div id="popop_footer" class="Popup-footer">
+			<div class="Popup-close">
+				<button style="width: 60px;" onclick="changeScanState()">保存</button>
 			</div>
 		</div>
 	</div>
-	<div id="popop_footer" class="Popup-footer">
-		<div class="Popup-close">
-			<button style="width: 60px;" onclick="changeScanState()">保存</button>
-		</div>
-	</div>
-</div>
 </body>
 </html>
 

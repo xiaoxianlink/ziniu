@@ -36,6 +36,7 @@ $(document).ready(function(){
 										<option value="">全部</option>
 										<option value="0" <?php if($array[1]=='0'){echo "selected='selected'";}?>>添加新记录</option>
 										<option value="1" <?php if($array[1]==1){echo "selected='selected'";}?>>更改记录状态</option>
+										<option value="2" <?php if($array[1]==2){echo "selected='selected'";}?>>重新打开状态</option>
 								</select>
 			</div>
 			<div  class="query_div" > 
@@ -71,10 +72,41 @@ $(document).ready(function(){
 			<td>{$vo.code}</td>
 			<td>{$vo.money}</td>
 			<td>{$vo.points}</td>
-			<td>未处理</td>
-			<td><if condition="$vo['l_type'] eq 0">未处理<elseif condition="$vo['l_type'] eq 1"/>处理中<elseif condition="$vo['l_type'] eq 2"/>已处理</if></td>
-			<td><if condition="$vo['l_type'] eq 0">{$vo.query_no}<elseif condition="$vo['l_type'] eq 2"/>{$vo.close_query_no}</if></td>
-			<td><if condition="$vo['l_state'] eq '1'">添加新记录<else/>更改记录状态</if></td>
+			<td>
+				<if condition="$vo['l_type'] eq 0">
+					<if condition="$vo['l_state'] eq '1'">未处理
+					<elseif condition="$vo['l_state'] eq 3"/>已处理
+					</if>
+				<elseif condition="$vo['l_type'] eq 1"/>未处理
+				<elseif condition="$vo['l_type'] eq 2"/>处理中
+				</if>
+			</td>
+			<td>
+				<if condition="$vo['l_type'] eq 0">未处理
+				<elseif condition="$vo['l_type'] eq 1"/>处理中
+				<elseif condition="$vo['l_type'] eq 2"/>已处理
+				</if>
+			</td>
+			<td>
+				<if condition="$vo['l_state'] eq '1'">{$vo.query_no}
+				<elseif condition="$vo['l_state'] eq 2"/>
+					<if condition="$vo['l_type'] eq 2">
+						<if condition="isset($vo['log_id'])">{$vo.log_id}
+						<else/>{$vo.close_query_no}
+						</if>
+					</if>
+				<else/>
+					<if condition="isset($vo['log_id'])">{$vo.log_id}
+					<else/>{$vo.close_query_no}
+					</if>
+				</if>
+			</td>
+			<td>
+				<if condition="$vo['l_state'] eq '1'">添加新记录
+				<elseif condition="$vo['l_state'] eq 2"/>更改记录状态
+				<else/>&#x2718;重新打开状态
+				</if>
+			</td>
 			<td><if condition="$vo['l_c_time'] neq ''">{$vo.l_c_time|date='Y-m-d H:i:s',###}</if></td>
 		</tr>
 	</foreach>

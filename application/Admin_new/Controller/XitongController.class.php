@@ -10,7 +10,9 @@ use Weizhang\Controller\JiaoyiController;
 include_once 'application/Weixin/Conf/config.php';
 
 class XitongController extends AdminbaseController {
+
 	protected $xitong_model;
+
 	public function _initialize() {
 		parent::_initialize ();
 		$_SESSION ['dingyue'] = '';
@@ -32,27 +34,27 @@ class XitongController extends AdminbaseController {
 			$province = $_SESSION ['xitong'] ['province_name1'];
 			$area = $_SESSION ['xitong'] ['wei_range1'];
 		}
-		if (empty ( $province )) {
-			$where = "";
-		} else {
+		
+		$where = "";
+		if (isset ( $province )) {
 			$where = " (province like '%$province%' or abbreviation like '%$province%')";
 		}
 		if (! empty ( $vcode )) {
-			$where = " is_dredge=$vcode-1";
+			$where = " is_dredge = $vcode-1";
 			$this->assign ( "vcode", $vcode );
 		}
 		if (empty ( $_order )) {
 			$_order = 'desc';
 		}
-		$order = "a.sf_id $_order,a.level asc";
+		$order = "a.gb_code_p, a.gb_code_c, a.level asc";
 		$this->assign ( 'order', $_order );
 		$count = $this->xitong_model->table ( "cw_region as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.sf_id,a.level,a.province,a.abbreviation,a.code,a.acode,a.city,a.nums,a.engine_nums,a.frame_nums,a.c_engine_nums,a.c_frame_nums,a.gb_code_c,a.cxy_frame_nums,a.cxy_engine_nums,a.is_dredge " )->table ( "(SELECT @rownum:=0) r,cw_region as a" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->xitong_model->field ( "a.id,a.sf_id,a.level,a.province,a.abbreviation,a.city,a.nums,a.gb_code_c,a.gb_code_p,a.is_dredge, a.cxy_time, a.cxy_frame_nums, a.icar_time, a.icar_frame_nums" )->table ( "cw_region as a" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$is_dredge = $this->xitong_model->field ( "count(*) as num" )->table ( "cw_region" )->where ( " is_dredge=0" )->select ();
 		$no_dredge = $this->xitong_model->field ( "count(*) as nums" )->table ( "cw_region" )->where ( " is_dredge=1" )->select ();
-		$all_dregde = $this->xitong_model->field ( "count(*) as numer" )->table ( "cw_region" )->where ( "is_dredge=0 or is_dredge=1" )->select ();
+		$all_dregde = $this->xitong_model->field ( "count(*) as numer" )->table ( "cw_region" )->select ();
 		$this->assign ( "is_num", $is_dredge );
 		$this->assign ( "no_num", $no_dredge );
 		$this->assign ( "all_dregde", $all_dregde );
@@ -60,6 +62,29 @@ class XitongController extends AdminbaseController {
 		$this->assign ( "pageIndex", $page->firstRow );
 		$this->display ();
 	}
+	function city_cxy() {
+		$where = "a.level = 2";
+		$order = "a.gb_code_p, a.gb_code_c";
+		$count = $this->xitong_model->table ( "cw_region as a" )->where ($where )->count ();
+		$page = $this->page ( $count, 50 );
+		$roles = $this->xitong_model->field ( "a.gb_code_c,a.province, a.city, a.cxy_frame_nums,a.cxy_engine_nums" )->table ( "cw_region as a" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->order($order)->select ();
+		$this->assign ( "str", $roles );
+		$this->assign ( "Page", $page->show ( 'Admin' ));
+		$this->assign ( "pageIndex", $page->firstRow );
+		$this->display ();
+	}
+	function city_icar() {
+		$where = "a.level = 2";
+		$order = "a.gb_code_p, a.gb_code_c";
+		$count = $this->xitong_model->table ( "cw_region as a" )->where ( $where )->count ();
+		$page = $this->page ( $count, 50 );
+		$roles = $this->xitong_model->field ( "a.gb_code_c,a.province, a.city, a.icar_city,a.icar_code,a.icar_need_engine,a.icar_need_frame,a.icar_engine_nums,a.icar_frame_nums" )->table ( "cw_region as a" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->order($order)->select ();
+		$this->assign ( "str", $roles );
+		$this->assign ( "Page", $page->show ( 'Admin' ) );
+		$this->assign ( "pageIndex", $page->firstRow );
+		$this->display ();
+	}
+	/*
 	function city_add() {
 		$cxy_code = $_POST ['cxy_code'];
 		$acode = $_POST ['acode'];
@@ -87,6 +112,7 @@ class XitongController extends AdminbaseController {
 			$this->error ( "添加失败！" );
 		}
 	}
+	*/
 	function city_update() {
 		$id = $_REQUEST ['id'];
 		$is_dredge = isset ( $_REQUEST ['is_dredge'] ) ? $_REQUEST ['is_dredge'] : 0;
@@ -262,7 +288,7 @@ class XitongController extends AdminbaseController {
 	}
 	function jilu() {
 		$number = $_POST ['number'];
-		$city = $_POST ['city'];
+		$code = $_POST ['code'];
 		$state = $_POST ['state'];
 		$time_start = strtotime ( $_POST ['time_start'] );
 		$time_end = strtotime ( $_POST ['time_end'] );
@@ -270,30 +296,30 @@ class XitongController extends AdminbaseController {
 		if (IS_POST) {
 			$_SESSION ['xitong'] = '';
 			$_SESSION ['xitong'] ['number3'] = $number;
-			$_SESSION ['xitong'] ['city3'] = $city;
+			$_SESSION ['xitong'] ['code3'] = $code;
 			$_SESSION ['xitong'] ['state3'] = $state;
 			$_SESSION ['xitong'] ['time_start3'] = $time_start;
 			$_SESSION ['xitong'] ['time_end3'] = $time_end;
 		} else {
 			$number = $_SESSION ['xitong'] ['number3'];
-			$city = $_SESSION ['xitong'] ['city3'];
+			$code = $_SESSION ['xitong'] ['code3'];
 			$state = $_SESSION ['xitong'] ['state3'];
 			$time_start = $_SESSION ['xitong'] ['time_start3'];
 			$time_end = $_SESSION ['xitong'] ['time_end3'];
 		}
 		$this->assign ( "array", array (
 				$number,
-				$city,
+				$code,
 				$state,
 				empty ( $time_start ) ? '' : date ( "Y/m/d H:i:s", $time_start ),
 				empty ( $time_end ) ? '' : date ( "Y/m/d H:i:s", $time_end ) 
 		) );
 		$where = "1=1";
 		if (! empty ( $number )) {
-			$where .= " and  b.license_number like '%$number%' ";
+			$where .= " and a.license_number like '%$number%' ";
 		}
-		if (! empty ( $city )) {
-			$where .= "";
+		if (! empty ( $code )) {
+			$where .= " and a.code like '%$code%'";
 		}
 		if (! empty ( $state )) {
 			$where .= " and a.is_manage='$state'-1 ";
@@ -309,14 +335,15 @@ class XitongController extends AdminbaseController {
 		}
 		$order = "a.time $_order";
 		$this->assign ( 'order', $_order );
-		$count = $this->xitong_model->table ( "cw_endorsement as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_violation as v on v.code=a.code" )->where ( $where )->count ();
+		$count = $this->xitong_model->table ( "cw_endorsement as a" )->join ( "cw_violation as v on v.code=a.code", "left" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,b.license_number,a.time,a.area,a.code,a.money,a.points,a.query_no,a.certificate_no,a.address,a.content,a.office,a.is_manage,a.id,v.code as v_code,v.money as v_money,v.points as v_points,v.content as v_content" )->table ( "(SELECT @rownum:=0) r,cw_endorsement as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_violation as v on v.code=a.code" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->xitong_model->field ( "a.hash,a.license_number,a.time,a.area,a.code,a.money,a.points,a.query_no,a.certificate_no,a.address,a.content,a.office,a.is_manage,a.id,v.code as v_code,v.money as v_money,v.points as v_points,v.content as v_content" )->table ( "cw_endorsement as a" )->join ( "cw_violation as v on v.code = a.code", "left" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		
+		$stats = $this->xitong_model->query("select count(id) as total, sum(case is_manage when 0 then 1 else 0 end) as new, sum(case is_manage when 1 then 1 else 0 end) as in_process, sum(case is_manage when 2 then 1 else 0 end) as finish from cw_endorsement");
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
-		$roles_a = $this->xitong_model->field ( "count(id) as numbers" )->table ( "cw_endorsement" )->select ();
-		$this->assign ( 'sums', $roles_a );
 		$this->assign ( "pageIndex", $page->firstRow );
+		$this->assign ( "stats", $stats[0]);
 		$this->display ();
 	}
 	function log() {
@@ -345,13 +372,17 @@ class XitongController extends AdminbaseController {
 		) );
 		$where = "1=1";
 		if (! empty ( $number )) {
-			$where .= " and b.license_number like '%$number%'";
+			$where .= " and a.license_number like '%$number%'";
 		}
 		if ($state != null && $state != '') {
 			if ($state == '0') {
 				$where .= " and l.state = 1";
-			} else {
+			} 
+			else if($state == '1'){
 				$where .= " and l.state = 2";
+			}
+			else {
+				$where .= " and l.state = 3";
 			}
 		}
 		if (! empty ( $time_start )) {
@@ -365,9 +396,9 @@ class XitongController extends AdminbaseController {
 		}
 		$order = "l.c_time $_order";
 		$this->assign ( 'order', $_order );
-		$count = $this->xitong_model->table ( "cw_endorsement_log as l" )->join ( "cw_endorsement as a on a.id=l.end_id" )->join ( "cw_car as b on a.car_id=b.id" )->where ( $where )->count ();
+		$count = $this->xitong_model->table ( "cw_endorsement_log as l" )->join ( "cw_endorsement as a on a.id=l.end_id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->xitong_model->field ( "@rownum:=@rownum+1 AS iid,b.license_number,a.time,a.area,a.code,a.money,a.points,a.query_no,a.certificate_no,a.address,a.content,a.office,a.is_manage,a.manage_time,a.create_time,a.close_query_no,l.state as l_state,l.c_time as l_c_time,l.type as l_type" )->table ( "(SELECT @rownum:=0) r,cw_endorsement_log as l" )->join ( "cw_endorsement as a on a.id=l.end_id" )->join ( "cw_car as b on a.car_id=b.id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->xitong_model->field ( "a.license_number,a.time,a.area,a.code,a.money,a.points,a.query_no,a.certificate_no,a.address,a.content,a.office,a.is_manage,a.manage_time,a.create_time,a.close_query_no,l.log_id,l.state as l_state,l.c_time as l_c_time,l.type as l_type" )->table ("cw_endorsement_log as l" )->join ( "cw_endorsement as a on a.id=l.end_id" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$roles_a = $this->xitong_model->query ( "select count(id) as numbers from cw_endorsement_log " );
@@ -874,7 +905,16 @@ class XitongController extends AdminbaseController {
 		);
 		$car_model = M ( "Car" );
 		$car = $car_model->where ( $where )->find ();
-		$l_nums = mb_substr ( $car ['license_number'], 0, 2, 'utf-8' );
+		
+		$a_class = array("京", "沪", "津", "渝");
+		$l_nums = "";
+		$l_nums_a = mb_substr ( $car ['license_number'], 0, 1, 'utf-8' );
+		if(in_array($l_nums_a, $a_class)){
+			$l_nums = $l_nums_a;
+		}
+		else{
+			$l_nums = mb_substr ( $car ['license_number'], 0, 2, 'utf-8' );
+		}
 		$region_model = M ( "Region" );
 		$region = $region_model->where ( "nums = '$l_nums'" )->find ();
 		$region = $region_model->where ( "city = '{$region['city']}'" )->order ( "id" )->find ();

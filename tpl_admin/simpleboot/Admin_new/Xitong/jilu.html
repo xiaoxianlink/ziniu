@@ -51,77 +51,92 @@ $(document).ready(function(){
 </script>
 <body class="J_scroll_fixed">
 	<div class="wrap J_check_wrap">
-	<div id="cheliang_submit" class="top_div">
+	<div id="cheliang_submit" class="top_div" style="height:108px;">
 			<form action="{:U('Xitong/jilu')} " method="post">
-			<input type="submit"  id="cheliang_submit_input"   class="query_btn"  value="查询"/>
+			<input type="submit" id="cheliang_submit_input" class="query_btn" value="查询"/>
 			<div  class="query_div" > 
-					违章时间 <input type="text" name="time_start" id="time_start"  class="input length_3 J_datetime"    value="{$array.3}"/> 
-					— <input type="text"   class="input length_3 J_datetime" id="time_end" name="time_end" value="{$array.4}"/>
+				违章时间
+				<input type="text" name="time_start" id="time_start" class="input length_3 J_datetime" value="{$array.3}"/> 
+				— <input type="text" class="input length_3 J_datetime" id="time_end" name="time_end" value="{$array.4}"/>
+			</div>	
+			<div class="query_div" > 
+				状态
+				<select name="state" id="state" class="query_txt">
+					<option value="" ></option>
+					<option value="1" <?php if($array[2]==1){echo "selected='selected'";}?>>未处理</option>
+					<option value="2" <?php if($array[2]==2){echo "selected='selected'";}?>>处理中</option>
+					<option value="3" <?php if($array[2]==3){echo "selected='selected'";}?>>已处理</option>
+				</select>
 			</div>	
 			<div  class="query_div" > 
-				状态			<select name="state" id="state" class="query_txt"  >
-								<option value="" >全部({$sums.0.numbers})</option>
-								<option value="1" <?php if($array[2]==1){echo "selected='selected'";}?>>未处理</option>
-								<option value="2" <?php if($array[2]==2){echo "selected='selected'";}?>>处理中</option>
-								<option value="3" <?php if($array[2]==3){echo "selected='selected'";}?>>已处理</option>
-							</select>
+				违章代码<input type="text" class="query_txt" name="code" id="code" value="{$array.1}"/>
 			</div>	
 			<div  class="query_div" > 
-			   违章城市<select name="city" id="city" class="query_txt"  >
-							<option value="">全部</option>
-							</select>
-			</div>	
-			<div  class="query_div" > 
-					车牌号<input type="text"  class="query_txt"  name="number" id="number" value="{$array.0}"/>
+				车牌号<input type="text" class="query_txt" name="number" id="number" value="{$array.0}"/>
 			</div>	
 			</form>
 	</div>
-<table class="table table-hover table-bordered table-list" id="menus-table">
-	<tr>
-		<th>#</th>
-		<th>违章指纹</th>
-		<th>车牌号</th>
-		<th onclick="order('{$order}')">违章时间<?php if ($order == 'desc'){?>↓<?php }else{ ?>↑<?php } ?></th>
-		<th>违章城市</th>
-		<th>违章代码</th>
-		<th>罚金</th>
-		<th>罚分</th>
-		<th>查询编号</th>
-		<th>证书编号</th>
-		<th>违章地点</th>
-		<th style='width:20%'>违法信息</th>
-		<th>采证机关</th>
-		<th>是否已处理</th>
-	</tr>
-	<?php $i = 1;?>
-	<?php $i = $pageIndex + $i;?>
-	<foreach name="str" item="vo">
+	<div class="count_div">
+		<div class="count_txt" style="width: 150px;">总数：{$stats.total}</div>
+		<div class="count_txt" style="width: 150px;">未处理：{$stats.new}</div>
+		<div class="count_txt" style="width: 150px;">处理中：{$stats.in_process}</div>
+		<div class="count_txt" style="width: 150px;">已处理：{$stats.finish}</div>
+	</div>
+
+	<table class="table table-hover table-bordered table-list" id="menus-table">
 		<tr>
-			<td>{$i++}</td>
-			<td><?php echo md5($vo['license_number'].$vo['time']); ?></td>
-			<td>{$vo.license_number}</td>
-			<td><if condition="$vo['time'] neq ''">{$vo.time|date='Y-m-d H:i:s',###}</if></td>
-			<td>{$vo.area}</td>
-			<td><span class="sview" onmouseover="ShowPrompt(event,'{$vo.v_code}','{$vo.v_money}','{$vo.v_points}','{$vo.v_content}')" onmouseout="HiddenPrompt()">{$vo.code}</span></td>
-			<td>{$vo.money}</td>
-			<td>{$vo.points}</td>
-			<td>{$vo.query_no}</td>
-			<td>{$vo.certificate_no}</td>
-			<td>{$vo.address}</td>
-			<td>{$vo.content}</td>
-			<td>{$vo.office}</td>
-			<td><if condition="$vo['is_manage'] eq 0"><a href="#" onclick="finish('{$vo.id}')">未处理</a><elseif condition="$vo['is_manage'] eq 1"/><a href="#" onclick="finish('{$vo.id}')">处理中</a><elseif condition="$vo['is_manage'] eq 2"/>已处理</if></td>
+			<th>#</th>
+			<th>违章指纹</th>
+			<th>车牌号</th>
+			<th onclick="order('{$order}')">违章时间<?php if ($order == 'desc'){?>↓<?php }else{ ?>↑<?php } ?></th>
+			<th>违章城市</th>
+			<th>违章代码</th>
+			<th>罚金</th>
+			<th>罚分</th>
+			<th>查询编号</th>
+			<th>证书编号</th>
+			<th>违章地点</th>
+			<th style='width:20%'>违法信息</th>
+			<th>采证机关</th>
+			<th>是否已处理</th>
 		</tr>
-	</foreach>
-</table>
-<div class="pagination">{$Page}</div>
-</div>
-<div id="promptDiv" class="promptStyle">
-	<br /><br />
-	<div id="frame_number" class="prom_div"></div>
-	<div id="engine_number" class="prom_div"></div>
-</div>
-<script type="text/javascript" src="__ROOT__/statics/js/common.js"></script>
-<script type="text/javascript" src="__ROOT__/statics/js/content_addtop.js"></script>
+		<?php $i = 1;?>
+		<?php $i = $pageIndex + $i;?>
+		<foreach name="str" item="vo">
+			<tr>
+				<td>{$i++}</td>
+				<td>{$vo.hash}</td>
+				<td>{$vo.license_number}</td>
+				<td><if condition="$vo['time'] neq ''">{$vo.time|date='Y-m-d H:i:s',###}</if></td>
+				<td>{$vo.area}</td>
+				<td><span class="sview" onmouseover="ShowPrompt(event,'{$vo.v_code}','{$vo.v_money}','{$vo.v_points}','{$vo.v_content}')" onmouseout="HiddenPrompt()">{$vo.code}</span></td>
+				<td>{$vo.money}</td>
+				<td>{$vo.points}</td>
+				<td>{$vo.query_no}</td>
+				<td>{$vo.certificate_no}</td>
+				<td>{$vo.address}</td>
+				<td>{$vo.content}</td>
+				<td>{$vo.office}</td>
+				<td>
+					<if condition="$vo['is_manage'] eq 0">
+						<a href="#" onclick="finish('{$vo.id}')">未处理</a>
+					<elseif condition="$vo['is_manage'] eq 1"/>
+						<a href="#" onclick="finish('{$vo.id}')">处理中</a>
+					<elseif condition="$vo['is_manage'] eq 2"/>
+						已处理
+					</if>
+				</td>
+			</tr>
+		</foreach>
+	</table>
+	<div class="pagination">{$Page}</div>
+	</div>
+	<div id="promptDiv" class="promptStyle">
+		<br /><br />
+		<div id="frame_number" class="prom_div"></div>
+		<div id="engine_number" class="prom_div"></div>
+	</div>
+	<script type="text/javascript" src="__ROOT__/statics/js/common.js"></script>
+	<script type="text/javascript" src="__ROOT__/statics/js/content_addtop.js"></script>
 </body>
 </html>

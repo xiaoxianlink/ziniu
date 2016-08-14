@@ -41,7 +41,7 @@ class FuwuController extends AdminbaseController {
 		$this->assign ( 'order', $_order );
 		$count = $this->Fuwu_model->table ( "cw_services as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,a.id,a.phone,a.status,a.create_time,a.state,a.time,a.services_sn" )->table ( "(SELECT @rownum:=0) r,cw_services as a" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Fuwu_model->field ( "a.id,a.phone,a.status,a.create_time,a.state,a.time,a.services_sn" )->table ( "cw_services as a" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$model = M ( "services_city" );
 		$region_model = M ( "region" );
 		foreach ( $roles as $k => $v ) {
@@ -59,9 +59,6 @@ class FuwuController extends AdminbaseController {
 		}
 		$this->assign ( "str", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
-		/*
-		 * $a_roles=$this->Fuwu_model->query("select count(state) as a_state from cw_services "); $this->assign('a_roles',$a_roles); $b_roles=$this->Fuwu_model->query("select count(state) as b_state from cw_services where state=0" ); $this->assign('b_roles',$b_roles); $c_roles=$a_roles[0][a_state]-$b_roles[0][b_state]; $this->assign('c_roles',$c_roles);
-		 */
 		$roless = $this->Fuwu_model->field ( "count(state) as state" )->table ( "cw_services" )->group ( "state" )->select ();
 		$nums = $roless [0] [state] + $roless [1] [state];
 		$num_0 = $roless [0] [state];
@@ -96,7 +93,7 @@ class FuwuController extends AdminbaseController {
 		$where = '1=1';
 		$count = $this->Fuwu_model->table ( "cw_services as s" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,s.*" )->table ( "(SELECT @rownum:=0) r,cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Fuwu_model->field ( "s.*" )->table ( "cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "roles", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->display ();
@@ -104,7 +101,7 @@ class FuwuController extends AdminbaseController {
 	function select_services() {
 		$id = $_REQUEST ['id'];
 		$region = M ( "region" );
-		$province = $region->where ( "is_dredge=0 and level=1" )->select ();
+		$province = $region->where ( "is_dredge=0 and level=1" )->order("gb_code_p")->select ();
 		$sc_model = M ();
 		$sc_list = $sc_model->table ( "cw_services_city as sc" )->join ( "cw_region as r on r.id=sc.code" )->field ( "r.sf_id" )->where ( "sc.services_id='$id' and sc.state = 0" )->select ();
 		$array = array ();
@@ -120,7 +117,7 @@ class FuwuController extends AdminbaseController {
 				$checked = "";
 			}
 			$table .= "<td><input name='province_radio' type='checkbox' value='' $checked /></td>";
-			$table .= "<td>{$v['id']}</td>";
+			$table .= "<td>{$v['gb_code_p']}</td>";
 			$table .= "<td>{$v['province']}</td>";
 			$table .= "<td>{$v['abbreviation']}</td>";
 			$table .= "</tr>";
@@ -135,7 +132,7 @@ class FuwuController extends AdminbaseController {
 		$id = $_REQUEST ['id'];
 		$province = $_REQUEST ['province'];
 		$region = M ( "region" );
-		$city = $region->where ( "is_dredge=0 and level=2 and province = '$province'" )->order ( "id" )->group ( "city" )->select ();
+		$city = $region->where ( "is_dredge=0 and level=2 and province = '$province'" )->order("gb_code_c")->group ( "city" )->select ();
 		$table = '<tr><th class="th3"></th><th class="th3">城市编码</th><th class="th3">城市名称</th><th class="th3">简称</th></tr>';
 		foreach ( $city as $v ) {
 			$table .= "<tr>";
@@ -147,7 +144,7 @@ class FuwuController extends AdminbaseController {
 				$checked = "";
 			}
 			$table .= "<td><input name='city_box' type='checkbox' $checked value='' onclick='insert_city({$v['id']})' /></td>";
-			$table .= "<td>{$v['id']}</td>";
+			$table .= "<td>{$v['gb_code_c']}</td>";
 			$table .= "<td>{$v['city']}</td>";
 			$table .= "<td>{$v['abbreviation']}</td>";
 			$table .= "</tr>";
@@ -192,7 +189,7 @@ class FuwuController extends AdminbaseController {
 		$where = '1=1';
 		$count = $this->Fuwu_model->table ( "cw_services as s" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,s.*" )->table ( "(SELECT @rownum:=0) r,cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Fuwu_model->field ( "s.*" )->table ( "cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "roles", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->display ();
@@ -430,7 +427,7 @@ class FuwuController extends AdminbaseController {
 		$where = '1=1';
 		$count = $this->Fuwu_model->table ( "cw_services as s" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,s.*" )->table ( "(SELECT @rownum:=0) r,cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Fuwu_model->field ( "s.*" )->table ( "cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "roles", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->display ();
@@ -439,24 +436,24 @@ class FuwuController extends AdminbaseController {
 		$where = '1=1';
 		$count = $this->Fuwu_model->table ( "cw_services as s" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,s.*" )->table ( "(SELECT @rownum:=0) r,cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Fuwu_model->field ( "s.*" )->table ( "cw_services as s" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$this->assign ( "roles", $roles );
 		$this->assign ( "Page", $page->show ( 'Admin' ) );
 		$this->display ();
 	}
 	function select_services3() {
-				$id = $_REQUEST ['id'];
+		$id = $_REQUEST ['id'];
 		$roles = $this->Fuwu_model->field ( "r.province" )->table ( "cw_services_city as sc" )->join ( "cw_region as r on r.id=sc.code" )->where ( "sc.services_id = '$id' and sc.state = 0" )->select ();
 		$provinces = "'0'";
 		foreach ( $roles as $v ) {
 			$provinces .= ",'{$v['province']}'";
 		}
-		$region = M ( "region" );
-		$province = $region->where ( "is_dredge=0 and level=1 and province in ($provinces)" )->select ();
+		$region = M ("region" );
+		$province = $region->where ( "is_dredge=0 and level=1 and province in ($provinces)" )->order("gb_code_p")->select ();
 		$table = '<tr><th class="th2">省份编码</th><th class="th2">省份名称</th><th class="th2">简称</th></tr>';
 		foreach ( $province as $v ) {
 			$table .= "<tr onclick='select_city(" . '"' . $v ['province'] . '"' . ")'>";
-			$table .= "<td>{$v['id']}</td>";
+			$table .= "<td>{$v['gb_code_p']}</td>";
 			$table .= "<td>{$v['province']}</td>";
 			$table .= "<td>{$v['abbreviation']}</td>";
 			$table .= "</tr>";
@@ -470,11 +467,11 @@ class FuwuController extends AdminbaseController {
 	function select_city2() {
 		$id = $_REQUEST ['id'];
 		$province = $_REQUEST ['province'];
-		$city = $this->Fuwu_model->field ( "r.*" )->table ( "cw_services_city as sc" )->join ( "cw_region as r on r.id=sc.code" )->where ( "r.is_dredge=0 and r.level=2 and sc.services_id = '$id' and r.province = '$province'" )->group ( "city" )->select ();
+		$city = $this->Fuwu_model->field ( "r.*" )->table ( "cw_services_city as sc" )->join ( "cw_region as r on r.id=sc.code" )->where ( "r.is_dredge=0 and r.level=2 and sc.services_id = '$id' and r.province = '$province'" )->order("gb_code_c")->group ( "city" )->select ();
 		$table = '<tr><th class="th4">城市编码</th><th class="th4">城市名称</th><th class="th4">简称</th></tr>';
 		foreach ( $city as $v ) {
 			$table .= "<tr onclick='select_scode({$v['id']})'>";
-			$table .= "<td>{$v['id']}</td>";
+			$table .= "<td>{$v['gb_code_c']}</td>";
 			$table .= "<td>{$v['city']}</td>";
 			$table .= "<td>{$v['abbreviation']}</td>";
 			$table .= "</tr>";
@@ -659,7 +656,7 @@ class FuwuController extends AdminbaseController {
 		}
 		$count = $this->Fuwu_model->table ( "cw_services as a" )->join ( "cw_bank as b on b.bank_id=a.id" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Fuwu_model->field ( "@rownum:=@rownum+1 AS iid,b.income_money,a.id,a.phone,a.state,a.create_time,a.all_nums,a.nums,(5-(a.all_nums-a.nums)*0.1 + a.nums*0.1) as grade,concat ( left (a.nums/a.all_nums *100,5),'%') as mod_one,format(a.all_nums/((unix_timestamp(now()) -a.create_time)/24/3600),2) as tuidan,format(a.nums/((unix_timestamp(now()) -a.create_time)/24/3600),2) as jiedan,format(b.income_money/((unix_timestamp(now()) -a.create_time)/24/3600),2) as turnover,a.services_sn" )->table ( "(SELECT @rownum:=0) r,cw_services as a" )->join ( "cw_bank as b on b.bank_id=a.id" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Fuwu_model->field ( "b.income_money,a.id,a.phone,a.state,a.create_time,a.all_nums,a.nums,(5-(a.all_nums-a.nums)*0.1 + a.nums*0.1) as grade,concat ( left (a.nums/a.all_nums *100,5),'%') as mod_one,format(a.all_nums/((unix_timestamp(now()) -a.create_time)/24/3600),2) as tuidan,format(a.nums/((unix_timestamp(now()) -a.create_time)/24/3600),2) as jiedan,format(b.income_money/((unix_timestamp(now()) -a.create_time)/24/3600),2) as turnover,a.services_sn" )->table ( "cw_services as a" )->join ( "cw_bank as b on b.bank_id=a.id" )->where ( $where )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		foreach ( $roles as $k => $v ) {
 			$roles [$k] ['create_time'] = ceil ( (time () - $v ['create_time']) / 3600 / 24 );
 		}

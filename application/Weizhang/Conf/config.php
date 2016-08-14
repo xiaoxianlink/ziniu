@@ -21,7 +21,7 @@ define ( "api_icar", "http://120.26.57.239/api/" ); // 爱车坊端口
 define ( "app_id_icar", "2500000002" ); // 爱车坊merCode
 define ( "app_key_icar", "9a5eae4723e87befc85459d5b0c585dc" ); // 爱车坊merKey
 
-define ( "timing_count", "20" ); // 每周定时查询数量
+define ( "timing_count", "50" ); // 每周定时查询数量
 
 
 

@@ -98,6 +98,31 @@ function decrMoneyPerTx(){
 	}
 	$("#moneyPerTx").val(target);
 }
+
+function incrMoneyPerPoint2(){
+	var moneyPerPoint = parseInt($("#moneyPerPoint").val());
+	$("#moneyPerPoint").val(moneyPerPoint + 1);
+}
+function decrMoneyPerPoint2(){
+	var moneyPerPoint = parseInt($("#moneyPerPoint").val());
+	var target = moneyPerPoint - 1;
+	if(target < 0){
+		target = 0;
+	}
+	$("#moneyPerPoint").val(target);
+}
+function incrMoneyPerTx2(){
+	var moneyPerTx = parseInt($("#moneyPerTx").val());
+	$("#moneyPerTx").val(moneyPerTx + 1);
+}
+function decrMoneyPerTx2(){
+	var moneyPerTx = parseInt($("#moneyPerTx").val());
+	var target = moneyPerTx - 1;
+	if(target < 0){
+		target = 0;
+	}
+	$("#moneyPerTx").val(target);
+}
 function generate_preview(){
 	var city_id = $("#city_id").val();
 	if(city_id == ""){
@@ -190,13 +215,16 @@ $(document).ready(function(){
 							<div class="dynPrice-left"></div>
 							<div class="dynPrice-center" style="vertical-align: top;"> + </div>
 							<div class="dynPrice-right" style="vertical-align: top;">
+								<input type="button" class="dynPrice-btn" value="-1" onclick="decrMoneyPerPoint2()" />
 								<input type="button" class="dynPrice-btn" value="-10" onclick="decrMoneyPerPoint()" />
 								<div style="display: inline-block; text-align:center;" >
 									<input type="text" name="moneyPerPoint" id="moneyPerPoint" pattern="\d*" style="width:60px" readonly/>
 									<br>
 									<span >劳务费</span>
 								</div>
-								<input type="button" class="dynPrice-btn" value="+10" onclick="incrMoneyPerPoint()" /> * 违章罚分
+								<input type="button" class="dynPrice-btn" value="+10" onclick="incrMoneyPerPoint()" />
+								<input type="button" class="dynPrice-btn" value="+1" onclick="incrMoneyPerPoint2()" />
+								* 违章罚分
 							</div>
 							</td>
 						</tr>
@@ -205,6 +233,7 @@ $(document).ready(function(){
 							<div class="dynPrice-left"></div>
 							<div class="dynPrice-center" style="vertical-align: top;"> + </div>
 							<div class="dynPrice-right" style="vertical-align: top;">
+								<input type="button" class="dynPrice-btn" value="-1" onclick="decrMoneyPerTx2()" />
 								<input type="button" class="dynPrice-btn" value="-5" onclick="decrMoneyPerTx()" />
 								<div style="display: inline-block;text-align:center;" >
 									<input type="text" name="moneyPerTx" id="moneyPerTx" pattern="\d*" style="width:60px" readonly/>
@@ -212,6 +241,7 @@ $(document).ready(function(){
 									<span >手续费</span>
 								</div>
 								<input type="button" class="dynPrice-btn" value="+5" onclick="incrMoneyPerTx()" />
+								<input type="button" class="dynPrice-btn" value="+1" onclick="incrMoneyPerTx2()" />
 							</div>
 							</td>
 						</tr>

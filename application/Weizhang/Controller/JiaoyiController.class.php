@@ -40,17 +40,15 @@ class JiaoyiController extends AdminbaseController {
 			$where .= " and end.close_query_no = $query_no ";
 		}
 		if(!empty($license_number)){
-			$where .= " and car.license_number like '%$license_number%'";
+			$where .= " and end.license_number like '%$license_number%'";
 		}
 		$model = M ( "" );
 		$now = time();
-		$count = $model->table ( "cw_endorsement as end" )->join ( "cw_car as car on car.id = end.car_id")->join ( "cw_order as o on o.endorsement_id = end.id", "left" )->join ( "cw_services as srv on srv.id = o.services_id", "left" )->join ( "cw_turn_order as t on t.order_id = o.id and t.sod_id = o.so_id", "left" )->where ( "end.close_confirm = 1 and end.is_manage <> 2 and end.close_time <= $now"  . $where)->count("Distinct end.id");
+		$count = $model->table ( "cw_endorsement as end" )->join ( "cw_order as o on o.endorsement_id = end.id", "left" )->join ( "cw_services as srv on srv.id = o.services_id", "left" )->join ( "cw_turn_order as t on t.order_id = o.id and t.sod_id = o.so_id", "left" )->where ( "end.close_confirm = 1 and end.is_manage <> 2 and end.close_time <= $now"  . $where)->count("Distinct end.id");
 		$orderSQL = "end.close_time desc";
 		$page = $this->page ( $count, 50 );
-		/*
-		$roles = $model->field ( "@rownum:=@rownum+1 AS iid, car.license_number, end.*, o.order_sn, o.order_status, o.c_time as order_time, o.pay_money, o.pay_type, o.pay_sn, o.services_id, srv.services_sn, srv.phone, t.id as to_id, t.c_time as to_c_time, t.finish_time as to_finish_time, t.state as to_state" )->table ( "cw_endorsement as end" )->join ( "cw_car as car on car.id = end.car_id")->join ( "cw_order as o on o.endorsement_id = end.id", "left" )->join ( "cw_services as srv on srv.id = o.services_id", "left" )->join ( "cw_turn_order as t on t.order_id = o.id and t.sod_id = o.so_id", "left" )->where ( "end.close_confirm = 1 and end.is_manage <> 2 and end.close_time <= $now " . $where)->order("end.close_time")->limit ( $page->firstRow . ',' . $page->listRows )->select ();
-		*/
-		$roles = $model->field ( "@rownum:=@rownum+1 AS iid, car.license_number, end.*" )->table ( "cw_endorsement as end" )->join ( "cw_car as car on car.id = end.car_id")->join ( "cw_order as o on o.endorsement_id = end.id", "left" )->join ( "cw_services as srv on srv.id = o.services_id", "left" )->join ( "cw_turn_order as t on t.order_id = o.id and t.sod_id = o.so_id", "left" )->where ( "end.close_confirm = 1 and end.is_manage <> 2 and end.close_time <= $now " . $where)->order("end.close_time")->group("end.id")->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		
+		$roles = $model->field ( "end.*" )->table ( "cw_endorsement as end" )->join ( "cw_order as o on o.endorsement_id = end.id", "left" )->join ( "cw_services as srv on srv.id = o.services_id", "left" )->join ( "cw_turn_order as t on t.order_id = o.id and t.sod_id = o.so_id", "left" )->where ( "end.close_confirm = 1 and end.is_manage <> 2 and end.close_time <= $now " . $where)->order("end.close_time")->group("end.id")->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$end_ids = array();
 		foreach ( $roles as $k => $v ) {
 			$end_ids[] = $v["id"];
@@ -94,7 +92,7 @@ class JiaoyiController extends AdminbaseController {
 		$end = $end_model->where("id=$end_id")->find();
 		if(!empty($end)){
 			if($end['is_manage'] <> 2 && $end['close_confirm'] == 1){
-				$this->close_endorsement($end_id);
+				$this->close_endorsement($end_id, $end["close_query_no"]);
 				$this->finish_order($end_id);
 				$this->push_confirm($end_id);
 			}
@@ -103,7 +101,7 @@ class JiaoyiController extends AdminbaseController {
 		$this->redirect("Jiaoyi/close_endorsements");
 	}
 	
-	function close_endorsement($end_id){
+	function close_endorsement($end_id, $query_no){
 		$now = time();
 		$end_model = M ( "endorsement" );
 		$data = array(
@@ -116,6 +114,7 @@ class JiaoyiController extends AdminbaseController {
 		$data = array (
 				"end_id" => $end_id,
 				"state" => 2,
+				"log_id" => $query_no,
 				"c_time" => $now,
 				"type" => 2 
 		);

@@ -74,7 +74,8 @@ $(document).ready(function(){
 			<th>罚款总计</th>
 			<th>返回违章记录条数</th>
 			<th>新增违章记录条数</th>
-			<th>修改违章记录条数</th>
+			<th>违章处理待确认数</th>
+			<th>违章未处理确认数</th>
 		</tr>
 		<foreach name="str" item="vo">
 			<tr>
@@ -86,14 +87,25 @@ $(document).ready(function(){
 				<td>{$vo.city}</td>
 				<td>{$vo.c_time|date='Y-m-d H:i:s',###}</td>
 				<td>{$vo.port}</td>
-				<td>{$vo.code}</td>
-				<td>{$vo.content}</td>
-				<td><if condition="$vo['state'] eq '0'">自动<elseif condition="$vo['state'] eq '1'"/>手动<else />未知</if></td>
+				<td><if condition="$vo['code'] eq '0'">{$vo.code}<else /><font color="red">{$vo.code}</font></if></td>
+				<td><if condition="$vo['code'] eq '0'">{$vo.content}<else /><font color="red">{$vo.content}</font></if></td>
+				<td>
+					<if condition="$vo['state'] eq '0'">
+						<font color="SlateGray">自动&#9992;</font>
+					<elseif condition="$vo['state'] eq '1'"/>
+						<font color="MidnightBlue">手动</font>
+					<elseif condition="$vo['state'] eq '2'"/>
+						补查
+					<else />
+						未知
+					</if>
+				</td>
 				<td>{$vo.points}</td>
 				<td>{$vo.money}</td>
 				<td>{$vo.all_nums}</td>
-				<td>{$vo.add_nums}</td>
-				<td>{$vo.edit_nums}</td>
+				<td><if condition="$vo['add_nums'] eq '0'">{$vo.add_nums}<else /><font color="blue">&#10011;{$vo.add_nums}</font></if></td>
+				<td><if condition="$vo['close_nums'] eq '0'">{$vo.close_nums}<else /><font color="blue">&#10004;{$vo.close_nums}</font></if></td>
+				<td><if condition="$vo['edit_nums'] eq '0'">{$vo.edit_nums}<else /><font color="red">&#10008;{$vo.edit_nums}</font></if></td>
 			</tr>
 		</foreach>
 	</table>
