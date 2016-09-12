@@ -151,7 +151,7 @@ class DingyueController extends AdminbaseController {
 		$time_end = strtotime ( $time_end );
 		$where = "1=1";
 		if (! empty ( $number )) {
-			$where .= " AND b.license_number like '%$number%'";
+			$where .= " AND a.license_number like '%$number%'";
 		}
 		if (! empty ( $port )) {
 			$where .= " AND a.port like '%$port%'";
@@ -174,9 +174,9 @@ class DingyueController extends AdminbaseController {
 		$order = "a.c_time $_order";
 		$this->assign ( 'order', $_order );
 		// $roles=$this->Dingyue_model->field("a.query_no,b.id,b.license_number,b.frame_number,b.engine_number,a.area,a.time,a.query_port,c.code,a.points")->table("cw_endorsement as a")->join("cw_car as b on a.car_id=b.id")->join("cw_code as c on c.port=a.query_port")->where($where)->limit($page->firstRow . ',' . $page->listRows)->select();
-		$count = $this->Dingyue_model->table ( "cw_endorsement_jilu as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_code as c on a.code=c.code and a.port=c.port" )->where ( $where )->count ();
+		$count = $this->Dingyue_model->table ( "cw_endorsement_jilu as a" )->where ( $where )->count ();
 		$page = $this->page ( $count, 50 );
-		$roles = $this->Dingyue_model->field ( "a.*,b.license_number,b.frame_number,b.engine_number,c.content" )->table ( "cw_endorsement_jilu as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_code as c on a.code=c.code and a.port=c.port" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
+		$roles = $this->Dingyue_model->field ( "a.*, b.frame_number,b.engine_number,c.content" )->table ( "cw_endorsement_jilu as a" )->join ( "cw_car as b on a.car_id=b.id" )->join ( "cw_code as c on a.code=c.code and a.port=c.port" )->where ( $where )->order ( $order )->limit ( $page->firstRow . ',' . $page->listRows )->select ();
 		$code_mode = M ( "Code" );
 		$endorsement_mode = M ( "endorsement" );
 		$count = $this->Dingyue_model->table ( "cw_endorsement_jilu" )->count ();
