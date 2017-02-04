@@ -379,7 +379,7 @@ class XitongController extends AdminbaseController {
 				$where .= " and l.state = 1";
 			} 
 			else if($state == '1'){
-				$where .= " and l.state = 2";
+				$where .= " and (l.state = 2 or l.state = 4)";
 			}
 			else {
 				$where .= " and l.state = 3";
@@ -1038,8 +1038,6 @@ class XitongController extends AdminbaseController {
 	// 违章已处理
 	function e_finish() {
 		$e_id = isset ( $_REQUEST ['e_id'] ) ? $_REQUEST ['e_id'] : 0;
-		$endorsement_model = M ( "Endorsement" );
-		$log_model = M ( "Endorsement_log" );
 		if ($e_id != 0) {
 			// TODO fixme
 			$api = new JiaoyiController();

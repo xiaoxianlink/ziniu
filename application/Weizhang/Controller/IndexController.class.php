@@ -213,7 +213,7 @@ class IndexController extends HomeBaseController {
 			$log_model = M ( "Endorsement_log" );
 			$data = array (
 					"end_id" => $end_id,
-					"state" => 2,
+					"state" => 4,  // auto confirm state
 					"log_id" => $v["close_query_no"],
 					"c_time" => $now,
 					"type" => 2 
